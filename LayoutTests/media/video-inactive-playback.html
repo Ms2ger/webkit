@@ -3,7 +3,7 @@
 <script src="video-test.js"></script>
 <script src="media-file.js"></script>
 <script>
-
+enableFullTestDetailsPrinting();
 function go()
 {
     nextTest();
@@ -11,10 +11,14 @@ function go()
 
 function nextTest()
 {
-    if (tests.length)
-        tests.shift()();
-    else
+    if (tests.length) {
+        var t = tests.shift();
+        console.log("Going to run " + t);
+        t();
+    } else {
+        console.log("Finishing");
         endTest();
+    }
 }
 
 function timeoutFor(time)
@@ -34,6 +38,7 @@ function waitFor(eventName)
 var tests = [
     function initializeTests() {
         findMediaElement();
+        console.log("run('internals...");
         run('internals.setMediaSessionRestrictions("videoaudio", "")');
         run('video.src = findMediaFile("video", "content/test")');
         waitFor('canplaythrough').then(nextTest);

@@ -239,7 +239,7 @@ var testEnded = false;
 
 function endTest()
 {
-    consoleWrite("END OF TEST");
+    consoleWrite("END OF TEST" + window.testRunner);
     testEnded = true;
     if (window.testRunner) {
         // FIXME (121170): We shouldn't need the zero-delay timer. But text track layout
@@ -283,6 +283,7 @@ function logResult(success, text)
 
 function consoleWrite(text)
 {
+    console.log(text)
     if (testEnded)
         return;
     logConsole().innerHTML += text + "<br>";

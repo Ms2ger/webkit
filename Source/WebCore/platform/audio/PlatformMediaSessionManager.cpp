@@ -308,9 +308,10 @@ void PlatformMediaSessionManager::applicationWillBecomeInactive() const
 void PlatformMediaSessionManager::applicationDidBecomeActive() const
 {
     LOG(Media, "PlatformMediaSessionManager::applicationDidBecomeInactive");
-
+    printf("PlatformMediaSessionManager::applicationDidBecomeInactive\n");
     Vector<PlatformMediaSession*> sessions = m_sessions;
     forEachSession([&] (PlatformMediaSession& session, size_t) {
+        printf("PlatformMediaSessionManager::applicationDidBecomeInactive: session\n");
         if (m_restrictions[session.mediaType()] & InactiveProcessPlaybackRestricted)
             session.endInterruption(PlatformMediaSession::MayResumePlaying);
     });
