@@ -56,7 +56,7 @@ var tests = [
     },
 
     function testPlaybackPausesWhenInactive() {
-        run('internals.setMediaSessionRestrictions("videoaudio", "inactiveprocessplaybackrestricted")');
+        run('internals.setMediaSessionRestrictions("video", "inactiveprocessplaybackrestricted")');
         run('internals.applicationWillBecomeInactive()');
         waitFor('pause').then(nextTest);
     },
