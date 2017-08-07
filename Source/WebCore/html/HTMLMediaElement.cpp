@@ -181,7 +181,7 @@ static void clearFlags(unsigned& value, unsigned flags)
     value &= ~flags;
 }
     
-#if !LOG_DISABLED
+//#if !LOG_DISABLED
 static String urlForLoggingMedia(const URL& url)
 {
     static const unsigned maximumURLLengthForLogging = 128;
@@ -219,7 +219,7 @@ static String actionName(HTMLMediaElementEnums::DelayedActionType action)
 #undef ACTION
 }
 
-#endif
+//#endif
 
 #ifndef LOG_MEDIA_EVENTS
 // Default to not logging events because so many are generated they can overwhelm the rest of 
@@ -5013,7 +5013,7 @@ void HTMLMediaElement::updatePlayState(UpdateState updateState)
     bool shouldBePlaying = potentiallyPlaying();
     bool playerPaused = m_player->paused();
 
-    LOG(Media, "HTMLMediaElement::updatePlayState(%p) - shouldBePlaying = %s, playerPaused = %s", this, boolString(shouldBePlaying), boolString(playerPaused));
+    printf("HTMLMediaElement::updatePlayState(%p) - shouldBePlaying = %s, playerPaused = %s\n", this, boolString(shouldBePlaying), boolString(playerPaused));
 
     if (shouldBePlaying) {
         scheduleUpdatePlaybackControlsManager();
@@ -5570,6 +5570,7 @@ void HTMLMediaElement::toggleStandardFullscreenState()
 
 void HTMLMediaElement::enterFullscreen(VideoFullscreenMode mode)
 {
+    printf("Going fullscreeeeeeeeeeeeeeeeeen\n");
     LOG(Media, "HTMLMediaElement::enterFullscreen(%p)", this);
     ASSERT(mode != VideoFullscreenModeNone);
 
@@ -5615,12 +5616,13 @@ void HTMLMediaElement::enterFullscreen()
 
 void HTMLMediaElement::exitFullscreen()
 {
-    LOG(Media, "HTMLMediaElement::exitFullscreen(%p)", this);
+    printf("HTMLMediaElement::exitFullscreen(%p)\n", this);
 
 #if ENABLE(FULLSCREEN_API)
     if (document().settings().fullScreenEnabled() && document().webkitCurrentFullScreenElement() == this) {
         if (document().webkitIsFullScreen())
             document().webkitCancelFullScreen();
+        printf("HTMLMediaElement::exitFullscreen(%p) ===> return 1\n", this);
         return;
     }
 #endif
@@ -5634,8 +5636,10 @@ void HTMLMediaElement::exitFullscreen()
     if (hasMediaControls())
         mediaControls()->exitedFullscreen();
 
-    if (!document().page() || !is<HTMLVideoElement>(*this))
+    if (!document().page() || !is<HTMLVideoElement>(*this)) {
+        printf("HTMLMediaElement::exitFullscreen(%p) ===> return 2\n", this);
         return;
+    }
 
     if (!paused() && m_mediaSession->requiresFullscreenForVideoPlayback(*this)) {
         if (!document().settings().allowsInlineMediaPlaybackAfterFullscreen() || isVideoTooSmallForInlinePlayback())
@@ -5650,12 +5654,15 @@ void HTMLMediaElement::exitFullscreen()
 
 #if PLATFORM(MAC) && ENABLE(VIDEO_PRESENTATION_MODE)
     if (document().activeDOMObjectsAreSuspended() || document().activeDOMObjectsAreStopped())
-        document().page()->chrome().client().exitVideoFullscreenToModeWithoutAnimation(downcast<HTMLVideoElement>(*this), VideoFullscreenModeNone);
+        document().page()->chrome().client().exitVideoFullscreenTo(downcast<HTMLVideoElement>(*this), VideoFullscreenModeNone);
     else
 #endif
     if (document().page()->chrome().client().supportsVideoFullscreen(oldVideoFullscreenMode)) {
         document().page()->chrome().client().exitVideoFullscreenForVideoElement(downcast<HTMLVideoElement>(*this));
+        printf("HTMLMediaElement::exitFullscreen(%p) ===> DISPATCH\n", this);
         scheduleEvent(eventNames().webkitendfullscreenEvent);
+    } else {
+        printf("HTMLMediaElement::exitFullscreen(%p) ===> return 3\n", this);
     }
 }
 

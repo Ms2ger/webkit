@@ -2178,7 +2178,7 @@ webkit.org/b/174240 svg/dom/SVGScriptElement/script-change-externalResourcesRequ
 
 webkit.org/b/174241 media/video-inactive-playback.html [ Timeout ]
 
-webkit.org/b/174242 media/media-fullscreen-pause-inline.html [ Timeout ]
+#webkit.org/b/174242 media/media-fullscreen-pause-inline.html [ Timeout ]
 
 webkit.org/b/174243 fast/images/low-memory-decode.html [ Timeout ]
 

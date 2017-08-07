@@ -95,7 +95,10 @@ static bool pageExplicitlyAllowsElementToAutoplayInline(const HTMLMediaElement& 
 {
     Document& document = element.document();
     Page* page = document.page();
-    return document.isMediaDocument() && !document.ownerElement() && page && page->allowsMediaDocumentInlinePlayback();
+    bool result =  document.isMediaDocument() && !document.ownerElement() && page && page->allowsMediaDocumentInlinePlayback();
+    printf("pageExplicitlyAllowsElementToAutoplayInline returns %s\n", result ? "true" : "false");
+    
+    return result;
 }
 
 MediaElementSession::MediaElementSession(HTMLMediaElement& element)
@@ -577,7 +580,7 @@ MediaPlayer::Preload MediaElementSession::effectivePreloadForElement(const HTMLM
     return preload;
 }
 
-bool MediaElementSession::requiresFullscreenForVideoPlayback(const HTMLMediaElement& element) const
+static bool RequiresFullscreenForVideoPlayback(const MediaElementSession& self, const HTMLMediaElement& element)
 {
     if (pageExplicitlyAllowsElementToAutoplayInline(element))
         return false;
@@ -612,6 +615,13 @@ bool MediaElementSession::requiresFullscreenForVideoPlayback(const HTMLMediaElem
         return false;
 
     return !element.hasAttributeWithoutSynchronization(HTMLNames::playsinlineAttr);
+}
+
+bool MediaElementSession::requiresFullscreenForVideoPlayback(const HTMLMediaElement& element) const
+{
+    bool result = RequiresFullscreenForVideoPlayback(*this, element);
+    printf("requiresFullscreenForVideoPlayback returns %s\n", result ? "true" : "false");
+    return result;
 }
 
 bool MediaElementSession::allowsAutomaticMediaDataLoading(const HTMLMediaElement& element) const

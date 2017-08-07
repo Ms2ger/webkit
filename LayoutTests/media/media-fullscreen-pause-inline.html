@@ -22,11 +22,15 @@
     {
         testExpected('video.webkitDisplayingFullscreen', true);
         waitForEventOnce('webkitendfullscreen', endfullscreen);
+        console.log("================================");
+        console.log("EXPECTING EVENT vvvvvvvvvvvvvvvv");
+        console.log("================================");
         run('video.webkitExitFullscreen()');
     }
 
     function endfullscreen()
     {
+        console.log("endfullscreen")
         testExpected('video.paused', false);
         run('video.pause()');
         waitForEventOnce('pause', paused);

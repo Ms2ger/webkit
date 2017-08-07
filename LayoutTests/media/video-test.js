@@ -283,6 +283,7 @@ function logResult(success, text)
 
 function consoleWrite(text)
 {
+    console.log(text)
     if (testEnded)
         return;
     logConsole().innerHTML += text + "<br>";
