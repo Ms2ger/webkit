@@ -3228,6 +3228,7 @@ ExceptionOr<void> Internals::beginMediaSessionInterruption(const String& interru
 
 void Internals::endMediaSessionInterruption(const String& flagsString)
 {
+    printf("Internals::endMediaSessionInterruption\n");
     PlatformMediaSession::EndInterruptionFlags flags = PlatformMediaSession::NoFlags;
 
     if (equalLettersIgnoringASCIICase(flagsString, "mayresumeplaying"))
@@ -3238,11 +3239,13 @@ void Internals::endMediaSessionInterruption(const String& flagsString)
 
 void Internals::applicationWillBecomeInactive()
 {
+    printf("Internals::applicationWillBecomeInactive\n");
     PlatformMediaSessionManager::sharedManager().applicationWillBecomeInactive();
 }
 
 void Internals::applicationDidBecomeActive()
 {
+    printf("Internals::applicationDidBecomeActive\n");
     PlatformMediaSessionManager::sharedManager().applicationDidBecomeActive();
 }
 
@@ -3297,6 +3300,8 @@ ExceptionOr<void> Internals::setMediaSessionRestrictions(const String& mediaType
         if (equalLettersIgnoringASCIICase(restrictionString, "suspendedunderlockplaybackrestricted"))
             restrictions |= PlatformMediaSessionManager::SuspendedUnderLockPlaybackRestricted;
     }
+
+    printf("Adding restrictions: 0x%x\n", restrictions);
     PlatformMediaSessionManager::sharedManager().addRestriction(mediaType, restrictions);
     return { };
 }

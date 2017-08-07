@@ -65,6 +65,7 @@ PlatformMediaSessionManager::PlatformMediaSessionManager()
 
 void PlatformMediaSessionManager::resetRestrictions()
 {
+    printf("PlatformMediaSessionManager::resetRestrictions\n");
     m_restrictions[PlatformMediaSession::Video] = NoRestrictions;
     m_restrictions[PlatformMediaSession::Audio] = NoRestrictions;
     m_restrictions[PlatformMediaSession::VideoAudio] = NoRestrictions;
@@ -170,12 +171,14 @@ void PlatformMediaSessionManager::removeSession(PlatformMediaSession& session)
 void PlatformMediaSessionManager::addRestriction(PlatformMediaSession::MediaType type, SessionRestrictions restriction)
 {
     ASSERT(type > PlatformMediaSession::None && type <= PlatformMediaSession::MediaStreamCapturingAudio);
+    printf("PlatformMediaSessionManager::addRestriction: %d => %x\n", type, restriction);
     m_restrictions[type] |= restriction;
 }
 
 void PlatformMediaSessionManager::removeRestriction(PlatformMediaSession::MediaType type, SessionRestrictions restriction)
 {
     ASSERT(type > PlatformMediaSession::None && type <= PlatformMediaSession::MediaStreamCapturingAudio);
+    printf("PlatformMediaSessionManager::removeRestriction: %d => %x\n", type, restriction);
     m_restrictions[type] &= ~restriction;
 }
 
@@ -299,21 +302,30 @@ void PlatformMediaSessionManager::applicationWillBecomeInactive() const
     LOG(Media, "PlatformMediaSessionManager::applicationWillBecomeInactive");
 
     Vector<PlatformMediaSession*> sessions = m_sessions;
-    forEachSession([&] (PlatformMediaSession& session, size_t) {
-        if (m_restrictions[session.mediaType()] & InactiveProcessPlaybackRestricted)
+    forEachSession([&] (PlatformMediaSession& session, size_t index) {
+        printf("PlatformMediaSessionManager::applicationWillBecomeInactive: %d %d => %x\n", index, session.mediaType(), m_restrictions[session.mediaType()]);
+        if (m_restrictions[session.mediaType()] & InactiveProcessPlaybackRestricted) {
+            printf("PlatformMediaSessionManager::applicationWillBecomeInactive: doing something\n");
             session.beginInterruption(PlatformMediaSession::ProcessInactive);
+        } else {
+            printf("PlatformMediaSessionManager::applicationWillBecomeInactive: doing nothing\n");
+        }
     });
 }
 
 void PlatformMediaSessionManager::applicationDidBecomeActive() const
 {
-    LOG(Media, "PlatformMediaSessionManager::applicationDidBecomeInactive");
-    printf("PlatformMediaSessionManager::applicationDidBecomeInactive\n");
+    LOG(Media, "PlatformMediaSessionManager::applicationDidBecomeActive");
+    printf("PlatformMediaSessionManager::applicationDidBecomeActive\n");
     Vector<PlatformMediaSession*> sessions = m_sessions;
-    forEachSession([&] (PlatformMediaSession& session, size_t) {
-        printf("PlatformMediaSessionManager::applicationDidBecomeInactive: session\n");
-        if (m_restrictions[session.mediaType()] & InactiveProcessPlaybackRestricted)
+    forEachSession([&] (PlatformMediaSession& session, size_t index) {
+        printf("PlatformMediaSessionManager::applicationDidBecomeActive: %d %d => %x\n", index, session.mediaType(), m_restrictions[session.mediaType()]);
+        if (m_restrictions[session.mediaType()] & InactiveProcessPlaybackRestricted) {
+            printf("PlatformMediaSessionManager::applicationDidBecomeActive: doing something\n");
             session.endInterruption(PlatformMediaSession::MayResumePlaying);
+        } else {
+            printf("PlatformMediaSessionManager::applicationDidBecomeActive: doing nothing\n");
+        }
     });
 }
 
