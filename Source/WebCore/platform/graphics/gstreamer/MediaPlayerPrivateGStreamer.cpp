@@ -2106,6 +2106,7 @@ void MediaPlayerPrivateGStreamer::createGSTPlayBin()
     gst_bus_add_signal_watch_full(bus.get(), RunLoopSourcePriority::RunLoopDispatcher);
     g_signal_connect(bus.get(), "message", G_CALLBACK(busMessageCallback), this);
 
+    printf("setting mute to %d\n", m_player->muted());
     g_object_set(m_pipeline.get(), "mute", m_player->muted(), nullptr);
 
     g_signal_connect_swapped(m_pipeline.get(), "notify::source", G_CALLBACK(sourceChangedCallback), this);

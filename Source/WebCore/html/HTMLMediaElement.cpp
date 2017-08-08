@@ -181,6 +181,11 @@ static void clearFlags(unsigned& value, unsigned flags)
     value &= ~flags;
 }
     
+static const char* boolString(bool val)
+{
+    return val ? "true" : "false";
+}
+
 #if !LOG_DISABLED
 static String urlForLoggingMedia(const URL& url)
 {
@@ -189,11 +194,6 @@ static String urlForLoggingMedia(const URL& url)
     if (url.string().length() < maximumURLLengthForLogging)
         return url.string();
     return url.string().substring(0, maximumURLLengthForLogging) + "...";
-}
-
-static const char* boolString(bool val)
-{
-    return val ? "true" : "false";
 }
 
 static String actionName(HTMLMediaElementEnums::DelayedActionType action)
@@ -858,6 +858,8 @@ Node::InsertionNotificationRequest HTMLMediaElement::insertedInto(ContainerNode&
         m_muted = hasAttributeWithoutSynchronization(mutedAttr);
         m_mediaSession->canProduceAudioChanged();
     }
+
+    printf("insertedInto:"); muted();
 
     return InsertionShouldCallFinishedInsertingSubtree;
 }
@@ -1533,6 +1535,8 @@ void HTMLMediaElement::loadResource(const URL& initialURL, ContentType& contentT
         m_muted = hasAttributeWithoutSynchronization(mutedAttr);
         m_mediaSession->canProduceAudioChanged();
     }
+
+    printf("loadResource:"); muted();
 
     updateVolume();
 
@@ -3385,6 +3389,7 @@ ExceptionOr<void> HTMLMediaElement::setVolume(double volume)
 
 bool HTMLMediaElement::muted() const
 {
+    printf("muted() => %s ? %s : %s\n", boolString(m_explicitlyMuted), boolString(m_muted), boolString(hasAttributeWithoutSynchronization(mutedAttr))); 
     return m_explicitlyMuted ? m_muted : hasAttributeWithoutSynchronization(mutedAttr);
 }
 
@@ -3429,6 +3434,8 @@ void HTMLMediaElement::setMuted(bool muted)
 #endif
         m_mediaSession->canProduceAudioChanged();
     }
+
+    printf("setMuted:"); this->muted();
 
     scheduleUpdatePlaybackControlsManager();
 }
@@ -7032,13 +7039,23 @@ unsigned long long HTMLMediaElement::fileSize() const
 
 PlatformMediaSession::MediaType HTMLMediaElement::mediaType() const
 {
+    PlatformMediaSession::MediaType result;
+
     if (m_player && m_readyState >= HAVE_METADATA) {
+        printf("  -v- hasVideo=%s hasAudio=%s && muted=%s => %s\n",
+               boolString(hasVideo()), boolString(hasAudio()), boolString(muted()),
+               boolString(hasVideo() && hasAudio() && !muted()));
         if (hasVideo() && hasAudio() && !muted())
-            return PlatformMediaSession::VideoAudio;
-        return hasVideo() ? PlatformMediaSession::Video : PlatformMediaSession::Audio;
+            result = PlatformMediaSession::VideoAudio;
+        else
+            result = hasVideo() ? PlatformMediaSession::Video : PlatformMediaSession::Audio;
+    } else {
+        result = presentationType();
+        printf("  -v- presentationType() => %x\n", result);
     }
 
-    return presentationType();
+    printf("mediaType() => %x\n", result);
+    return result;
 }
 
 PlatformMediaSession::MediaType HTMLMediaElement::presentationType() const
@@ -7330,6 +7347,7 @@ void HTMLMediaElement::pageMutedStateDidChange()
 
 bool HTMLMediaElement::effectiveMuted() const
 {
+    printf("effectiveMuted: %d || %d\n", muted(), (document().page() && document().page()->isAudioMuted()));
     return muted() || (document().page() && document().page()->isAudioMuted());
 }
 

@@ -748,12 +748,16 @@ void MediaPlayer::setVolume(double volume)
 
 bool MediaPlayer::muted() const
 {
+    printf("MediaPlayer::muted() => %d\n", m_muted);
     return m_muted;
 }
 
 void MediaPlayer::setMuted(bool muted)
 {
+    printf("MediaPlayer::setMuted(): %d => %d\n", m_muted, muted);
     m_muted = muted;
+
+    CRASH();
 
     if (m_private->supportsMuting())
         m_private->setMuted(muted);

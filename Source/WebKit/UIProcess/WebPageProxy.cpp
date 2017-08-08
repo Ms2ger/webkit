@@ -4188,6 +4188,8 @@ void WebPageProxy::setMuted(WebCore::MediaProducer::MutedStateFlags state)
         UserMediaProcessManager::singleton().muteCaptureMediaStreamsExceptIn(*this);
 #endif
 
+    printf("Sending message SetMuted(%d)\n", state);
+
     m_process->send(Messages::WebPage::SetMuted(state), m_pageID);
     activityStateDidChange(ActivityState::IsAudible | ActivityState::IsCapturingMedia);
 }

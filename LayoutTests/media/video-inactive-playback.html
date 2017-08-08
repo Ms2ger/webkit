@@ -38,7 +38,6 @@ function waitFor(eventName)
 var tests = [
     function initializeTests() {
         findMediaElement();
-        console.log("run('internals...");
         run('internals.setMediaSessionRestrictions("videoaudio", "")');
         run('video.src = findMediaFile("video", "content/test")');
         waitFor('canplaythrough').then(nextTest);
@@ -56,7 +55,7 @@ var tests = [
     },
 
     function testPlaybackPausesWhenInactive() {
-        run('internals.setMediaSessionRestrictions("video", "inactiveprocessplaybackrestricted")');
+        run('internals.setMediaSessionRestrictions("videoaudio", "inactiveprocessplaybackrestricted")');
         run('internals.applicationWillBecomeInactive()');
         waitFor('pause').then(nextTest);
     },

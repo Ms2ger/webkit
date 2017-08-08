@@ -531,7 +531,10 @@ public:
     MediaProducer::MediaStateFlags mediaState() const { return m_mediaState; }
     void updateIsPlayingMedia(uint64_t);
     MediaProducer::MutedStateFlags mutedState() const { return m_mutedState; }
-    bool isAudioMuted() const { return m_mutedState & MediaProducer::AudioIsMuted; }
+    bool isAudioMuted() const {
+        printf("Page::isAudioMuted() -> m_mutedState=%x\n", m_mutedState);
+        return m_mutedState & MediaProducer::AudioIsMuted;
+    }
     bool isMediaCaptureMuted() const { return m_mutedState & MediaProducer::CaptureDevicesAreMuted; };
     WEBCORE_EXPORT void setMuted(MediaProducer::MutedStateFlags);
     WEBCORE_EXPORT void stopMediaCapture();

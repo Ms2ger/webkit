@@ -3564,6 +3564,8 @@ void Internals::setPageMuted(StringView statesString)
             state |= MediaProducer::CaptureDevicesAreMuted;
     }
 
+    printf("----- internals ------\n");
+
     if (Page* page = document->page())
         page->setMuted(state);
 }

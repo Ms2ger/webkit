@@ -4577,6 +4577,7 @@ void WebPage::setMediaVolume(float volume)
 
 void WebPage::setMuted(MediaProducer::MutedStateFlags state)
 {
+    printf("Calling setMuted(%d)\n", state);
     m_page->setMuted(state);
 }
 

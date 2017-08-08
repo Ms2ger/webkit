@@ -1491,7 +1491,9 @@ void Page::setMuted(MediaProducer::MutedStateFlags muted)
     if (m_mutedState == muted)
         return;
 
+    printf("Page::setMuted(): %x => %x\n", m_mutedState, muted);
     m_mutedState = muted;
+    CRASH();
 
     for (Frame* frame = &mainFrame(); frame; frame = frame->tree().traverseNext()) {
         if (!frame->document())
