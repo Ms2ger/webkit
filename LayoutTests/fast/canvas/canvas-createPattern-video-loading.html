@@ -32,6 +32,7 @@
     document.body.appendChild(canvases);
 
     var video = document.createElement("video");
+    document.body.appendChild(video);
     video.addEventListener("loadeddata", loadeddata);
     video.addEventListener("playing", playing);
 
@@ -42,7 +43,8 @@
     function checkPixels(context, x, y, r, g, b, tolerance)
     {
         buffer = context.getImageData(x, y, 1, 1).data;
-        shouldBeCloseTo("buffer[0]", r, tolerance);
+        console.log( `${x}, ${y}, ${buffer}`)
+        shouldBeCloseTo("buffer[0] /*"+x+","+y+"*/", r, tolerance);
         shouldBeCloseTo("buffer[1]", g, tolerance);
         shouldBeCloseTo("buffer[2]", b, tolerance);
     }
@@ -65,6 +67,7 @@
 
     function loadeddata()
     {
+        console.log("loadeddata")
         drawImageToCanvasAndCheckPixels();
 
         video.currentTime = 1;
@@ -73,11 +76,12 @@
 
     function playing()
     {
-        video.pause();
+        //video.pause();
 
+        console.log("played")
         drawImageToCanvasAndCheckPixels();
 
-        finishJSTest();
+       // finishJSTest();
     }
 
     window.jsTestIsAsync = true;

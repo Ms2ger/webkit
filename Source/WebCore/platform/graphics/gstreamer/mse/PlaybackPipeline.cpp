@@ -442,6 +442,7 @@ void PlaybackPipeline::flush(AtomicString trackId)
     GST_TRACE("segment: [%" GST_TIME_FORMAT ", %" GST_TIME_FORMAT "], rate: %f",
         GST_TIME_ARGS(start), GST_TIME_ARGS(stop), rate);
 
+    CRASH();
     if (!gst_element_send_event(GST_ELEMENT(appsrc), gst_event_new_flush_start())) {
         GST_WARNING("Failed to send flush-start event for trackId=%s", trackId.string().utf8().data());
         return;

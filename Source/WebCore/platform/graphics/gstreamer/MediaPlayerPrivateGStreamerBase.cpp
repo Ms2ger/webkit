@@ -716,6 +716,7 @@ GstFlowReturn MediaPlayerPrivateGStreamerBase::newPrerollCallback(GstElement* si
 
 void MediaPlayerPrivateGStreamerBase::flushCurrentBuffer()
 {
+    GST_DEBUG("---");
     WTF::GMutexLocker<GMutex> lock(m_sampleMutex);
     m_sample.clear();
 
@@ -735,26 +736,44 @@ void MediaPlayerPrivateGStreamerBase::setSize(const IntSize& size)
 
 void MediaPlayerPrivateGStreamerBase::paint(GraphicsContext& context, const FloatRect& rect)
 {
-    if (context.paintingDisabled())
+    printf("MediaPlayerPrivateGStreamerBase::paint: ");
+    if (context.paintingDisabled()) {
+        printf("return 1\n");
         return;
+    }
 
-    if (!m_player->visible())
+    if (!m_player->visible()) {
+        printf("return 2\n");
         return;
+    }
 
     WTF::GMutexLocker<GMutex> lock(m_sampleMutex);
-    if (!GST_IS_SAMPLE(m_sample.get()))
+    if (!m_sample.get()) {
+        printf("return 3a\n");
         return;
+    }
+
+    if (!GST_IS_SAMPLE(m_sample.get())) {
+        printf("return 3b\n");
+        return;
+    }
 
     ImagePaintingOptions paintingOptions(CompositeCopy);
     if (m_renderingCanBeAccelerated)
         paintingOptions.m_orientationDescription.setImageOrientationEnum(m_videoSourceOrientation);
 
     RefPtr<ImageGStreamer> gstImage = ImageGStreamer::createImage(m_sample.get());
-    if (!gstImage)
+    if (!gstImage) {
+        printf("return 4\n");
         return;
+    }
 
-    if (Image* image = reinterpret_cast<Image*>(gstImage->image()))
+    if (Image* image = reinterpret_cast<Image*>(gstImage->image())) {
+        printf("DRAW \n");
         context.drawImage(*image, rect, gstImage->rect(), paintingOptions);
+    }
+
+    printf("return 5\n");
 }
 
 #if USE(GSTREAMER_GL)
@@ -884,6 +903,7 @@ GstElement* MediaPlayerPrivateGStreamerBase::createGLAppSink()
             return GST_PAD_PROBE_OK;
 
         auto* player = static_cast<MediaPlayerPrivateGStreamerBase*>(userData);
+        GST_DEBUG("Calling flushCurrentBuffer");
         player->flushCurrentBuffer();
         return GST_PAD_PROBE_OK;
     }, this, nullptr);

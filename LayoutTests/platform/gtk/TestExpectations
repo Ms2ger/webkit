@@ -3337,7 +3337,7 @@ webkit.org/b/172813 fast/events/touch/document-create-touch.html [ Failure ]
 
 webkit.org/b/172814 media/restricted-audio-playback-with-multiple-settimeouts.html [ Failure ]
 
-webkit.org/b/173410 fast/canvas/canvas-createPattern-video-loading.html [ Failure ]
+#webkit.org/b/173410 fast/canvas/canvas-createPattern-video-loading.html [ Failure ]
 
 webkit.org/b/173411 fast/events/touch/frame-hover-update.html [ Failure ]
 

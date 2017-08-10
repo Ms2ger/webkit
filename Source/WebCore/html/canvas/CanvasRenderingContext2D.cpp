@@ -1842,20 +1842,26 @@ ExceptionOr<RefPtr<CanvasPattern>> CanvasRenderingContext2D::createPattern(HTMLC
 
 ExceptionOr<RefPtr<CanvasPattern>> CanvasRenderingContext2D::createPattern(HTMLVideoElement& videoElement, bool repeatX, bool repeatY)
 {
-    if (videoElement.readyState() < HTMLMediaElement::HAVE_CURRENT_DATA)
+    printf("Hello\n");
+    if (videoElement.readyState() < HTMLMediaElement::HAVE_CURRENT_DATA) {
+        printf(" --> null\n");
         return nullptr;
+    }
     
     checkOrigin(&videoElement);
     bool originClean = canvas().originClean();
 
 #if USE(CG) || (ENABLE(ACCELERATED_2D_CANVAS) && USE(GSTREAMER_GL) && USE(CAIRO))
-    if (auto nativeImage = videoElement.nativeImageForCurrentTime())
+    if (auto nativeImage = videoElement.nativeImageForCurrentTime()) {
+        printf(" --> native\n");
         return RefPtr<CanvasPattern> { CanvasPattern::create(BitmapImage::create(WTFMove(nativeImage)), repeatX, repeatY, originClean) };
+    }
 #endif
 
     auto imageBuffer = ImageBuffer::create(size(videoElement), drawingContext() ? drawingContext()->renderingMode() : Accelerated);
     videoElement.paintCurrentFrameInContext(imageBuffer->context(), FloatRect(FloatPoint(), size(videoElement)));
     
+    printf(" --> normal\n");
     return RefPtr<CanvasPattern> { CanvasPattern::create(ImageBuffer::sinkIntoImage(WTFMove(imageBuffer), Unscaled).releaseNonNull(), repeatX, repeatY, originClean) };
 }
 

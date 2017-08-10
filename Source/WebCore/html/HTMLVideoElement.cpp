@@ -274,8 +274,10 @@ void HTMLVideoElement::updateDisplayState()
 void HTMLVideoElement::paintCurrentFrameInContext(GraphicsContext& context, const FloatRect& destRect)
 {
     MediaPlayer* player = HTMLMediaElement::player();
-    if (!player)
+    if (!player) {
+        printf("No player\n");
         return;
+    }
     
     player->setVisible(true); // Make player visible or it won't draw.
     player->paintCurrentFrameInContext(context, destRect);
