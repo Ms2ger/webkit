@@ -976,6 +976,7 @@ Node* Internals::ensureUserAgentShadowRoot(Element& host)
 
 Node* Internals::shadowRoot(Element& host)
 {
+    printf("Internals::shadowRoot => %p\n", host.shadowRoot());
     return host.shadowRoot();
 }
 

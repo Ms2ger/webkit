@@ -5,6 +5,7 @@ function createControls(root, video, host)
 
 function Controller(root, video, host)
 {
+    console.log(root)
     this.video = video;
     this.root = root;
     this.host = host;
