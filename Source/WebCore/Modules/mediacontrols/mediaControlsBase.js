@@ -5,6 +5,7 @@ function createControls(root, video, host)
 
 function Controller(root, video, host)
 {
+    console.log(root)
     this.video = video;
     this.root = root;
     this.host = host;
@@ -248,6 +249,7 @@ Controller.prototype = {
 
     shouldHaveAnyUI: function()
     {
+        console.log(`this.video.textTracks=[..${this.video.textTracks.length}]`)
         return this.shouldHaveControls() || (this.video.textTracks && this.video.textTracks.length);
     },
 
@@ -273,6 +275,7 @@ Controller.prototype = {
 
     updateBase: function()
     {
+        console.log(`updateBase: this.shouldHaveAnyUI()=${this.shouldHaveAnyUI()}`)
         if (this.shouldHaveAnyUI()) {
             if (!this.base.parentNode) {
                 this.root.appendChild(this.base);
@@ -630,6 +633,7 @@ Controller.prototype = {
 
     handleFullscreenChange: function(event)
     {
+        console.log("handleFullscreenChange")
         this.updateBase();
         this.updateControls();
 

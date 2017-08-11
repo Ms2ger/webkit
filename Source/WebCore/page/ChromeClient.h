@@ -334,7 +334,10 @@ public:
     virtual GraphicsDeviceAdapter* graphicsDeviceAdapter() const { return nullptr; }
 #endif
 
-    virtual bool supportsVideoFullscreen(HTMLMediaElementEnums::VideoFullscreenMode) { return false; }
+    virtual bool supportsVideoFullscreen(HTMLMediaElementEnums::VideoFullscreenMode) {
+        printf("supportsVideoFullscreen - NYI<<<<<<<<<\n");
+        return true;
+    }
 
 #if ENABLE(VIDEO)
     virtual void enterVideoFullscreenForVideoElement(HTMLVideoElement&, HTMLMediaElementEnums::VideoFullscreenMode) { }

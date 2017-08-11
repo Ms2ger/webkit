@@ -6111,6 +6111,7 @@ void Document::fullScreenRendererDestroyed()
 
 void Document::fullScreenChangeDelayTimerFired()
 {
+    printf("======================= fullScreenChangeDelayTimerFired\n");
     // Since we dispatch events in this function, it's possible that the
     // document will be detached and GC'd. We protect it here to make sure we
     // can finish the function successfully.

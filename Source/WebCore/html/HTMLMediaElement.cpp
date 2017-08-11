@@ -5550,14 +5550,21 @@ double HTMLMediaElement::maxFastForwardRate() const
     
 bool HTMLMediaElement::isFullscreen() const
 {
-    if (m_videoFullscreenMode != VideoFullscreenModeNone)
+    printf("HTMLMediaElement::isFullscreen() => ");
+
+    if (m_videoFullscreenMode != VideoFullscreenModeNone) {
+        printf("true\n");
         return true;
+    }
     
 #if ENABLE(FULLSCREEN_API)
-    if (document().webkitIsFullScreen() && document().webkitCurrentFullScreenElement() == this)
+    if (document().webkitIsFullScreen() && document().webkitCurrentFullScreenElement() == this) {
+        printf("true\n");
         return true;
+    }
 #endif
     
+    printf("false\n");
     return false;
 }
 
@@ -6029,6 +6036,11 @@ bool HTMLMediaElement::shouldForceControlsDisplay() const
 
 void HTMLMediaElement::configureMediaControls()
 {
+    printf("%d || (%d && %d) || %d || %d\n",
+           controls(),
+           isVideo(), m_mediaSession->requiresFullscreenForVideoPlayback(*this),
+           shouldForceControlsDisplay(),
+           isFullscreen());
     bool requireControls = controls();
 
     // Always create controls for video when fullscreen playback is required.
@@ -6051,6 +6063,7 @@ void HTMLMediaElement::configureMediaControls()
     if (!requireControls || !isConnected() || !inActiveDocument())
         return;
 
+    printf("ensureMediaControlsShadowRoot()\n");
     ensureMediaControlsShadowRoot();
 #else
     if (!requireControls || !isConnected() || !inActiveDocument()) {
@@ -6058,6 +6071,7 @@ void HTMLMediaElement::configureMediaControls()
             mediaControls()->hide();
         return;
     }
+>>>>>
 
     if (!hasMediaControls() && !createMediaControls())
         return;
@@ -6851,6 +6865,7 @@ void HTMLMediaElement::setControllerJSProperty(const char* propertyName, JSC::JS
 
 void HTMLMediaElement::didAddUserAgentShadowRoot(ShadowRoot* root)
 {
+    printf("didAddUserAgentShadowRoot\n");
     LOG(Media, "HTMLMediaElement::didAddUserAgentShadowRoot(%p)", this);
 
     Page* page = document().page();
