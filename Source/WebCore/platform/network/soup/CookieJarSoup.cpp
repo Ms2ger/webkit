@@ -66,6 +66,7 @@ void setCookiesFromDOM(const NetworkStorageSession& session, const URL& firstPar
     value.split('\n', cookies);
     const size_t cookiesCount = cookies.size();
     for (size_t i = 0; i < cookiesCount; ++i) {
+        printf("COOKIE! %s\n", cookies[i].utf8().data());
         GUniquePtr<SoupCookie> cookie(soup_cookie_parse(cookies[i].utf8().data(), origin.get()));
         if (!cookie)
             continue;

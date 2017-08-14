@@ -4533,6 +4533,7 @@ ExceptionOr<String> Document::cookie()
 
 ExceptionOr<void> Document::setCookie(const String& value)
 {
+    printf("setCookie: %s\n", value.characters8() ? (const char*)value.characters8() : "null"  );
     if (page() && !page()->settings().cookieEnabled())
         return { };
 

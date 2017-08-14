@@ -1,11 +1,8 @@
 <!DOCTYPE html>
 <html>
 <body>
-<script src="/js-test-resources/js-test-pre.js"></script>
+<script src="../../../resources/js-test-pre.js"></script>
 <script>
-description("Test null handling of several Document attributes");
-
-debug("* cookie attribute");
 shouldBeEqualToString("document.cookie", "");
 evalAndLog("document.cookie = 'key=value'");
 shouldBeEqualToString("document.cookie", "key=value");
