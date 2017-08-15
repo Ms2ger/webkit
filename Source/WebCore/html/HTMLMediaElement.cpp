@@ -3304,7 +3304,7 @@ void HTMLMediaElement::pause()
 
 void HTMLMediaElement::pauseInternal()
 {
-    printf("HTMLMediaElement::pauseInternal(%p)\n", this);
+    printf("================== HTMLMediaElement::pauseInternal(%p)\n", this);
 
     if (!m_mediaSession->clientWillPausePlayback()) {
         LOG(Media, "  returning because of interruption");
