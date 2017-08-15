@@ -1016,7 +1016,6 @@ void HTMLMediaElement::rejectPendingPlayPromises(DOMError& error)
 void HTMLMediaElement::resolvePendingPlayPromises()
 {
     printf(">>> RESOLVING %d\n", m_pendingPlayPromises.size());
-    if (m_pendingPlayPromises.size() == 1) CRASH();
     Vector<DOMPromiseDeferred<void>> pendingPlayPromises = WTFMove(m_pendingPlayPromises);
 
     for (auto& promise : pendingPlayPromises)

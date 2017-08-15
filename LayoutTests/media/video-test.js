@@ -231,6 +231,7 @@ function testException(testString, exceptionString) {
     } catch (ex) {
         var exception = ex;
     }
+    console.log(exception)
     logResult(exception !== undefined && exception == eval(exceptionString),
         "TEST(" + testString + ") THROWS(" + exceptionString + ")");
 }

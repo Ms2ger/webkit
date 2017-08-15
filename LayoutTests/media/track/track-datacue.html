@@ -41,7 +41,7 @@
                 testExpected("(new Uint8Array(cue.data))[0]", 7);
 
                 consoleWrite("<br>*** Throw exception if data is not an ArrayBuffer.");
-                var error = "'TypeError: Type error'";
+                var error = "'TypeError: The DataCue.data attribute must be an instance of ArrayBuffer'";
                 testException("cue.data = null", error);
                 testException("cue.data = 'test'", error);
                 testException("cue.data = [5]", error);
