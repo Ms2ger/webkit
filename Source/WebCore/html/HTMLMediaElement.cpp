@@ -2479,12 +2479,14 @@ void HTMLMediaElement::setReadyState(MediaPlayer::ReadyState state)
 
     // If we transition to the Future Data state and we're about to begin playing, ensure playback is actually permitted first,
     // honoring any playback denial reasons such as the requirement of a user gesture.
+    bool forbidden = !m_mediaSession->playbackPermitted(*this);
+    bool pot = potentiallyPlaying();
     printf("setReadyState: %d & %d & %d & %d\n",
            m_readyState == HAVE_FUTURE_DATA,
            oldState < HAVE_FUTURE_DATA,
-           potentiallyPlaying(),
-           !m_mediaSession->playbackPermitted(*this));
-    if (m_readyState == HAVE_FUTURE_DATA && oldState < HAVE_FUTURE_DATA && potentiallyPlaying() && !m_mediaSession->playbackPermitted(*this)) {
+           pot,
+           forbidden);
+    if (m_readyState == HAVE_FUTURE_DATA && oldState < HAVE_FUTURE_DATA && pot && forbidden) {
         pauseInternal();
         setPlaybackWithoutUserGesture(PlaybackWithoutUserGesture::Prevented);
     }
@@ -4788,7 +4790,7 @@ void HTMLMediaElement::mediaPlayerFirstVideoFrameAvailable(MediaPlayer*)
 
 void HTMLMediaElement::mediaPlayerCharacteristicChanged(MediaPlayer*)
 {
-    printf("HTMLMediaElement::mediaPlayerCharacteristicChanged(%p)\n", this);
+    printf("------------------------ HTMLMediaElement::mediaPlayerCharacteristicChanged(%p)\n", this);
     
     beginProcessingMediaPlayerCallback();
 
@@ -4806,6 +4808,7 @@ void HTMLMediaElement::mediaPlayerCharacteristicChanged(MediaPlayer*)
         mediaControls()->reset();
     updateRenderer();
 
+    printf("\n");
     if (!paused() && !m_mediaSession->playbackPermitted(*this)) {
         pauseInternal();
         setPlaybackWithoutUserGesture(PlaybackWithoutUserGesture::Prevented);
