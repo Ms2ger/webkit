@@ -792,7 +792,7 @@ bool TestController::resetStateToConsistentValues(const TestOptions& options)
 
     WKPageClearWheelEventTestTrigger(m_mainWebView->page());
 
-    WKPageSetMuted(m_mainWebView->page(), true);
+//    WKPageSetMuted(m_mainWebView->page(), true);
 
     WKPageClearUserMediaState(m_mainWebView->page());
 

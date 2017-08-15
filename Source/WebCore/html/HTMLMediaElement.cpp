@@ -1006,6 +1006,7 @@ void HTMLMediaElement::scheduleResolvePendingPlayPromises()
 
 void HTMLMediaElement::rejectPendingPlayPromises(DOMError& error)
 {
+    printf(">>> REJECTING %d\n", m_pendingPlayPromises.size());
     Vector<DOMPromiseDeferred<void>> pendingPlayPromises = WTFMove(m_pendingPlayPromises);
 
     for (auto& promise : pendingPlayPromises)
@@ -1014,6 +1015,8 @@ void HTMLMediaElement::rejectPendingPlayPromises(DOMError& error)
 
 void HTMLMediaElement::resolvePendingPlayPromises()
 {
+    printf(">>> RESOLVING %d\n", m_pendingPlayPromises.size());
+    if (m_pendingPlayPromises.size() == 1) CRASH();
     Vector<DOMPromiseDeferred<void>> pendingPlayPromises = WTFMove(m_pendingPlayPromises);
 
     for (auto& promise : pendingPlayPromises)
@@ -1022,6 +1025,7 @@ void HTMLMediaElement::resolvePendingPlayPromises()
 
 void HTMLMediaElement::scheduleNotifyAboutPlaying()
 {
+    printf("scheduleNotifyAboutPlaying %d\n", m_pendingPlayPromises.size());
     m_promiseTaskQueue.enqueueTask(std::bind(&HTMLMediaElement::notifyAboutPlaying, this));
 }
 
@@ -2440,8 +2444,10 @@ void HTMLMediaElement::setReadyState(MediaPlayer::ReadyState state)
     bool isPotentiallyPlaying = potentiallyPlaying();
     if (m_readyState == HAVE_FUTURE_DATA && oldState <= HAVE_CURRENT_DATA && tracksAreReady) {
         scheduleEvent(eventNames().canplayEvent);
-        if (isPotentiallyPlaying)
+        if (isPotentiallyPlaying) {
+            printf("sched 1\n");
             scheduleNotifyAboutPlaying();
+        }
         shouldUpdateDisplayState = true;
     }
 
@@ -2451,8 +2457,10 @@ void HTMLMediaElement::setReadyState(MediaPlayer::ReadyState state)
 
         scheduleEvent(eventNames().canplaythroughEvent);
 
-        if (isPotentiallyPlaying && oldState <= HAVE_CURRENT_DATA)
+        if (isPotentiallyPlaying && oldState <= HAVE_CURRENT_DATA) {
+            printf("sched 2\n");
             scheduleNotifyAboutPlaying();
+        }
 
         auto success = canTransitionFromAutoplayToPlay();
         if (success) {
@@ -2461,6 +2469,7 @@ void HTMLMediaElement::setReadyState(MediaPlayer::ReadyState state)
             setPlaybackWithoutUserGesture(PlaybackWithoutUserGesture::Started);
             m_playbackStartedTime = currentMediaTime().toDouble();
             scheduleEvent(eventNames().playEvent);
+            printf("sched 3\n");
             scheduleNotifyAboutPlaying();
         } else if (success.value() == MediaPlaybackDenialReason::UserGestureRequired)
             setPlaybackWithoutUserGesture(PlaybackWithoutUserGesture::Prevented);
@@ -2470,6 +2479,11 @@ void HTMLMediaElement::setReadyState(MediaPlayer::ReadyState state)
 
     // If we transition to the Future Data state and we're about to begin playing, ensure playback is actually permitted first,
     // honoring any playback denial reasons such as the requirement of a user gesture.
+    printf("setReadyState: %d & %d & %d & %d\n",
+           m_readyState == HAVE_FUTURE_DATA,
+           oldState < HAVE_FUTURE_DATA,
+           potentiallyPlaying(),
+           !m_mediaSession->playbackPermitted(*this));
     if (m_readyState == HAVE_FUTURE_DATA && oldState < HAVE_FUTURE_DATA && potentiallyPlaying() && !m_mediaSession->playbackPermitted(*this)) {
         pauseInternal();
         setPlaybackWithoutUserGesture(PlaybackWithoutUserGesture::Prevented);
@@ -2840,6 +2854,7 @@ MediaPlayer::MovieLoadType HTMLMediaElement::movieLoadType() const
 
 bool HTMLMediaElement::hasAudio() const
 {
+    printf("hasAudio: %p ? .. : false\n", m_player); 
     return m_player ? m_player->hasAudio() : false;
 }
 
@@ -3157,7 +3172,7 @@ void HTMLMediaElement::setPreload(const String& preload)
 
 void HTMLMediaElement::play(DOMPromiseDeferred<void>&& promise)
 {
-    LOG(Media, "HTMLMediaElement::play(%p)", this);
+    printf("HTMLMediaElement::play(%p)\n", this);
 
     auto success = m_mediaSession->playbackPermitted(*this);
     if (!success) {
@@ -3289,7 +3304,7 @@ void HTMLMediaElement::pause()
 
 void HTMLMediaElement::pauseInternal()
 {
-    LOG(Media, "HTMLMediaElement::pauseInternal(%p)", this);
+    printf("HTMLMediaElement::pauseInternal(%p)\n", this);
 
     if (!m_mediaSession->clientWillPausePlayback()) {
         LOG(Media, "  returning because of interruption");
@@ -3312,6 +3327,8 @@ void HTMLMediaElement::pauseInternal()
 
     setPlaybackWithoutUserGesture(PlaybackWithoutUserGesture::None);
 
+    printf("================== Going to reject iff %d is false: %d ==================\n",
+           m_paused, m_pendingPlayPromises.size());
     if (!m_paused) {
         m_paused = true;
         scheduleTimeupdateEvent(false);
@@ -4771,7 +4788,7 @@ void HTMLMediaElement::mediaPlayerFirstVideoFrameAvailable(MediaPlayer*)
 
 void HTMLMediaElement::mediaPlayerCharacteristicChanged(MediaPlayer*)
 {
-    LOG(Media, "HTMLMediaElement::mediaPlayerCharacteristicChanged(%p)", this);
+    printf("HTMLMediaElement::mediaPlayerCharacteristicChanged(%p)\n", this);
     
     beginProcessingMediaPlayerCallback();
 
@@ -7497,6 +7514,7 @@ void HTMLMediaElement::updateShouldAutoplay()
 
 void HTMLMediaElement::updateShouldPlay()
 {
+    printf("HTMLMediaElement::updateShouldPlay");
     if (!paused() && !m_mediaSession->playbackPermitted(*this)) {
         pauseInternal();
         setPlaybackWithoutUserGesture(PlaybackWithoutUserGesture::Prevented);

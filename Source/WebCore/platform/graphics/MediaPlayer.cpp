@@ -119,7 +119,10 @@ public:
     FloatSize naturalSize() const override { return FloatSize(); }
 
     bool hasVideo() const override { return false; }
-    bool hasAudio() const override { return false; }
+    bool hasAudio() const override {
+        printf("FAKE hazAudio\n");
+        return false;
+    }
 
     void setVisible(bool) override { }
 
@@ -661,7 +664,9 @@ bool MediaPlayer::hasVideo() const
 
 bool MediaPlayer::hasAudio() const
 {
-    return m_private->hasAudio();
+    bool x = m_private->hasAudio();
+    printf("%p->hasAudio() = %d\n", m_private.get(), x); 
+    return x;
 }
 
 bool MediaPlayer::inMediaDocument() const

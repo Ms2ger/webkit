@@ -152,7 +152,7 @@ MediaPlayerPrivateGStreamer::MediaPlayerPrivateGStreamer(MediaPlayer* player)
     , m_delayingLoad(false)
     , m_maxTimeLoadedAtLastDidLoadingProgress(0)
     , m_hasVideo(false)
-    , m_hasAudio(false)
+    , m_hasAudio(-1)
     , m_readyTimerHandler(RunLoop::main(), this, &MediaPlayerPrivateGStreamer::readyTimerFired)
     , m_totalBytes(0)
     , m_preservesPitch(false)
@@ -687,6 +687,7 @@ void MediaPlayerPrivateGStreamer::audioChangedCallback(MediaPlayerPrivateGStream
 
 void MediaPlayerPrivateGStreamer::notifyPlayerOfAudio()
 {
+    GST_DEBUG("notifyPlayerOfAudio().");
     if (UNLIKELY(!m_pipeline || !m_source))
         return;
 
@@ -695,7 +696,8 @@ void MediaPlayerPrivateGStreamer::notifyPlayerOfAudio()
     GstElement* element = useMediaSource ? m_source.get() : m_pipeline.get();
     g_object_get(element, "n-audio", &numTracks, nullptr);
 
-    m_hasAudio = numTracks > 0;
+    GST_DEBUG("numTracks=%d.", numTracks);
+    m_hasAudio = numTracks > 0 ? 1 : 0;
 
     if (useMediaSource) {
         GST_DEBUG("Tracks managed by source element. Bailing out now.");

@@ -72,7 +72,10 @@ public:
     void handlePluginInstallerResult(GstInstallPluginsReturn);
 
     bool hasVideo() const override { return m_hasVideo; }
-    bool hasAudio() const override { return m_hasAudio; }
+    bool hasAudio() const override {
+        printf("%p->hasAudio() => %d\n", this, m_hasAudio);
+        return m_hasAudio > 0;
+    }
 
     void load(const String &url) override;
 #if ENABLE(MEDIA_SOURCE)
@@ -241,7 +244,7 @@ private:
     bool m_delayingLoad;
     mutable float m_maxTimeLoadedAtLastDidLoadingProgress;
     bool m_hasVideo;
-    bool m_hasAudio;
+    int32_t m_hasAudio;
     RunLoop::Timer<MediaPlayerPrivateGStreamer> m_readyTimerHandler;
     mutable unsigned long long m_totalBytes;
     URL m_url;

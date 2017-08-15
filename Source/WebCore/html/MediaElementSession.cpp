@@ -170,6 +170,8 @@ static bool needsDocumentLevelMediaUserGestureQuirk(Document& document)
 
 SuccessOr<MediaPlaybackDenialReason> MediaElementSession::playbackPermitted(const HTMLMediaElement& element) const
 {
+    printf("MediaElementSession::playbackPermitted\n");
+
     if (element.document().isMediaDocument() && !element.document().ownerElement())
         return { };
 
@@ -203,8 +205,22 @@ SuccessOr<MediaPlaybackDenialReason> MediaElementSession::playbackPermitted(cons
         return MediaPlaybackDenialReason::UserGestureRequired;
     }
 
-    if (m_restrictions & RequireUserGestureForAudioRateChange && (!element.isVideo() || element.hasAudio()) && !element.muted() && element.volume() && !element.document().processingUserGestureForMedia()) {
+    bool hasAudio = element.hasAudio();
+    printf("  %d & (%d|%d) & %d & %f & %d\n",
+        m_restrictions & RequireUserGestureForAudioRateChange,
+        !element.isVideo(),
+        hasAudio,
+        !element.muted(),
+        element.volume(),
+        !element.document().processingUserGestureForMedia());
+
+    if (m_restrictions & RequireUserGestureForAudioRateChange &&
+        (!element.isVideo() || hasAudio) &&
+        !element.muted() &&
+        element.volume() &&
+        !element.document().processingUserGestureForMedia()) {
         RELEASE_LOG(Media, "MediaElementSession::playbackPermitted - returning FALSE because of audio rate change restriction");
+        printf("  --> NOT PERMITTED\n");
         return MediaPlaybackDenialReason::UserGestureRequired;
     }
 
@@ -213,6 +229,7 @@ SuccessOr<MediaPlaybackDenialReason> MediaElementSession::playbackPermitted(cons
         return MediaPlaybackDenialReason::UserGestureRequired;
     }
 
+    printf("  --> PERMITTED\n");
     return { };
 }
 
