@@ -3319,6 +3319,7 @@ void HTMLMediaElement::pauseInternal()
     if (!m_paused) {
         m_paused = true;
         scheduleTimeupdateEvent(false);
+        printf("pause 1\n");
         scheduleEvent(eventNames().pauseEvent);
         m_promiseTaskQueue.enqueueTask([this]() {
             rejectPendingPlayPromises(DOMError::create("AbortError", "The operation was aborted."));
@@ -4481,6 +4482,7 @@ void HTMLMediaElement::mediaPlayerTimeChanged(MediaPlayer*)
             if (!m_mediaController && !m_paused) {
                 // changes paused to true and fires a simple event named pause at the media element.
                 m_paused = true;
+        printf("pause 2\n");
                 scheduleEvent(eventNames().pauseEvent);
                 m_mediaSession->clientWillPausePlayback();
             }

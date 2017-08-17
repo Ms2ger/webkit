@@ -3339,7 +3339,7 @@ webkit.org/b/172275 imported/w3c/web-platform-tests/html/browsers/the-window-obj
 webkit.org/b/172276 media/video-muted.html [ Failure ]
 webkit.org/b/172276 media/video-play-audio-require-user-gesture.html [ Failure ]
 
-webkit.org/b/172277 media/video-restricted-invisible-autoplay-allowed-if-audible.html [ Failure ]
+#webkit.org/b/172277 media/video-restricted-invisible-autoplay-allowed-if-audible.html [ Failure ]
 
 webkit.org/b/172278 fast/html/marquee-child-wrap.html [ ImageOnlyFailure ]
 
@@ -3365,7 +3365,7 @@ webkit.org/b/172812 fast/canvas/webgl/lose-context-on-status-failure.html [ Fail
 
 webkit.org/b/172813 fast/events/touch/document-create-touch.html [ Failure ]
 
-webkit.org/b/172814 media/restricted-audio-playback-with-multiple-settimeouts.html [ Failure ]
+#webkit.org/b/172814 media/restricted-audio-playback-with-multiple-settimeouts.html [ Failure ]
 
 webkit.org/b/173410 fast/canvas/canvas-createPattern-video-loading.html [ Failure ]
 
@@ -3374,7 +3374,7 @@ webkit.org/b/173411 fast/events/touch/frame-hover-update.html [ Failure ]
 webkit.org/b/173413 imported/w3c/web-platform-tests/XMLHttpRequest/setrequestheader-content-type.htm [ Failure ]
 webkit.org/b/173413 imported/w3c/web-platform-tests/html/semantics/forms/textfieldselection/selection-after-content-change.html [ Failure ]
 
-webkit.org/b/143702 media/progress-events-generated-correctly.html [ Failure ]
+#webkit.org/b/143702 media/progress-events-generated-correctly.html [ Failure ]
 
 webkit.org/b/173413 imported/w3c/web-platform-tests/html/webappapis/system-state-and-capabilities/the-navigator-object/navigator-pluginarray.html [ Failure ]
 
