@@ -2840,16 +2840,16 @@ webkit.org/b/133803 editing/input/option-page-up-down.html [ Failure ]
 webkit.org/b/133803 editing/input/scroll-viewport-page-up-down.html [ Failure ]
 webkit.org/b/133803 editing/undo/undo-deleteWord.html [ Failure ]
 
-webkit.org/b/134976 media/media-controls-invalid-url.html [ Failure Timeout ]
+#webkit.org/b/134976 media/media-controls-invalid-url.html [ Failure Timeout ]
 
-webkit.org/b/134979 media/track/track-cue-mutable-text.html [ Failure ]
+#webkit.org/b/134979 media/track/track-cue-mutable-text.html [ Failure ]
 webkit.org/b/134979 media/track/track-cue-nothing-to-render.html [ Failure ]
 webkit.org/b/134979 media/track/track-cue-rendering-mode-changed.html [ Failure Timeout ]
 webkit.org/b/134979 media/track/track-cue-rendering-rtl.html [ Crash Failure Timeout ]
 webkit.org/b/134979 media/track/track-cue-rendering-snap-to-lines-not-set.html [ Failure Timeout ]
 
-webkit.org/b/134995 media/track/track-in-band-subtitles-too-large.html [ Failure ]
-webkit.org/b/134995 media/track/track-long-word-container-sizing.html [ Failure ]
+#webkit.org/b/134995 media/track/track-in-band-subtitles-too-large.html [ Failure ]
+#webkit.org/b/134995 media/track/track-long-word-container-sizing.html [ Failure ]
 
 webkit.org/b/135529 svg/css/parse-height.html [ Failure ]
 webkit.org/b/135529 svg/css/parse-length.html [ Failure ]

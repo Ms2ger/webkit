@@ -208,6 +208,11 @@ Controller.prototype = {
 
     handleEvent: function(event)
     {
+        console.log(`handleEvent: ${event.type} to ${event.currentTarget}`)
+        let logged = this.listeners[event.type].map(function({element:element, handler:handler, useCapture:useCapture}) {
+            return `{element:${element}, handler:${handler.name}, useCapture:${useCapture}}`
+        });
+        console.log(logged)
         var preventDefault = false;
 
         try {
@@ -531,6 +536,7 @@ Controller.prototype = {
 
     handleError: function(event)
     {
+            this.showControls();
         this.updateStatusDisplay();
     },
 
@@ -646,6 +652,7 @@ Controller.prototype = {
 
     handleWrapperMouseMove: function(event)
     {
+        console.log(`handleWrapperMouseMove`)
         this.showControls();
         this.resetHideControlsTimer();
 
@@ -922,6 +929,7 @@ Controller.prototype = {
 
     updateDuration: function()
     {
+        console.log(`>>> CALLED updateDuration ${this.video.duration}`)
         var duration = this.video.duration;
         this.controls.timeline.min = 0;
         this.controls.timeline.max = duration;

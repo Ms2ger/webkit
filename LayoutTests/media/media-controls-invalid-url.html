@@ -32,9 +32,10 @@
 
             function error()
             {
+                console.log("Page error event")
                 try {
                     testExpected("getTimeLineValue()", video.currentTime);
-                    endTest();
+                    //endTest();
                 } catch (exception) {
                     failTest(exception.description);
                 }
