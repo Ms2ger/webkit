@@ -186,12 +186,14 @@ void CaptionUserPreferences::setPreferredLanguage(const String& language)
 
 void CaptionUserPreferences::setPreferredAudioCharacteristic(const String& characteristic)
 {
+    printf("CaptionUserPreferences::setPreferredAudioCharacteristic\n");
     m_userPreferredAudioCharacteristic = characteristic;
     notify();
 }
 
 Vector<String> CaptionUserPreferences::preferredAudioCharacteristics() const
 {
+    printf("CaptionUserPreferences::preferredAudioCharacteristics\n");
     Vector<String> characteristics;
     if (!m_userPreferredAudioCharacteristic.isEmpty())
         characteristics.append(m_userPreferredAudioCharacteristic);

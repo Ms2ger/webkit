@@ -10,18 +10,23 @@
             }
 
             function start() {
-                if (window.internals)
+                if (window.internals) {
                     internals.setUserPreferredAudioCharacteristic('public.accessibility.describes-video');
+                    consoleWrite(internals.userPreferredAudioCharacteristics());
+                }
                 findMediaElement();
                 video = document.getElementById('video');
                 waitForEvent('canplaythrough', canplaythrough);
                 video.src = findMediaFile('video', 'content/audio-describes-video');
+                consoleWrite(video.src)
             }
 
             function canplaythrough() {
                 testExpected('video.audioTracks.length', 2);
                 testExpected('video.audioTracks[0].enabled', false);
+                testExpected('video.audioTracks[0].id', 'A0');
                 testExpected('video.audioTracks[1].enabled', true);
+                testExpected('video.audioTracks[1].id', 'A1');
                 endTest();
             }
         </script>
