@@ -3507,7 +3507,7 @@ webkit.org/b/160119 media/track/track-delete-during-setup.html [ Timeout Pass ]
 
 # This one has its own bug because the crashes were preexisting; only the
 # timeout is caused by the switch to threaded compositor.
-webkit.org/b/160131 media/track/track-in-band-duplicate-tracks-when-source-changes.html [ Crash Timeout Pass ]
+#webkit.org/b/160131 media/track/track-in-band-duplicate-tracks-when-source-changes.html [ Crash Timeout Pass ]
 
 webkit.org/b/160131 plugins/return-error-from-new-stream-doesnt-invoke-destroy-stream.html [ Timeout Pass ]
 

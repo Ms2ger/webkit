@@ -31,6 +31,8 @@
 
             function setup()
             {
+              document.body.style.backgroundColor = 'green';
+              setTimeout(function() {
                 findMediaElement();
                 // This bug only occurs when using the <source> element.
                 // Don't change this to use video.src.
@@ -38,6 +40,7 @@
                 source.src = '../content/counting-subtitled.m4v';
                 video.appendChild(source);
                 waitForEventOnce('canplaythrough', storeTrackNumber);
+              }, 0000);
             }
 
         </script>

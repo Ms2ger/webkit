@@ -3977,8 +3977,11 @@ TextTrackList& HTMLMediaElement::textTracks()
 
 VideoTrackList& HTMLMediaElement::videoTracks()
 {
+    fprintf(stderr, "HTMLMediaElement::videoTracks: %p\n", this);
+    fprintf(stderr, " --> %p\n", m_videoTracks.get());
     if (!m_videoTracks)
         m_videoTracks = VideoTrackList::create(this, ActiveDOMObject::scriptExecutionContext());
+    fprintf(stderr, " --> %p\n", m_videoTracks.get());
 
     return *m_videoTracks;
 }
