@@ -17,19 +17,24 @@ function finish()
 
 window.addEventListener('load', function()
 {
+    console.log("Load event");
     var endTime = new Date().getTime();
     var loadTime = endTime - startTime;
+    consoleWrite(loadTime)
     if(loadTime > 2000)
         document.getElementById('load-time').innerHTML = 'Load Time > 2s' + '  FAIL';
     else
         document.getElementById('load-time').innerHTML = 'Load Time < 2s' + '  PASS';
-    finish();
+//    finish();
 }, false);
 
 </script>
 <body>
 
-<video id="video" controls preload="none">
+<video id="video" controls preload="none"
+       onstalled="console.log('stalled')"
+       onprogress="console.log('progress')"
+>
 </video>
 <script>
     var vid = document.getElementById('video');

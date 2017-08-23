@@ -41,7 +41,7 @@ namespace Inspector {
 #if !LOG_DISABLED
 static bool sLogToSystemConsole = true;
 #else
-static bool sLogToSystemConsole = false;
+static bool sLogToSystemConsole = true;
 #endif
 
 bool JSGlobalObjectConsoleClient::logToSystemConsole()

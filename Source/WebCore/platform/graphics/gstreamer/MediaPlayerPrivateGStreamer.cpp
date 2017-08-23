@@ -1983,13 +1983,17 @@ void MediaPlayerPrivateGStreamer::setDownloadBuffering()
 
 void MediaPlayerPrivateGStreamer::setPreload(MediaPlayer::Preload preload)
 {
+    printf("setPreload() %d => %d\n", m_preload, preload);
     if (preload == MediaPlayer::Auto && isLiveStream())
         return;
 
     m_preload = preload;
     setDownloadBuffering();
 
-    if (m_delayingLoad && m_preload != MediaPlayer::None) {
+    if (m_preload == MediaPlayer::None)
+        return;
+
+    if (m_delayingLoad) {
         m_delayingLoad = false;
         commitLoad();
     }

@@ -800,9 +800,14 @@ void HTMLMediaElement::parseAttribute(const QualifiedName& name, const AtomicStr
             m_preload = MediaPlayer::Auto;
         }
 
+        printf("preload attr: %d\n", m_preload);
+
         // The attribute must be ignored if the autoplay attribute is present
-        if (!autoplay() && !m_havePreparedToPlay && m_player)
-            m_player->setPreload(m_mediaSession->effectivePreloadForElement(*this));
+        if (!autoplay() && !m_havePreparedToPlay && m_player) {
+            auto effective = m_mediaSession->effectivePreloadForElement(*this);
+            printf("effective: %d\n", effective);
+            m_player->setPreload(effective);
+        }
 
     } else if (name == mediagroupAttr)
         setMediaGroup(value);
@@ -2709,6 +2714,7 @@ void HTMLMediaElement::cdmClientAttemptToResumePlaybackIfNecessary()
 
 void HTMLMediaElement::progressEventTimerFired()
 {
+    printf("progressEventTimerFired\n");
     ASSERT(m_player);
     if (m_networkState != NETWORK_LOADING)
         return;
@@ -6050,6 +6056,7 @@ bool HTMLMediaElement::isURLAttribute(const Attribute& attribute) const
 
 void HTMLMediaElement::setShouldDelayLoadEvent(bool shouldDelay)
 {
+    printf("setShouldDelayLoadEvent(%d)\n", shouldDelay);
     if (m_shouldDelayLoadEvent == shouldDelay)
         return;
 

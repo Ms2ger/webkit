@@ -3213,9 +3213,9 @@ webkit.org/b/168369 accessibility/gtk/text-at-offset-textinput.html [ Failure ]
 webkit.org/b/168370 accessibility/hidden-th-still-column-header.html [ Failure ]
 webkit.org/b/168370 accessibility/selected-text-range-aria-elements.html [ Failure ]
 
-webkit.org/b/168373 fullscreen/video-controls-rtl.html [ Failure ]
-webkit.org/b/168373 imported/w3c/web-platform-tests/html/semantics/embedded-content/media-elements/readyState_during_canplaythrough.html [ Failure ]
-webkit.org/b/168373 media/media-preload-no-delay-loadevent.html [ Failure ]
+#webkit.org/b/168373 fullscreen/video-controls-rtl.html [ Failure ]
+#webkit.org/b/168373 imported/w3c/web-platform-tests/html/semantics/embedded-content/media-elements/readyState_during_canplaythrough.html [ Failure ]
+#webkit.org/b/168373 media/media-preload-no-delay-loadevent.html [ Failure ]
 webkit.org/b/168373 media/video-background-playback.html [ Failure Timeout ]
 webkit.org/b/168373 media/video-concurrent-playback.html [ Failure Timeout ]
 
