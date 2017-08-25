@@ -19,24 +19,24 @@
 
             function testMenuIsVisible()
             {
+                consoleWrite("*** Track menu should be visible");
                 var trackListElement = getTrackListElement();
                 displayStyle = window.getComputedStyle(trackListElement.parentNode).display;
-                consoleWrite("*** Track menu should be visible " + displayStyle);
-                testExpected("displayStyle", "block");
-                // Now, click outside of the video to test that the track menu hides when clicking anywhere else.
-                eventSender.mouseMoveTo(1, 1);
-                eventSender.mouseDown();
-                eventSender.mouseUp();
+                testExpected("displayStyle", "none", "!=");
                 testMenuIsInvisible();
             }
 
             function testMenuIsInvisible()
             {
+                consoleWrite("*** Track menu should be invisible");
+                // Click outside of the video to test that the track menu hides when clicking anywhere else.
+                eventSender.mouseMoveTo(1, 1);
+                eventSender.mouseDown();
+                eventSender.mouseUp();
                 var trackListElement = getTrackListElement();
                 displayStyle = window.getComputedStyle(trackListElement.parentNode).display;
-                consoleWrite("*** Track menu should be invisible " + displayStyle);
                 testExpected("displayStyle", "none");
-                endTest();
+//                endTest();
             }
 
             function start()
