@@ -6522,16 +6522,26 @@ void Document::updateLastHandledUserGestureTimestamp(MonotonicTime time)
 
 bool Document::processingUserGestureForMedia() const
 {
-    if (ScriptController::processingUserGestureForMedia())
+    printf("Document::processingUserGestureForMedia\n");
+    if (ScriptController::processingUserGestureForMedia()) {
+        printf("  --> ScriptController::processingUserGestureForMedia = true\n");
         return true;
+    }
 
-    if (settings().mediaUserGestureInheritsFromDocument())
-        return topDocument().hasHadUserInteraction();
+    if (settings().mediaUserGestureInheritsFromDocument()) {
+        bool x = topDocument().hasHadUserInteraction();
+        printf("  --> mediaUserGestureInheritsFromDocument = %d\n", x);
+        return x;
+    }
 
     auto* loader = this->loader();
-    if (loader && loader->allowedAutoplayQuirks().contains(AutoplayQuirk::InheritedUserGestures))
-        return topDocument().hasHadUserInteraction();
+    if (loader && loader->allowedAutoplayQuirks().contains(AutoplayQuirk::InheritedUserGestures)) {
+        bool x = topDocument().hasHadUserInteraction();
+        printf("  --> mediaUserGestureInheritsFromDocument = %d\n", x);
+        return x;
+    }
 
+    printf("  --> false\n");
     return false;
 }
 

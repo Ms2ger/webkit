@@ -29,6 +29,10 @@
 
     var tests = [
         function() {
+            run("shouldResolve(mediaElement.play()).then(next, next)");
+        },
+
+        function() {
             consoleWrite('Test > 1s in single step');
             consoleWrite('setTimeout 1, 1.1s');
             setTimeout(() => {

@@ -104,7 +104,15 @@ bool UserGestureIndicator::processingUserGestureForMedia()
     if (!isMainThread())
         return false;
 
-    return currentToken() ? currentToken()->processingUserGestureForMedia() : false;
+    printf("currentToken() = %p\n", currentToken().get());
+    if (!currentToken()) {
+        printf("  --> false\n");
+        return false;
+    }
+
+    bool result = currentToken()->processingUserGestureForMedia();
+    printf("  --> %d\n", result);
+    return result;
 }
 
 }
