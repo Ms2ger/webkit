@@ -3331,8 +3331,11 @@ void HTMLMediaElement::play(DOMPromiseDeferred<void>&& promise)
 {
     LOG(Media, "HTMLMediaElement::play(%p)", this);
 
+    printf("HTMLMediaElement::play()\n");
+
     auto success = m_mediaSession->playbackPermitted(*this);
     if (!success) {
+        printf("Reject 1\n");
         if (success.value() == MediaPlaybackDenialReason::UserGestureRequired)
             setPlaybackWithoutUserGesture(PlaybackWithoutUserGesture::Prevented);
         promise.reject(NotAllowedError);
@@ -3340,18 +3343,25 @@ void HTMLMediaElement::play(DOMPromiseDeferred<void>&& promise)
     }
 
     if (m_error && m_error->code() == MediaError::MEDIA_ERR_SRC_NOT_SUPPORTED) {
+        printf("Reject 2\n");
         promise.reject(NotSupportedError, "The operation is not supported.");
         return;
     }
 
-    if (processingUserGestureForMedia())
+    if (processingUserGestureForMedia()) {
+        printf("processingUserGestureForMedia=true\n");
         removeBehaviorsRestrictionsAfterFirstUserGesture();
+    } else {
+        printf("processingUserGestureForMedia=false\n");
+    }
 
     if (!playInternal()) {
+        printf("Reject 3\n");
         promise.reject(NotAllowedError);
         return;
     }
 
+    printf("m_pendingPlayPromises.append(WTFMove(promise));\n");
     m_pendingPlayPromises.append(WTFMove(promise));
 }
 

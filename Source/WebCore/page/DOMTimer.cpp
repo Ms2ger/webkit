@@ -176,6 +176,7 @@ static inline bool shouldForwardUserGesture(Seconds interval)
 
 static inline RefPtr<UserGestureToken> userGestureTokenToForward(Seconds interval)
 {
+    printf("Hello from userGestureTokenToForward\n");
     if (!shouldForwardUserGesture(interval))
         return nullptr;
 
