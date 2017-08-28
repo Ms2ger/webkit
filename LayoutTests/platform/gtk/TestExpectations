@@ -2153,7 +2153,7 @@ webkit.org/b/153946 imported/w3c/web-platform-tests/dom/ranges/Range-mutations.h
 
 webkit.org/b/153949 media/media-volume-slider-rendered-normal.html [ Timeout Failure ]
 
-webkit.org/b/156109 http/tests/security/contentSecurityPolicy/audio-redirect-blocked.html [ Timeout ]
+#webkit.org/b/156109 http/tests/security/contentSecurityPolicy/audio-redirect-blocked.html [ Timeout ]
 webkit.org/b/156109 http/tests/security/contentSecurityPolicy/video-redirect-blocked.html [ Timeout ]
 
 webkit.org/b/158921 http/tests/security/video-cross-origin-caching.html [ Timeout ]
@@ -3468,8 +3468,6 @@ webkit.org/b/160119 fast/forms/search/search-cancel-button-visible-when-input-be
 webkit.org/b/160139 fast/history/page-cache-geolocation-active-oneshot.html [ Crash Timeout Pass ]
 
 webkit.org/b/160119 fast/images/composited-animated-gif-outside-viewport.html [ Timeout Pass ]
-
-webkit.org/b/160119 fast/regions/fullscreen/full-screen-video-from-region.html [ Crash Pass ]
 
 webkit.org/b/160119 fast/repaint/selection-gap-fixed-child.html [ Failure ]
 webkit.org/b/160119 fast/repaint/selection-gap-flipped-fixed-child.html [ Failure ]

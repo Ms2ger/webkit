@@ -186,7 +186,6 @@ static void clearFlags(unsigned& value, unsigned flags)
     value &= ~flags;
 }
 
-#if !LOG_DISABLED
 static String urlForLoggingMedia(const URL& url)
 {
     static const unsigned maximumURLLengthForLogging = 128;
@@ -201,6 +200,7 @@ static const char* boolString(bool val)
     return val ? "true" : "false";
 }
 
+#if !LOG_DISABLED
 static String actionName(HTMLMediaElementEnums::DelayedActionType action)
 {
     StringBuilder actionBuilder;
@@ -2054,6 +2054,7 @@ bool HTMLMediaElement::isSafeToLoadURL(const URL& url, InvalidURLAction actionIf
     }
 
     if (!isAllowedToLoadMediaURL(*this, url, isInUserAgentShadowTree())) {
+        printf("HTMLMediaElement::isSafeToLoadURL(%p) - %s -> rejected by Content Security Policy\n", this, urlForLoggingMedia(url).utf8().data());
         LOG(Media, "HTMLMediaElement::isSafeToLoadURL(%p) - %s -> rejected by Content Security Policy", this, urlForLoggingMedia(url).utf8().data());
         return false;
     }
@@ -4517,6 +4518,7 @@ URL HTMLMediaElement::selectNextSourceChild(ContentType* contentType, String* ke
         return mediaURL;
 
 CheckAgain:
+        printf("CheckAgain: %d", actionIfInvalid == Complain);
         if (actionIfInvalid == Complain)
             source->scheduleErrorEvent();
     }
