@@ -293,15 +293,21 @@ static const AtomicString& textPlain()
 
 static const MediaPlayerFactory* bestMediaEngineForSupportParameters(const MediaEngineSupportParameters& parameters, const MediaPlayerFactory* current = nullptr)
 {
-    if (parameters.type.isEmpty() && !parameters.isMediaSource && !parameters.isMediaStream)
+    printf("bestMediaEngineForSupportParameters:\n");
+    printf("  type='%s'\n", parameters.type.raw().utf8().data());
+    if (parameters.type.isEmpty() && !parameters.isMediaSource && !parameters.isMediaStream) {
+        printf("null 1\n");
         return nullptr;
+    }
 
     // 4.8.10.3 MIME types - In the absence of a specification to the contrary, the MIME type "application/octet-stream"
     // when used with parameters, e.g. "application/octet-stream;codecs=theora", is a type that the user agent knows 
     // it cannot render.
     if (parameters.type.containerType() == applicationOctetStream()) {
-        if (!parameters.type.codecs().isEmpty())
+        if (!parameters.type.codecs().isEmpty()) {
+            printf("null 1\n");
             return nullptr;
+        }
     }
 
     const MediaPlayerFactory* foundEngine = nullptr;
@@ -319,6 +325,7 @@ static const MediaPlayerFactory* bestMediaEngineForSupportParameters(const Media
         }
     }
 
+    printf("foundEngine=0x%p\n", foundEngine);
     return foundEngine;
 }
 
@@ -392,6 +399,7 @@ bool MediaPlayer::load(const URL& url, const ContentType& contentType, const Str
 
     // If the MIME type is missing or is not meaningful, try to figure it out from the URL.
     AtomicString containerType = m_contentType.containerType();
+    printf("Checking mime type... '%s'\n", m_contentType.raw().utf8().data());
     if (containerType.isEmpty() || containerType == applicationOctetStream() || containerType == textPlain()) {
         if (m_url.protocolIsData())
             m_contentType = ContentType(mimeTypeFromDataURL(m_url.string()));
@@ -479,10 +487,12 @@ void MediaPlayer::loadWithNextMediaEngine(const MediaPlayerFactory* current)
 
     if (!m_contentType.isEmpty() || MEDIASTREAM || MEDIASOURCE)
         engine = nextBestMediaEngine(current);
+    printf("First try: %p\n", engine);
 
     // If no MIME type is specified or the type was inferred from the file extension, just use the next engine.
     if (!engine && (m_contentType.isEmpty() || m_contentMIMETypeWasInferredFromExtension))
         engine = nextMediaEngine(current);
+    printf("Second try: %p ('%s'.isEmpty() | %d)\n", engine, m_contentType.raw().utf8().data(), m_contentMIMETypeWasInferredFromExtension);
 
     // Don't delete and recreate the player unless it comes from a different engine.
     if (!engine) {
@@ -935,6 +945,10 @@ void MediaPlayer::getSupportedTypes(HashSet<String, ASCIICaseInsensitiveHash>& t
         HashSet<String, ASCIICaseInsensitiveHash> engineTypes;
         engine.getSupportedTypes(engineTypes);
         types.add(engineTypes.begin(), engineTypes.end());
+    }
+
+    for (auto& current : types) {
+        printf("  WWW %s\n", current.utf8().data());
     }
 } 
 
