@@ -1813,6 +1813,7 @@ static HashSet<String, ASCIICaseInsensitiveHash>& mimeTypeSet()
     {
         MediaPlayerPrivateGStreamerBase::initializeGStreamerAndRegisterWebKitElements();
         HashSet<String, ASCIICaseInsensitiveHash> set;
+        set.add(AtomicString("video/ms2ger"));
 
         GList* audioDecoderFactories = gst_element_factory_list_get_elements(GST_ELEMENT_FACTORY_TYPE_DECODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_AUDIO, GST_RANK_MARGINAL);
         GList* videoDecoderFactories = gst_element_factory_list_get_elements(GST_ELEMENT_FACTORY_TYPE_DECODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_VIDEO, GST_RANK_MARGINAL);
@@ -1865,7 +1866,9 @@ static HashSet<String, ASCIICaseInsensitiveHash>& mimeTypeSet()
             else if (current.elementType == VideoDecoder)
                 factories = videoDecoderFactories;
 
-            if (gstRegistryHasElementForMediaType(factories, current.capsString)) {
+            bool hasElement = gstRegistryHasElementForMediaType(factories, current.capsString);
+            printf("  XXX %s -> %d\n", current.capsString, hasElement);
+            if (hasElement) {
                 if (!current.webkitMimeTypes.isEmpty()) {
                     for (const auto& mimeType : current.webkitMimeTypes)
                         set.add(mimeType);
@@ -1930,6 +1933,9 @@ static HashSet<String, ASCIICaseInsensitiveHash>& mimeTypeSet()
         gst_plugin_feature_list_free(audioDecoderFactories);
         gst_plugin_feature_list_free(videoDecoderFactories);
         gst_plugin_feature_list_free(demuxerFactories);
+        for (auto& current : set) {
+            printf("  YYY %s\n", current.utf8().data());
+        }
         return set;
     }();
     return mimeTypes;
