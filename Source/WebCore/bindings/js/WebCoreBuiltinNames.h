@@ -67,6 +67,8 @@ namespace WebCore {
     macro(IDBRequest) \
     macro(IDBTransaction) \
     macro(IDBVersionChangeEvent) \
+    macro(IdleCallback) \
+    macro(IdleDeadline) \
     macro(InputEvent) \
     macro(IntersectionObserver) \
     macro(IntersectionObserverEntry) \
@@ -166,6 +168,7 @@ namespace WebCore {
     macro(byobRequest) \
     macro(caches) \
     macro(cancel) \
+    macro(cancelIdleCallback) \
     macro(cloneArrayBuffer) \
     macro(cloneForJS) \
     macro(close) \
@@ -227,6 +230,7 @@ namespace WebCore {
     macro(reader) \
     macro(readyPromiseCapability) \
     macro(removeTrack) \
+    macro(requestIdleCallback) \
     macro(response) \
     macro(responseCacheIsValid) \
     macro(retrieveResponse) \

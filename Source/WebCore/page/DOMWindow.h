@@ -61,6 +61,7 @@ class Element;
 class EventListener;
 class FloatRect;
 class History;
+class IdleRequestCallback;
 class Location;
 class MediaQueryList;
 class Navigator;
@@ -78,6 +79,7 @@ class StyleMedia;
 class WebKitNamespace;
 class WebKitPoint;
 
+struct IdleRequestOptions;
 struct WindowFeatures;
 
 enum SetLocationLocking { LockHistoryBasedOnGestureState, LockHistoryAndBackForwardList };
@@ -248,6 +250,9 @@ public:
     int requestAnimationFrame(Ref<RequestAnimationFrameCallback>&&);
     int webkitRequestAnimationFrame(Ref<RequestAnimationFrameCallback>&&);
     void cancelAnimationFrame(int id);
+
+    uint32_t requestIdleCallback(Ref<IdleRequestCallback>&&, const IdleRequestOptions&) { return 0; }
+    void cancelIdleCallback(uint32_t) {}
 
     // Secure Contexts
     bool isSecureContext() const;

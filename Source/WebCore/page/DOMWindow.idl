@@ -146,6 +146,9 @@ typedef USVString CSSOMString;
     // Extensions in Compatibility specification (https://compat.spec.whatwg.org/#windoworientation-interface).
     [Conditional=ORIENTATION_EVENTS] readonly attribute long orientation;
 
+    [EnabledAtRuntime=IdleCallback] unsigned long requestIdleCallback(IdleRequestCallback callback, optional IdleRequestOptions options);
+    [EnabledAtRuntime=IdleCallback] void cancelIdleCallback(unsigned long handle);
+
     // Non standard.
     [Replaceable, CustomGetter] readonly attribute Event event;
     attribute DOMString defaultStatus;

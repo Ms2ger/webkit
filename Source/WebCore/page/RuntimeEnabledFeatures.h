@@ -216,6 +216,9 @@ public:
     void setInspectorAdditionsEnabled(bool isEnabled) { m_inspectorAdditionsEnabled = isEnabled; }
     bool inspectorAdditionsEnabled() const { return m_inspectorAdditionsEnabled; }
 
+    void setIdleCallbackEnabled(bool isEnabled) { m_idleCallbackEnabled = isEnabled; }
+    bool idleCallbackEnabled() const { return m_idleCallbackEnabled; }
+
     WEBCORE_EXPORT static RuntimeEnabledFeatures& sharedFeatures();
 
 private:
@@ -331,6 +334,8 @@ private:
 #endif
 
     bool m_inspectorAdditionsEnabled { false };
+
+    bool m_idleCallbackEnabled { false };
 
     friend class WTF::NeverDestroyed<RuntimeEnabledFeatures>;
 };

@@ -1,3 +1,31 @@
+2017-09-06  Ms2ger  <Ms2ger@igalia.com>
+
+        Implement requestIdleCallback
+        https://bugs.webkit.org/show_bug.cgi?id=164193
+
+        Reviewed by NOBODY (OOPS!).
+
+        wip
+
+        No new tests (OOPS!).
+
+        * CMakeLists.txt:
+        * DerivedSources.make:
+        * bindings/js/WebCoreBuiltinNames.h:
+        * dom/IdleDeadline.h: Added.
+        (WebCore::IdleDeadline::didTimeout):
+        (WebCore::IdleDeadline::timeRemaining):
+        * dom/IdleDeadline.idl: Added.
+        * dom/IdleRequestCallback.h: Added.
+        * dom/IdleRequestCallback.idl: Added.
+        * dom/IdleRequestOptions.h: Added.
+        * dom/IdleRequestOptions.idl: Added.
+        * page/DOMWindow.h:
+        * page/DOMWindow.idl:
+        * page/RuntimeEnabledFeatures.h:
+        (WebCore::RuntimeEnabledFeatures::setIdleCallbackEnabled):
+        (WebCore::RuntimeEnabledFeatures::idleCallbackEnabled const):
+
 2017-09-05  Zan Dobersek  <zdobersek@igalia.com>
 
         HTMLMediaElement: attach any existing EME CDMInstance in mediaEngineWasUpdated()
