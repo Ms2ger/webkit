@@ -225,6 +225,7 @@ static inline size_t maxActivePixelMemory()
 
 ExceptionOr<std::optional<RenderingContext>> HTMLCanvasElement::getContext(JSC::ExecState& state, const String& contextId, Vector<JSC::Strong<JSC::Unknown>>&& arguments)
 {
+    printf("getContext JS\n");
     if (is2dType(contextId)) {
         if (auto context = getContext2d(contextId))
             return std::optional<RenderingContext> { RefPtr<CanvasRenderingContext2D> { context } };
@@ -263,6 +264,7 @@ ExceptionOr<std::optional<RenderingContext>> HTMLCanvasElement::getContext(JSC::
 
 CanvasRenderingContext* HTMLCanvasElement::getContext(const String& type)
 {
+    printf("getContext ???\n");
     if (HTMLCanvasElement::is2dType(type))
         return getContext2d(type);
 
@@ -359,11 +361,15 @@ WebGLRenderingContextBase* HTMLCanvasElement::getContextWebGL(const String& type
 {
     ASSERT(HTMLCanvasElement::is3dType(type));
 
-    if (!shouldEnableWebGL(document().settings()))
+    if (!shouldEnableWebGL(document().settings())) {
+        printf("!shouldEnableWebGL()\n");
         return nullptr;
+    }
 
-    if (m_context && !m_context->isWebGL())
+    if (m_context && !m_context->isWebGL()) {
+        printf("non gl\n");
         return nullptr;
+    }
 
     if (!m_context) {
         m_context = WebGLRenderingContextBase::create(*this, attrs, type);
@@ -375,6 +381,7 @@ WebGLRenderingContextBase* HTMLCanvasElement::getContextWebGL(const String& type
         }
     }
 
+    printf("m_context = %p\nf", m_context.get());
     return static_cast<WebGLRenderingContextBase*>(m_context.get());
 }
 #endif

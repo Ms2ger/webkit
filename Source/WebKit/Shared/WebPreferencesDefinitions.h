@@ -373,7 +373,7 @@
     macro(SubresourceIntegrityEnabled, subresourceIntegrityEnabled, Bool, bool, DEFAULT_EXPERIMENTAL_FEATURES_ENABLED, "SubresourceIntegrity", "Enable SubresourceIntegrity") \
     macro(ViewportFitEnabled, viewportFitEnabled, Bool, bool, true, "Viewport Fit", "Enable viewport-fit viewport parameter") \
     macro(WebAnimationsEnabled, webAnimationsEnabled, Bool, bool, false, "Web Animations", "Web Animations prototype") \
-    macro(WebGL2Enabled, webGL2Enabled, Bool, bool, false, "WebGL 2.0", "WebGL 2 prototype") \
+    macro(WebGL2Enabled, webGL2Enabled, Bool, bool, true, "WebGL 2.0", "WebGL 2 prototype") \
     macro(WebGPUEnabled, webGPUEnabled, Bool, bool, false, "WebGPU", "WebGPU prototype") \
     macro(DirectoryUploadEnabled, directoryUploadEnabled, Bool, bool, false, "Directory Upload", "input.webkitdirectory") \
     macro(DataTransferItemsEnabled, dataTransferItemsEnabled, Bool, bool, false, "Data Transfer Items", "Enables DataTransferItem in the clipboard API") \

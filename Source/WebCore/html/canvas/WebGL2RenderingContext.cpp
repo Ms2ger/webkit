@@ -424,7 +424,7 @@ void WebGL2RenderingContext::texStorage2D(GC3Denum target, GC3Dsizei levels, GC3
     }
     texture->setImmutable();
 
-    m_context->texStorage2D(target, levels, internalFormat, width, height);
+//    m_context->texStorage2D(target, levels, internalFormat, width, height);
 
     {
         GC3Denum format;
@@ -935,7 +935,7 @@ WebGLAny WebGL2RenderingContext::getActiveUniforms(WebGLProgram& program, const 
     case GraphicsContext3D::UNIFORM_IS_ROW_MAJOR:
         {
             Vector<GC3Dint> params(uniformIndices.size(), 0);
-            m_context->getActiveUniforms(program.object(), uniformIndices, pname, params);
+            //m_context->getActiveUniforms(program.object(), uniformIndices, pname, params);
             return WTFMove(params);
         }
     default:
