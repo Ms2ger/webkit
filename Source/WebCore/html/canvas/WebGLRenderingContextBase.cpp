@@ -364,8 +364,11 @@ static bool isHighPerformanceContext(const RefPtr<GraphicsContext3D>& context)
 std::unique_ptr<WebGLRenderingContextBase> WebGLRenderingContextBase::create(HTMLCanvasElement& canvas, WebGLContextAttributes& attributes, const String& type)
 {
 #if ENABLE(WEBGL2)
-    if (type == "webgl2" && !RuntimeEnabledFeatures::sharedFeatures().webGL2Enabled())
+    if (type == "webgl2" && !RuntimeEnabledFeatures::sharedFeatures().webGL2Enabled()) {
+        printf("!webGL2Enabled()\n");
         return nullptr;
+    }
+    printf("webGL2Enabled() ==> continue\n");
 #else
     UNUSED_PARAM(type);
 #endif
