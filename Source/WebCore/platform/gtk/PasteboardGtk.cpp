@@ -75,17 +75,20 @@ PasteboardImage::~PasteboardImage()
 Pasteboard::Pasteboard(SelectionData& selectionData)
     : m_selectionData(selectionData)
 {
+    printf("Creating Pasteboard(%p) no name, selectionData\n", this);
 }
 
 Pasteboard::Pasteboard(const String& name)
     : m_selectionData(SelectionData::create())
     , m_name(name)
 {
+    printf("Creating Pasteboard(%p) name=%s\n", this, name.utf8().data());
 }
 
 Pasteboard::Pasteboard()
     : m_selectionData(SelectionData::create())
 {
+    printf("Creating Pasteboard(%p) no name\n", this);
 }
 
 Pasteboard::~Pasteboard()
