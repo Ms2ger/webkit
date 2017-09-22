@@ -4,13 +4,17 @@
 
 function mycopy(event)
 {
+    console.log(`mycopy: ${event}`)
+    console.log(event.clipboardData.getData('text/plain'));
     event.clipboardData.setData('text/plain', "SUCCESS");
+    console.log(event.clipboardData.getData('text/plain'));
     event.preventDefault();
 }
 
 function mypaste(event)
 {
     var clip = event.clipboardData.getData('text/plain');
+    console.log(`mypaste: ${event} -> ${clip}`)
     document.getElementById('result').innerHTML = clip;
     event.preventDefault();
 }
@@ -29,7 +33,7 @@ function test()
 </script>
 <body onload='test()' onbeforecopy='event.preventDefault()' oncopy='mycopy(event)' onbeforepaste='event.preventDefault()' onpaste='mypaste(event)'>
 
-<div id='result' contenteditable='true'>FAILURE</div>
+RESULT: <div id='result' contenteditable='true'>FAILURE</div>
 
 </body>
 </html>

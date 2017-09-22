@@ -43,6 +43,7 @@ Ref<SelectionData> PlatformPasteboard::readFromClipboard()
 {
     Ref<SelectionData> selection(SelectionData::create());
     PasteboardHelper::singleton().getClipboardContents(m_clipboard, selection.get());
+    printf("PlatformPasteboard::readFromClipboard: text=%s\n", selection->text().utf8().data());
     return selection;
 }
 

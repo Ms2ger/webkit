@@ -34,6 +34,10 @@ static void replaceNonBreakingSpaceWithSpace(String& str)
 
 void SelectionData::setText(const String& newText)
 {
+    printf("SelectionData(%p)    SelectionData::setText: %s\n", this, newText.utf8().data());
+    if (newText != "SUCCESS") {
+//        CRASH();
+    }
     m_text = newText;
     replaceNonBreakingSpaceWithSpace(m_text);
 }

@@ -343,6 +343,7 @@ static bool dispatchClipboardEvent(RefPtr<Element>&& target, const AtomicString&
 
     target->dispatchEvent(event);
     bool noDefaultProcessing = event->defaultPrevented();
+    printf("++++> noDefaultProcessing=%d; mode: %d...\n", noDefaultProcessing, storeMode == DataTransfer::StoreMode::ReadWrite);
     if (noDefaultProcessing && storeMode == DataTransfer::StoreMode::ReadWrite) {
         auto pasteboard = Pasteboard::createForCopyAndPaste();
         pasteboard->clear();

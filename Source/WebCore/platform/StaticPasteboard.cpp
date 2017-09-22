@@ -73,8 +73,11 @@ void StaticPasteboard::clear(const String& type)
 // FIXME: Copy the entire StaticPasteboard to UIProcess instead of writing each string.
 void StaticPasteboard::commitToPasteboard(Pasteboard& pasteboard)
 {
-    for (auto& type : m_types)
+    printf("Pasteboard(%p)  commitToPasteboard --> Pasteboard(%p):\n", this, &pasteboard);
+    for (auto& type : m_types) {
+        printf("Pasteboard(%p)    %s => %s\n", this, type.utf8().data(), m_stringContents.get(type).utf8().data());
         pasteboard.writeString(type, m_stringContents.get(type));
+    }
 }
 
 }

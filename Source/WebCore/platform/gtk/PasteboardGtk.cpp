@@ -129,6 +129,7 @@ void Pasteboard::readFromClipboard()
 
 void Pasteboard::writeString(const String& type, const String& data)
 {
+    printf("Pasteboard(%p)    writeString\n    %s => %s\n", this, type.utf8().data(), data.utf8().data());
     switch (selectionDataTypeFromHTMLClipboardType(type)) {
     case ClipboardDataTypeURIList:
     case ClipboardDataTypeURL:
@@ -150,6 +151,7 @@ void Pasteboard::writeString(const String& type, const String& data)
 
 void Pasteboard::writePlainText(const String& text, SmartReplaceOption smartReplaceOption)
 {
+    printf("Pasteboard(%p)    writePlainText\n", this);
     m_selectionData->clearAll();
     m_selectionData->setText(text);
     m_selectionData->setCanSmartReplace(smartReplaceOption == CanSmartReplace);
@@ -186,6 +188,7 @@ void Pasteboard::write(const PasteboardImage& pasteboardImage)
 
 void Pasteboard::write(const PasteboardWebContent& pasteboardContent)
 {
+    printf("Pasteboard(%p)    write\n", this);
     m_selectionData->clearAll();
     m_selectionData->setText(pasteboardContent.text);
     m_selectionData->setMarkup(pasteboardContent.markup);

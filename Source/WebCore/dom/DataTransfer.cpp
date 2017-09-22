@@ -74,6 +74,7 @@ DataTransfer::DataTransfer(StoreMode mode, std::unique_ptr<Pasteboard> pasteboar
 
 Ref<DataTransfer> DataTransfer::createForCopyAndPaste(StoreMode mode)
 {
+    printf("mode == StoreMode::ReadWrite: %d\n", mode == StoreMode::ReadWrite);
     return adoptRef(*new DataTransfer(mode, mode == StoreMode::ReadWrite ? std::make_unique<StaticPasteboard>() : Pasteboard::createForCopyAndPaste()));
 }
 
@@ -132,14 +133,19 @@ void DataTransfer::clearData(const String& type)
 
 String DataTransfer::getData(const String& type) const
 {
-    if (!canReadData())
+    printf("DataTransfer::getData\n");
+
+    if (!canReadData()) {
+        printf("  canReadData()=false\n");
         return String();
+    }
 
 #if ENABLE(DRAG_SUPPORT)
     if (forFileDrag() && m_pasteboard->readFilenames().size())
         return { };
 #endif
 
+    printf("m_pasteboard=%p\n", m_pasteboard.get());
     return m_pasteboard->readString(normalizeType(type));
 }
 
