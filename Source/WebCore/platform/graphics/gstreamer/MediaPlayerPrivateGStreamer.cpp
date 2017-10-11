@@ -1008,7 +1008,10 @@ void MediaPlayerPrivateGStreamer::handleMessage(GstMessage* message)
         break;
     case GST_MESSAGE_ELEMENT:
         if (gst_is_missing_plugin_message(message)) {
-            if (gst_install_plugins_supported()) {
+            GST_LOG("CALLING gst_install_plugins_supported");
+            auto x = gst_install_plugins_supported();
+            GST_LOG("got %d", x);
+            if (x) {
                 m_missingPluginsCallback = MediaPlayerRequestInstallMissingPluginsCallback::create([this](uint32_t result) {
                     m_missingPluginsCallback = nullptr;
                     if (result != GST_INSTALL_PLUGINS_SUCCESS)
