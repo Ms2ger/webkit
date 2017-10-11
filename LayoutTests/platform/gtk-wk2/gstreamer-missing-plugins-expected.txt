@@ -1,0 +1,4 @@
+
+EVENT(error)
+END OF TEST
+

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MediaController - timeupdate test</title>
+    <script src=../../media/video-test.js></script>
+    <script src=../../media/media-file.js></script>
+    <script>
+        var video;
+
+        var start = function() {
+            findMediaElement();
+
+            waitForEventAndEnd('canplay');
+            waitForEventAndEnd('error');
+            video.src = findMediaFile("video", "../../media/content/made-up-codecs");
+        };
+    </script>
+</head>
+<body>
+    <body onload="start()">
+        <video id="video" mediaGroup="group" controls autoplay></video>
+    </body>
+</body>
+</html>
