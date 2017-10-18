@@ -22,6 +22,9 @@
 #include "WebKitTestBus.h"
 #include "WebViewTest.h"
 #include <wtf/glib/GRefPtr.h>
+#include <glib.h>
+#include <gst/gst.h>
+#include <gst/pbutils/missing-plugins.h>
 
 static WebKitTestBus* bus;
 static GUniquePtr<char> scriptDialogResult;
@@ -186,6 +189,7 @@ static void testWebExtensionIsolatedWorld(WebViewTest* test, gconstpointer)
 #if PLATFORM(GTK)
 static gboolean permissionRequestCallback(WebKitWebView*, WebKitPermissionRequest* request, WebViewTest* test)
 {
+    fprintf(stderr, "\n##### permissionRequestCallback\n");
     if (!WEBKIT_IS_INSTALL_MISSING_MEDIA_PLUGINS_PERMISSION_REQUEST(request))
         return FALSE;
 
@@ -200,6 +204,9 @@ static gboolean permissionRequestCallback(WebKitWebView*, WebKitPermissionReques
 
 static void testInstallMissingPluginsPermissionRequest(WebViewTest* test, gconstpointer)
 {
+    fprintf(stderr, "\n##### testInstallMissingPluginsPermissionRequest\n");
+    bool x = gst_install_plugins_supported();
+    g_assert(x);
     GUniquePtr<char> extensionBusName(g_strdup_printf("org.webkit.gtk.WebExtensionTest%u", Test::s_webExtensionID));
     GRefPtr<GDBusProxy> proxy = adoptGRef(bus->createProxy(extensionBusName.get(),
         "/org/webkit/gtk/WebExtensionTest", "org.webkit.gtk.WebExtensionTest", test->m_mainLoop));
@@ -282,18 +289,7 @@ void beforeAll()
     if (!bus->run())
         return;
 
-    // FIXME: Use JSC API in the extension to get the title from JavaScript.
-#if PLATFORM(GTK)
-    WebViewTest::add("WebKitWebExtension", "dom-document-title", testWebExtensionGetTitle);
-#endif
-    WebViewTest::add("WebKitWebExtension", "document-loaded-signal", testDocumentLoadedSignal);
-    WebViewTest::add("WebKitWebView", "web-process-crashed", testWebKitWebViewProcessCrashed);
-    WebViewTest::add("WebKitWebExtension", "window-object-cleared", testWebExtensionWindowObjectCleared);
-    WebViewTest::add("WebKitWebExtension", "isolated-world", testWebExtensionIsolatedWorld);
-#if PLATFORM(GTK)
     WebViewTest::add("WebKitWebView", "install-missing-plugins-permission-request", testInstallMissingPluginsPermissionRequest);
-    WebViewTest::add("WebKitWebExtension", "form-controls-associated-signal", testWebExtensionFormControlsAssociated);
-#endif
 }
 
 void afterAll()
