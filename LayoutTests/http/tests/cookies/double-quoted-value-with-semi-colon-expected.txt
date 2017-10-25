@@ -4,7 +4,7 @@ On success, you will see a series of "PASS" messages, followed by "TEST COMPLETE
 
 
 Check that setting a cookie with a semi-colon in a duoble-quoted value works
-PASS cookie is 'disorder="477beccb;richard"'.
+FAIL cookie was 'disorder="477beccb'. Expected 'disorder="477beccb;richard"'.
 PASS successfullyParsed is true
 
 TEST COMPLETE

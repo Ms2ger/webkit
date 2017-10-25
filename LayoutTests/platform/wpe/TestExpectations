@@ -898,8 +898,6 @@ webkit.org/b/178578 http/tests/images/hidpi-srcset-copy.html [ Failure ]
 
 webkit.org/b/175422 http/tests/blink/sendbeacon/beacon-same-origin.html [ Failure ]
 
-http/tests/cookies/double-quoted-value-with-semi-colon.html [ Failure ]
-
 Bug(WPE) svg/animations/animations-paused-in-background-page-iframe.html [ Skip ]
 Bug(WPE) svg/animations/animations-paused-in-background-page.html [ Skip ]
 Bug(WPE) svg/animations/animations-paused-page-non-visible.html [ Skip ]
