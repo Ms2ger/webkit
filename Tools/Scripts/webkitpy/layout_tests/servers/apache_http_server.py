@@ -59,6 +59,8 @@ class LayoutTestApacheHttpd(http_server_base.HttpServerBase):
             self._mappings = [{'port': self.HTTP_SERVER_PORT},
                               {'port': self.ALTERNATIVE_HTTP_SERVER_PORT},
                               {'port': self.HTTPS_SERVER_PORT, 'sslcert': True}]
+        print("LayoutTestApacheHttpd")
+        print(self._mappings)
         self._output_dir = output_dir
         self._filesystem.maybe_make_directory(output_dir)
 
@@ -151,6 +153,7 @@ class LayoutTestApacheHttpd(http_server_base.HttpServerBase):
         # quotes above and keep cmd as a sequence.
         # FIXME: It's unclear if this is still needed.
         self._start_cmd = " ".join(start_cmd)
+        print(self._start_cmd)
         self._stop_cmd = " ".join(stop_cmd)
 
     def _get_apache_config_file_path(self, test_dir, output_dir):

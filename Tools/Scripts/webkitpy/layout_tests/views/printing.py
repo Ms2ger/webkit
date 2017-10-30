@@ -105,10 +105,13 @@ class Printer(object):
         self._print_default(found_str + '.')
 
     def print_expected(self, run_results, tests_with_result_type_callback):
+        print("print_expected")
         self._print_expected_results_of_type(run_results, test_expectations.PASS, "passes", tests_with_result_type_callback)
         self._print_expected_results_of_type(run_results, test_expectations.FAIL, "failures", tests_with_result_type_callback)
         self._print_expected_results_of_type(run_results, test_expectations.FLAKY, "flaky", tests_with_result_type_callback)
         self._print_debug('')
+        print(60*"-")
+        print("END print_expected")
 
     def print_workers_and_shards(self, num_workers, num_shards):
         driver_name = self._port.driver_name()
@@ -124,6 +127,7 @@ class Printer(object):
 
     def _print_expected_results_of_type(self, run_results, result_type, result_type_str, tests_with_result_type_callback):
         tests = tests_with_result_type_callback(result_type)
+        print(tests)
         now = run_results.tests_by_timeline[test_expectations.NOW]
         wontfix = run_results.tests_by_timeline[test_expectations.WONTFIX]
 

@@ -239,6 +239,8 @@ class Manager(object):
         self._runner = LayoutTestRunner(self._options, self._port, self._printer, self._results_directory, self._test_is_slow,
                                         needs_http=needs_http, needs_web_platform_test_server=needs_web_platform_test_server, needs_websockets=needs_websockets)
 
+        print("default_device_tests")
+        print(default_device_tests)
         if default_device_tests:
             _log.info('')
             _log.info("Running %s", pluralize(len(tests_to_run), "test"))
@@ -248,6 +250,8 @@ class Manager(object):
 
             initial_results, retry_results, enabled_pixel_tests_in_retry = self._run_test_subset(default_device_tests, tests_to_skip)
 
+        print("custom_device_tests")
+        print(custom_device_tests.items())
         for device_class in custom_device_tests:
             device_tests = custom_device_tests[device_class]
             if device_tests:
@@ -290,11 +294,18 @@ class Manager(object):
         finally:
             self._clean_up_run()
 
+        print("_run_test_subset")
+        print(initial_results.total)
+        print(initial_results.unexpected)
         return (initial_results, retry_results, enabled_pixel_tests_in_retry)
 
     def _end_test_run(self, start_time, end_time, initial_results, retry_results, enabled_pixel_tests_in_retry):
         # Some crash logs can take a long time to be written out so look
         # for new logs after the test run finishes.
+
+        print("END---------------")
+        print(initial_results.total)
+        print(initial_results.unexpected)
 
         _log.debug("looking for new crash logs")
         self._look_for_new_crash_logs(initial_results, start_time)
@@ -326,6 +337,8 @@ class Manager(object):
 
     def _run_tests(self, tests_to_run, tests_to_skip, repeat_each, iterations, num_workers, retrying):
         test_inputs = self._get_test_inputs(tests_to_run, repeat_each, iterations)
+        print("test_inputs")
+        print(test_inputs)
 
         return self._runner.run_tests(self._expectations, test_inputs, tests_to_skip, num_workers, retrying)
 

@@ -17,6 +17,7 @@ Bug(WPE) webrtc [ Skip ]
 
 # Doesn't apply to platforms that don't enforce the CFNetwork-style 3rd party cookie policy.
 http/tests/cookies/third-party-cookie-relaxing.html [ WontFix Failure ]
+http/tests/cookies/double-quoted-value-with-semi-colon.html [ Pass ]
 
 Bug(WPE) http/tests/appcache [ Pass ]
 # Appcache manifest is still downloaded in the WebProcess

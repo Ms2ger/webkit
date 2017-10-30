@@ -33,7 +33,7 @@ test infrastructure (the Port and Driver classes)."""
 import difflib
 import itertools
 import json
-import logging
+import logging, time
 import os
 import operator
 import optparse
@@ -959,8 +959,10 @@ class Port(object):
 
         Ports can stub this out if they don't need a web server to be running."""
         assert not self._http_server, 'Already running an http server.'
+        print("...start_http_server... %s" % self._uses_apache())
         http_port = self.get_option('http_port')
         if self._uses_apache():
+            print("Calling LayoutTestApacheHttpd")
             server = apache_http_server.LayoutTestApacheHttpd(self, self.results_directory(), additional_dirs=additional_dirs, port=http_port)
         else:
             server = http_server.Lighttpd(self, self.results_directory(), additional_dirs=additional_dirs, port=http_port)
@@ -1038,6 +1040,7 @@ class Port(object):
 
     def stop_http_server(self):
         """Shut down the http server if it is running. Do nothing if it isn't."""
+        print("... stop_http_server ...")
         if self._http_server:
             self._http_server.stop()
             self._http_server = None

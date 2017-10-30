@@ -100,9 +100,10 @@ class LayoutTestRunner(object):
         self._printer.num_tests = len(test_inputs)
         self._printer.num_started = 0
 
-        if not retrying:
-            self._printer.print_expected(run_results, self._expectations.model().get_tests_with_result_type)
+        print("print_expected--------")
+        self._printer.print_expected(run_results, self._expectations.model().get_tests_with_result_type)
 
+        print(list(tests_to_skip))
         for test_name in set(tests_to_skip):
             result = test_results.TestResult(test_name)
             result.type = test_expectations.SKIP
@@ -132,6 +133,8 @@ class LayoutTestRunner(object):
             _log.debug('%s("%s") raised, exiting' % (e.__class__.__name__, str(e)))
             raise
 
+        print("run rs")
+        print(run_results.unexpected)
         return run_results
 
     def _worker_factory(self, worker_connection):
@@ -190,6 +193,7 @@ class LayoutTestRunner(object):
         self._interrupt_if_at_failure_limits(run_results)
 
     def start_servers(self):
+        time.sleep(3)
         if self._needs_http and not self._port.is_http_server_running():
             self._printer.write_update('Starting HTTP server ...')
             self._port.start_http_server()
@@ -201,6 +205,8 @@ class LayoutTestRunner(object):
             self._port.start_web_platform_test_server()
 
     def stop_servers(self):
+        import time
+#        time.sleep(10)
         if self._needs_http:
             self._printer.write_update('Stopping HTTP server ...')
             self._port.stop_http_server()
@@ -329,6 +335,8 @@ class Worker(object):
 
     def _clean_up_after_test(self, test_input, result):
         test_name = test_input.test_name
+        
+        print(result.unexpected)
 
         if result.failures:
             # Check and kill DumpRenderTree if we need to.
