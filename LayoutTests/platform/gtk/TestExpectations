@@ -2900,11 +2900,7 @@ webkit.org/b/148936 imported/w3c/web-platform-tests/html/semantics/interactive-e
 webkit.org/b/149128 fast/text/control-characters [ ImageOnlyFailure ]
 
 # web-platform-tests XHR tests
-imported/w3c/web-platform-tests/XMLHttpRequest/getallresponseheaders.htm [ Failure ]
 imported/w3c/web-platform-tests/XMLHttpRequest/headers-normalize-response.htm [ Failure ]
-imported/w3c/web-platform-tests/XMLHttpRequest/send-entity-body-get-head-async.htm [ Failure ]
-imported/w3c/web-platform-tests/XMLHttpRequest/send-entity-body-get-head.htm [ Failure ]
-imported/w3c/web-platform-tests/XMLHttpRequest/send-redirect.htm [ Failure ]
 imported/w3c/web-platform-tests/XMLHttpRequest/status-async.htm [ Failure ]
 imported/w3c/web-platform-tests/XMLHttpRequest/status-basic.htm [ Failure ]
 imported/w3c/web-platform-tests/XMLHttpRequest/status-error.htm [ Failure ]
