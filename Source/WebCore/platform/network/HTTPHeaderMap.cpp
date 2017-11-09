@@ -91,13 +91,28 @@ void HTTPHeaderMap::set(const String& name, const String& value)
     m_commonHeaders.set(headerName, value);
 }
 
+
+void HTTPHeaderMap::printUncommon() const
+{
+        for (auto& header : m_uncommonHeaders) {
+            fprintf(stderr, "  {\n");
+            fprintf(stderr, "    %s: %s\n", header.key.utf8().data(), header.value.utf8().data());
+            fprintf(stderr, "  }\n");
+        }
+}
+
 void HTTPHeaderMap::add(const String& name, const String& value)
 {
     HTTPHeaderName headerName;
-    if (!findHTTPHeaderName(name, headerName)) {
+    bool found = findHTTPHeaderName(name, headerName);
+    fprintf(stderr, "  found = %d \n", found);
+    if (!found) {
         auto result = m_uncommonHeaders.add(name, value);
+        fprintf(stderr, "  new entry = %d\n", result.isNewEntry);
         if (!result.isNewEntry)
             result.iterator->value = result.iterator->value + ", " + value;
+        fprintf(stderr, "  result = %s\n", result.iterator->value.utf8().data());
+        printUncommon();
         return;
     }
     add(headerName, value);

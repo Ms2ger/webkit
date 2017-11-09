@@ -823,19 +823,23 @@ ResourceErrorOr<CachedResourceHandle<CachedResource>> CachedResourceLoader::requ
     RevalidationPolicy policy = determineRevalidationPolicy(type, request, resource.get(), forPreload, defer);
     switch (policy) {
     case Reload:
+        fprintf(stderr, ">>>>reload\n");
         memoryCache.remove(*resource);
         FALLTHROUGH;
     case Load:
+        fprintf(stderr, ">>>>load\n");
         if (resource)
             logMemoryCacheResourceRequest(frame(), DiagnosticLoggingKeys::memoryCacheEntryDecisionKey(), DiagnosticLoggingKeys::unusedKey());
         resource = loadResource(type, WTFMove(request));
         break;
     case Revalidate:
+        fprintf(stderr, ">>>>revalidate\n");
         if (resource)
             logMemoryCacheResourceRequest(frame(), DiagnosticLoggingKeys::memoryCacheEntryDecisionKey(), DiagnosticLoggingKeys::revalidatingKey());
         resource = revalidateResource(WTFMove(request), *resource);
         break;
     case Use:
+        fprintf(stderr, ">>>>use\n");
         ASSERT(resource);
         if (shouldUpdateCachedResourceWithCurrentRequest(*resource, request)) {
             resource = updateCachedResourceWithCurrentRequest(*resource, WTFMove(request));
@@ -867,6 +871,8 @@ ResourceErrorOr<CachedResourceHandle<CachedResource>> CachedResourceLoader::requ
         }
         break;
     }
+
+    fprintf(stderr, ">>>>done\n");
     ASSERT(resource);
     resource->setOriginalRequest(WTFMove(originalRequest));
 

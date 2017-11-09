@@ -115,9 +115,17 @@ void ResourceRequest::updateSoupMessageHeaders(SoupMessageHeaders* soupHeaders) 
     const HTTPHeaderMap& headers = httpHeaderFields();
     if (!headers.isEmpty()) {
         HTTPHeaderMap::const_iterator end = headers.end();
-        for (HTTPHeaderMap::const_iterator it = headers.begin(); it != end; ++it)
+        for (HTTPHeaderMap::const_iterator it = headers.begin(); it != end; ++it) {
+            fprintf(stderr, "Setting header: %s => %s\n", it->key.utf8().data(), it->value.utf8().data());
             soup_message_headers_append(soupHeaders, it->key.utf8().data(), it->value.utf8().data());
+        }
     }
+    SoupMessageHeadersIter headersIter;
+    soup_message_headers_iter_init(&headersIter, soupHeaders);
+    const char* headerName;
+    const char* headerValue;
+    while (soup_message_headers_iter_next(&headersIter, &headerName, &headerValue))
+        fprintf(stderr, "Found header: %s => %s\n", headerName, headerValue);
 }
 
 void ResourceRequest::updateFromSoupMessageHeaders(SoupMessageHeaders* soupHeaders)

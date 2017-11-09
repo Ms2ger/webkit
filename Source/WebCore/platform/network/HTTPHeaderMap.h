@@ -131,6 +131,8 @@ public:
     WEBCORE_EXPORT bool contains(const String&) const;
     bool remove(const String&);
 
+    void printUncommon() const;
+
 #if USE(CF)
     void set(CFStringRef name, const String& value);
 #ifdef __OBJC__

@@ -100,6 +100,10 @@ void FetchLoader::start(ScriptExecutionContext& context, const FetchRequest& req
     } else
         referrer = (referrer == "client") ? context.url().strippedForUseAsReferrer() : URL(context.url(), referrer).strippedForUseAsReferrer();
 
+    fprintf(stderr, "loader::start\n");
+    request.headers().internalHeaders().printUncommon();
+    fetchRequest.httpHeaderFields().printUncommon();
+
     m_loader = ThreadableLoader::create(context, *this, WTFMove(fetchRequest), options, WTFMove(referrer));
     m_isStarted = m_loader;
 }

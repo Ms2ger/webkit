@@ -242,6 +242,8 @@ void WebLoaderStrategy::scheduleLoad(ResourceLoader& resourceLoader, CachedResou
 
 void WebLoaderStrategy::scheduleLoadFromNetworkProcess(ResourceLoader& resourceLoader, const ResourceRequest& request, const WebResourceLoader::TrackingParameters& trackingParameters, PAL::SessionID sessionID, bool shouldClearReferrerOnHTTPSToHTTPRedirect, Seconds maximumBufferingTime)
 {
+
+    fprintf(stderr, "scheduleLoadFromNetworkProcess\n");
     ResourceLoadIdentifier identifier = resourceLoader.identifier();
     ASSERT(identifier);
 

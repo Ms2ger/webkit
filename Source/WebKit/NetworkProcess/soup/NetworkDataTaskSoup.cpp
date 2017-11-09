@@ -203,6 +203,7 @@ void NetworkDataTaskSoup::clearRequest()
 
 void NetworkDataTaskSoup::resume()
 {
+    fprintf(stderr, "NetworkDataTaskSoup::resume()\n");
     ASSERT(m_state != State::Running);
     if (m_state == State::Canceling || m_state == State::Completed)
         return;
@@ -298,6 +299,7 @@ void NetworkDataTaskSoup::stopTimeout()
 
 void NetworkDataTaskSoup::sendRequestCallback(SoupRequest* soupRequest, GAsyncResult* result, NetworkDataTaskSoup* task)
 {
+    fprintf(stderr, "NetworkDataTaskSoup::sendRequestCallback\n");
     RefPtr<NetworkDataTaskSoup> protectedThis = adoptRef(task);
     if (task->state() == State::Canceling || task->state() == State::Completed || !task->m_client) {
         task->clearRequest();

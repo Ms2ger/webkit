@@ -101,6 +101,9 @@ DocumentThreadableLoader::DocumentThreadableLoader(Document& document, Threadabl
     , m_contentSecurityPolicy(WTFMove(contentSecurityPolicy))
     , m_shouldLogError(shouldLogError)
 {
+    fprintf(stderr, "DocumentThreadableLoader==>\n");
+    request.httpHeaderFields().printUncommon();
+
     relaxAdoptionRequirement();
 
     // Setting a referrer header is only supported in the async code path.
@@ -127,6 +130,8 @@ DocumentThreadableLoader::DocumentThreadableLoader(Document& document, Threadabl
     // As per step 11 of https://fetch.spec.whatwg.org/#main-fetch, data scheme (if same-origin data-URL flag is set) and about scheme are considered same-origin.
     if (request.url().protocolIsData())
         m_sameOriginRequest = options.sameOriginDataURLFlag == SameOriginDataURLFlag::Set;
+
+    fprintf(stderr, "m_sameOriginRequest = %d\n", m_sameOriginRequest);
 
     if (m_sameOriginRequest || m_options.mode == FetchOptions::Mode::NoCors) {
         loadRequest(WTFMove(request), DoSecurityCheck);
@@ -435,6 +440,7 @@ void DocumentThreadableLoader::preflightFailure(unsigned long identifier, const 
 
 void DocumentThreadableLoader::loadRequest(ResourceRequest&& request, SecurityCheckPolicy securityCheck)
 {
+    fprintf(stderr, "DocumentThreadableLoader::loadRequest\n");
     Ref<DocumentThreadableLoader> protectedThis(*this);
 
     // Any credential should have been removed from the cross-site requests.
@@ -447,6 +453,7 @@ void DocumentThreadableLoader::loadRequest(ResourceRequest&& request, SecurityCh
         request.setHTTPReferrer(m_referrer);
 
     if (m_async) {
+        fprintf(stderr, "  (async)\n");
         ResourceLoaderOptions options = m_options;
         options.clientCredentialPolicy = m_sameOriginRequest ? ClientCredentialPolicy::MayAskClientForCredentials : ClientCredentialPolicy::CannotAskClientForCredentials;
         options.contentSecurityPolicyImposition = ContentSecurityPolicyImposition::SkipPolicyCheck;
@@ -467,6 +474,7 @@ void DocumentThreadableLoader::loadRequest(ResourceRequest&& request, SecurityCh
             resource->removeClient(*this);
         }
 
+        newRequest.resourceRequest().httpHeaderFields().printUncommon();
         auto cachedResource = m_document.cachedResourceLoader().requestRawResource(WTFMove(newRequest));
         m_resource = cachedResource.valueOr(nullptr);
         if (m_resource)
@@ -475,6 +483,8 @@ void DocumentThreadableLoader::loadRequest(ResourceRequest&& request, SecurityCh
             logErrorAndFail(cachedResource.error());
         return;
     }
+
+    fprintf(stderr, "  (sync)\n");
 
     // If credentials mode is 'Omit', we should disable cookie sending.
     ASSERT(m_options.credentials != FetchOptions::Credentials::Omit);

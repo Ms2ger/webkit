@@ -50,6 +50,7 @@ static ExceptionOr<bool> canWriteHeader(const String& name, const String& value,
 
 static ExceptionOr<void> appendToHeaderMap(const String& name, const String& value, HTTPHeaderMap& headers, FetchHeaders::Guard guard)
 {
+    fprintf(stderr, "appendToHeaderMap(%s, %s)\n", name.utf8().data(), value.utf8().data());
     String normalizedValue = stripLeadingAndTrailingHTTPSpaces(value);
     auto canWriteResult = canWriteHeader(name, normalizedValue, guard);
     if (canWriteResult.hasException())

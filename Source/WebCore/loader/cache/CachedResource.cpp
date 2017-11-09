@@ -190,6 +190,7 @@ void CachedResource::failBeforeStarting()
 
 void CachedResource::load(CachedResourceLoader& cachedResourceLoader)
 {
+    fprintf(stderr, "CachedResource::load\n");
     if (!cachedResourceLoader.frame()) {
         RELEASE_LOG_IF_ALLOWED("load: No associated frame");
         failBeforeStarting();
@@ -293,6 +294,9 @@ void CachedResource::load(CachedResourceLoader& cachedResourceLoader)
             return;
         }
     }
+
+    fprintf(stderr, "loadResource with:\n");
+    request.httpHeaderFields().printUncommon();
 
     platformStrategies()->loaderStrategy()->loadResource(frame, *this, WTFMove(request), m_options, [this, protectedThis = CachedResourceHandle<CachedResource>(this), frame = makeRef(frame), loggingAllowed = cachedResourceLoader.isAlwaysOnLoggingAllowed()] (RefPtr<SubresourceLoader>&& loader) {
         m_loader = WTFMove(loader);

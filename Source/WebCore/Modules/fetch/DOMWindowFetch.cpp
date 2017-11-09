@@ -41,6 +41,8 @@ using FetchResponsePromise = DOMPromiseDeferred<IDLInterface<FetchResponse>>;
 
 void DOMWindowFetch::fetch(DOMWindow& window, FetchRequest::Info&& input, FetchRequest::Init&& init, Ref<DeferredPromise>&& deferred)
 {
+
+    fprintf(stderr, "========================================================\n");
     FetchResponsePromise promise = WTFMove(deferred);
 
     auto* document = window.document();

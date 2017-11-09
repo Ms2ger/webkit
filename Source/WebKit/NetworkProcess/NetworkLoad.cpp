@@ -73,6 +73,8 @@ NetworkLoad::NetworkLoad(NetworkLoadClient& client, NetworkLoadParameters&& para
     , m_parameters(WTFMove(parameters))
     , m_currentRequest(m_parameters.request)
 {
+    fprintf(stderr, "NetworkLoad(3)\n");
+    m_parameters.request.httpHeaderFields().printUncommon();
 #if ENABLE(NETWORK_CAPTURE)
     switch (NetworkCapture::Manager::singleton().mode()) {
     case NetworkCapture::Manager::RecordReplayMode::Record:
@@ -125,6 +127,8 @@ NetworkLoad::NetworkLoad(NetworkLoadClient& client, NetworkLoadParameters&& para
     , m_networkingContext(RemoteNetworkingContext::create(m_parameters.sessionID, m_parameters.shouldClearReferrerOnHTTPSToHTTPRedirect))
     , m_currentRequest(m_parameters.request)
 {
+    fprintf(stderr, "NetworkLoad(2)\n");
+    m_parameters.request.httpHeaderFields().printUncommon();
     m_handle = ResourceHandle::create(m_networkingContext.get(), m_parameters.request, this, m_parameters.defersLoading, m_parameters.contentSniffingPolicy == SniffContent, m_parameters.contentEncodingSniffingPolicy == ContentEncodingSniffingPolicy::Sniff);
 }
 
