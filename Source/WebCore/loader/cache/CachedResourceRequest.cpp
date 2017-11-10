@@ -247,7 +247,9 @@ void CachedResourceRequest::updateReferrerOriginAndUserAgentHeaders(FrameLoader&
         m_resourceRequest.setHTTPReferrer(outgoingReferrer);
     FrameLoader::addHTTPOriginIfNeeded(m_resourceRequest, outgoingOrigin);
 
-    frameLoader.applyUserAgent(m_resourceRequest);
+    fprintf(stderr, "%s: hasUserAgent = %d\n", m_resourceRequest.url().string().utf8().data(), m_resourceRequest.hasHTTPHeaderField(HTTPHeaderName::UserAgent));
+    if (!m_resourceRequest.hasHTTPHeaderField(HTTPHeaderName::UserAgent))
+        frameLoader.applyUserAgent(m_resourceRequest);
 }
 
 bool isRequestCrossOrigin(SecurityOrigin* origin, const URL& requestURL, const ResourceLoaderOptions& options)

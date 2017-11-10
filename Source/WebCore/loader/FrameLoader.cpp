@@ -2756,10 +2756,14 @@ void FrameLoader::loadPostRequest(FrameLoadRequest&& request, const String& refe
 
 unsigned long FrameLoader::loadResourceSynchronously(const ResourceRequest& request, StoredCredentialsPolicy storedCredentialsPolicy, ClientCredentialPolicy clientCredentialPolicy, ResourceError& error, ResourceResponse& response, RefPtr<SharedBuffer>& data)
 {
+
+    fprintf(stderr, "FrameLoader::loadResourceSynchronously 1: %s\n", request.httpUserAgent().utf8().data());
+
     ASSERT(m_frame.document());
     String referrer = SecurityPolicy::generateReferrerHeader(m_frame.document()->referrerPolicy(), request.url(), outgoingReferrer());
     
     ResourceRequest initialRequest = request;
+    fprintf(stderr, "FrameLoader::loadResourceSynchronously 1b: %s\n", initialRequest.httpUserAgent().utf8().data());
     initialRequest.setTimeoutInterval(10);
     
     if (!referrer.isEmpty())
@@ -2770,8 +2774,11 @@ unsigned long FrameLoader::loadResourceSynchronously(const ResourceRequest& requ
     
     addExtraFieldsToSubresourceRequest(initialRequest);
 
+    fprintf(stderr, "FrameLoader::loadResourceSynchronously 1c: %s\n", initialRequest.httpUserAgent().utf8().data());
+
     unsigned long identifier = 0;    
     ResourceRequest newRequest(initialRequest);
+    fprintf(stderr, "FrameLoader::loadResourceSynchronously 1d: %s\n", newRequest.httpUserAgent().utf8().data());
     requestFromDelegate(newRequest, identifier, error);
 
 #if ENABLE(CONTENT_EXTENSIONS)
@@ -2793,6 +2800,8 @@ unsigned long FrameLoader::loadResourceSynchronously(const ResourceRequest& requ
 
     m_frame.document()->contentSecurityPolicy()->upgradeInsecureRequestIfNeeded(newRequest, ContentSecurityPolicy::InsecureRequestType::Load);
     
+    fprintf(stderr, "FrameLoader::loadResourceSynchronously 2: %s\n", request.httpUserAgent().utf8().data());
+    fprintf(stderr, "FrameLoader::loadResourceSynchronously 3: %s\n", newRequest.httpUserAgent().utf8().data());
     if (error.isNull()) {
         ASSERT(!newRequest.isNull());
 
@@ -3271,9 +3280,11 @@ void FrameLoader::loadedResourceFromMemoryCache(CachedResource& resource, Resour
 
 void FrameLoader::applyUserAgent(ResourceRequest& request)
 {
-    String userAgent = this->userAgent(request.url());
-    ASSERT(!userAgent.isNull());
-    request.setHTTPUserAgent(userAgent);
+    if (!request.hasHTTPHeaderField(HTTPHeaderName::UserAgent)) {
+        String userAgent = this->userAgent(request.url());
+        ASSERT(!userAgent.isNull());
+        request.setHTTPUserAgent(userAgent);
+    }
 }
 
 bool FrameLoader::shouldInterruptLoadForXFrameOptions(const String& content, const URL& url, unsigned long requestIdentifier)

@@ -224,6 +224,8 @@ void NetworkResourceLoader::startNetworkLoad(const ResourceRequest& request)
     parameters.defersLoading = m_defersLoading;
     parameters.request = request;
 
+    fprintf(stderr, "startNetworkLoad: %s\n", request.httpUserAgent().utf8().data());
+
 #if USE(NETWORK_SESSION)
     if (request.url().protocolIsBlob())
         parameters.blobFileReferences = NetworkBlobRegistry::singleton().filesInBlob(m_connection, originalRequest().url());

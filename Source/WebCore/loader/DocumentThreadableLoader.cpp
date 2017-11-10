@@ -435,6 +435,8 @@ void DocumentThreadableLoader::preflightFailure(unsigned long identifier, const 
 
 void DocumentThreadableLoader::loadRequest(ResourceRequest&& request, SecurityCheckPolicy securityCheck)
 {
+    fprintf(stderr, "DocumentThreadableLoader::loadRequest: %s\n", request.httpUserAgent().utf8().data());
+
     Ref<DocumentThreadableLoader> protectedThis(*this);
 
     // Any credential should have been removed from the cross-site requests.

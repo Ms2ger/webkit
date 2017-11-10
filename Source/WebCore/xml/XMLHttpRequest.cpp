@@ -601,8 +601,12 @@ ExceptionOr<void> XMLHttpRequest::createRequest()
         request.setHTTPBody(WTFMove(m_requestEntityBody));
     }
 
-    if (!m_requestHeaders.isEmpty())
+    if (!m_requestHeaders.isEmpty()) {
+        fprintf(stderr, "Sending to %s; has UA: %d\n", m_url.string().utf8().data(), request.hasHTTPHeader(HTTPHeaderName::UserAgent));
         request.setHTTPHeaderFields(m_requestHeaders);
+        fprintf(stderr, "Sending to %s; has UA: %d\n", m_url.string().utf8().data(), request.hasHTTPHeader(HTTPHeaderName::UserAgent));
+        fprintf(stderr, "  %s\n", request.httpUserAgent().utf8().data());
+    }
 
     ThreadableLoaderOptions options;
     options.sendLoadCallbacks = SendCallbacks;

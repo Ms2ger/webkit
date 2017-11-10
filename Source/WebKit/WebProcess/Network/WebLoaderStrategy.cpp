@@ -398,6 +398,8 @@ void WebLoaderStrategy::networkProcessCrashed()
 
 void WebLoaderStrategy::loadResourceSynchronously(NetworkingContext* context, unsigned long resourceLoadIdentifier, const ResourceRequest& request, StoredCredentialsPolicy storedCredentialsPolicy, ClientCredentialPolicy clientCredentialPolicy, ResourceError& error, ResourceResponse& response, Vector<char>& data)
 {
+    fprintf(stderr, "WebLoaderStrategy::loadResourceSynchronously: %s\n", request.httpUserAgent().utf8().data());
+
     WebFrameNetworkingContext* webContext = static_cast<WebFrameNetworkingContext*>(context);
     // FIXME: Some entities in WebCore use WebCore's "EmptyFrameLoaderClient" instead of having a proper WebFrameLoaderClient.
     // EmptyFrameLoaderClient shouldn't exist and everything should be using a WebFrameLoaderClient,
