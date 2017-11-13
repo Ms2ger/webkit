@@ -107,7 +107,6 @@ List of files:
 /LayoutTests/imported/w3c/web-platform-tests/XMLHttpRequest/formdata-has.htm
 /LayoutTests/imported/w3c/web-platform-tests/XMLHttpRequest/formdata-set.htm
 /LayoutTests/imported/w3c/web-platform-tests/XMLHttpRequest/formdata.htm
-/LayoutTests/imported/w3c/web-platform-tests/XMLHttpRequest/getallresponseheaders-cl.htm
 /LayoutTests/imported/w3c/web-platform-tests/XMLHttpRequest/getallresponseheaders-cookies.htm
 /LayoutTests/imported/w3c/web-platform-tests/XMLHttpRequest/getallresponseheaders-status.htm
 /LayoutTests/imported/w3c/web-platform-tests/XMLHttpRequest/getallresponseheaders.htm

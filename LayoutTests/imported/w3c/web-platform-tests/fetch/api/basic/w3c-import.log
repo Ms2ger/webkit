@@ -29,6 +29,7 @@ List of files:
 /LayoutTests/imported/w3c/web-platform-tests/fetch/api/basic/referrer.any.js
 /LayoutTests/imported/w3c/web-platform-tests/fetch/api/basic/request-forbidden-headers.any.js
 /LayoutTests/imported/w3c/web-platform-tests/fetch/api/basic/request-head.any.js
+/LayoutTests/imported/w3c/web-platform-tests/fetch/api/basic/request-headers-case.any.js
 /LayoutTests/imported/w3c/web-platform-tests/fetch/api/basic/request-headers.any.js
 /LayoutTests/imported/w3c/web-platform-tests/fetch/api/basic/request-referrer-redirected-worker.html
 /LayoutTests/imported/w3c/web-platform-tests/fetch/api/basic/request-referrer.any.js
