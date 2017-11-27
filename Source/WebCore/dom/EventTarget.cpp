@@ -52,6 +52,12 @@ namespace WebCore {
 
 using namespace WTF;
 
+/* static */
+Ref<EventTarget> EventTarget::create()
+{
+    return adoptRef(*new EventTargetWithInlineData());
+}
+
 bool EventTarget::isNode() const
 {
     return false;

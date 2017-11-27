@@ -19,6 +19,7 @@
  */
 
 [
+    Constructor,
     CustomToJSObject,
     Exposed=(Window,Worker),
     IsImmutablePrototypeExoticObjectOnPrototype,

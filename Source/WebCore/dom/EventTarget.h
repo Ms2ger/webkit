@@ -60,6 +60,8 @@ DOM_EVENT_TARGET_INTERFACES_FOR_EACH(DOM_EVENT_INTERFACE_DECLARE)
 
 class EventTarget : public ScriptWrappable {
 public:
+    static Ref<EventTarget> create();
+
     void ref() { refEventTarget(); }
     void deref() { derefEventTarget(); }
 
@@ -117,6 +119,7 @@ public:
     void invalidateJSEventListeners(JSC::JSObject*);
 
 protected:
+    EventTarget();
     virtual ~EventTarget() = default;
     
     virtual EventTargetData* eventTargetData() = 0;
