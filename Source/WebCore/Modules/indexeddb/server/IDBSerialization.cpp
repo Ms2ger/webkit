@@ -233,6 +233,8 @@ static bool readDouble(const uint8_t*& data, const uint8_t* end, double& d)
 
 static void encodeKey(Vector<char>& data, const IDBKeyData& key)
 {
+    fprintf(stderr, "encodeKey()\n");
+    fflush(stderr);
     SIDBKeyType type = serializedTypeForKeyType(key.type());
     data.append(static_cast<char>(type));
 
@@ -266,11 +268,23 @@ static void encodeKey(Vector<char>& data, const IDBKeyData& key)
         break;
     }
     case SIDBKeyType::Array: {
+        fprintf(stderr, "SIDBKeyType::Array\n");
+        fflush(stderr);
+        fprintf(stderr, " => 0\n");
+        fflush(stderr);
         auto& array = key.array();
+        fprintf(stderr, " => 1\n");
+        fflush(stderr);
         uint64_t size = array.size();
+        fprintf(stderr, " => 2\n");
+        fflush(stderr);
         writeLittleEndian(data, size);
+        fprintf(stderr, " => 3\n");
+        fflush(stderr);
         for (auto& key : array)
             encodeKey(data, key);
+        fprintf(stderr, " => 4\n");
+        fflush(stderr);
 
         break;
     }
