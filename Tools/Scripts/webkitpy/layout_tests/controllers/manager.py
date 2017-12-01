@@ -540,7 +540,7 @@ class Manager(object):
 
     def _print_expectation_line_for_test(self, format_string, test):
         line = self._expectations.model().get_expectation_line(test)
-        print format_string.format(test, line.expected_behavior, self._expectations.readable_filename_and_line_number(line), line.original_string or '')
+        print format_string.format(test, line.expected_behavior, '', '')
     
     def _print_expectations_for_subset(self, device_class, test_col_width, tests_to_run, tests_to_skip={}):
         format_string = '{{:{width}}} {{}} {{}} {{}}'.format(width=test_col_width)
