@@ -653,11 +653,12 @@ double CSSPrimitiveValue::computeNonCalcLengthDouble(const CSSToLengthConversion
         // FIXME: We have a bug right now where the zoom will be applied twice to EX units.
         // We really need to compute EX using fontMetrics for the original specifiedSize and not use
         // our actual constructed rendering font.
-        fprintf(stderr, "CSS_EXS: %d", conversionData.style()->fontMetrics().hasXHeight());
+        fprintf(stderr, "CSS_EXS: %d\n", conversionData.style()->fontMetrics().hasXHeight());
         if (conversionData.style()->fontMetrics().hasXHeight())
             factor = conversionData.style()->fontMetrics().xHeight();
         else
             factor = (conversionData.computingFontSize() ? conversionData.style()->fontDescription().specifiedSize() : conversionData.style()->fontDescription().computedSize()) / 2.0;
+        fprintf(stderr, "  factor = %f\n", factor);
         break;
     case CSS_REMS:
         if (conversionData.rootStyle())

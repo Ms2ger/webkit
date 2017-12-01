@@ -61,8 +61,14 @@ public:
     float floatLineSpacing() const { return m_lineSpacing; }
     void setLineSpacing(float lineSpacing) { m_lineSpacing = lineSpacing; }
 
-    float xHeight() const { return m_xHeight; }
-    void setXHeight(float xHeight) { m_xHeight = xHeight; }
+    float xHeight() const {
+        fprintf(stderr, "xHeight(%p) => %f", this, m_xHeight);
+        return m_xHeight;
+    }
+    void setXHeight(float xHeight) {
+        m_xHeight = xHeight;
+        fprintf(stderr, "xHeight(%p) <= %f", this, m_xHeight);
+    }
     bool hasXHeight() const { return m_xHeight > 0; }
     
     bool hasCapHeight() const { return m_capHeight > 0; }

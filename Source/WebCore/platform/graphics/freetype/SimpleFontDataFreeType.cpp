@@ -112,7 +112,9 @@ void Font::platformInit()
 
     cairo_text_extents_t textExtents;
     cairo_scaled_font_text_extents(m_platformData.scaledFont(), "x", &textExtents);
-    m_fontMetrics.setXHeight(narrowPrecisionToFloat((platformData().orientation() == Horizontal) ? textExtents.height : textExtents.width));
+    auto x = narrowPrecisionToFloat((platformData().orientation() == Horizontal) ? textExtents.height : textExtents.width);
+    fprintf(stderr, "setXHeight(%f)\n", x);
+    m_fontMetrics.setXHeight(x);
 
     cairo_scaled_font_text_extents(m_platformData.scaledFont(), " ", &textExtents);
     m_spaceWidth = narrowPrecisionToFloat((platformData().orientation() == Horizontal) ? textExtents.x_advance : -textExtents.y_advance);
