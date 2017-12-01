@@ -208,7 +208,6 @@ Bug(WPE) imported/w3c/web-platform-tests/2dcontext [ Skip ]
 Bug(WPE) imported/w3c/web-platform-tests/background-fetch [ Skip ]
 Bug(WPE) imported/w3c/web-platform-tests/beacon [ Skip ]
 Bug(WPE) imported/w3c/web-platform-tests/cors [ Skip ]
-Bug(WPE) imported/w3c/web-platform-tests/css [ Skip ]
 Bug(WPE) imported/w3c/web-platform-tests/css-timing-1 [ Skip ]
 Bug(WPE) imported/w3c/web-platform-tests/custom-elements [ Skip ]
 Bug(WPE) imported/w3c/web-platform-tests/feature-policy [ Skip ]
@@ -226,6 +225,20 @@ Bug(WPE) imported/w3c/web-platform-tests/webrtc [ Skip ]
 
 imported/w3c/web-platform-tests/dom [ Pass ]
 imported/w3c/web-platform-tests/dom/nodes/Document-constructor-svg.svg [ Timeout ]
+
+
+# WPT: css
+# ========
+imported/w3c/web-platform-tests/css/css-grid-1/grid-items/grid-items-sizing-alignment-001.html [ Pass ]
+imported/w3c/web-platform-tests/css/css-grid-1/grid-layout-properties.html [ Pass ]
+
+webkit.org/b/177362 imported/w3c/web-platform-tests/css/css-pseudo-4/marker-font-properties.html [ ImageOnlyFailure ]
+imported/w3c/web-platform-tests/css/css-pseudo-4/first-letter-002.html [ Pass ]
+imported/w3c/web-platform-tests/css/css-pseudo-4/first-letter-003.html [ Pass ]
+
+Bug(WPE) imported/w3c/web-platform-tests/css/css-shapes-1 [ Skip ]
+Bug(WPE) imported/w3c/web-platform-tests/css/css-ui-3 [ Skip ]
+Bug(WPE) imported/w3c/web-platform-tests/css/selectors4 [ Skip ]
 
 
 # WPT: cssom
