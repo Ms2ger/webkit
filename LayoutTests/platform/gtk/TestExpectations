@@ -2924,8 +2924,6 @@ webkit.org/b/148935 accessibility/scroll-to-make-visible-with-subfocus.html [ Fa
 
 webkit.org/b/148936 imported/w3c/web-platform-tests/html/semantics/embedded-content/media-elements/mime-types/canPlayType.html [ Failure ]
 webkit.org/b/148936 imported/w3c/web-platform-tests/html/semantics/forms/textfieldselection/textfieldselection-setSelectionRange.html [ Failure ]
-webkit.org/b/148936 imported/w3c/web-platform-tests/html/semantics/forms/the-form-element/form-autocomplete.html [ Failure ]
-webkit.org/b/148936 imported/w3c/web-platform-tests/html/semantics/forms/the-input-element/telephone.html [ Failure ]
 
 webkit.org/b/149128 fast/text/control-characters [ ImageOnlyFailure ]
 
