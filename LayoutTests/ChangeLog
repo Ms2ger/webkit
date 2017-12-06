@@ -1,3 +1,14 @@
+2017-12-06  Ms2ger  <Ms2ger@igalia.com>
+
+        Implement {DOMMimeTypeArray, DOMPluginArray}::supportedPropertyNames().
+        https://bugs.webkit.org/show_bug.cgi?id=180471
+
+        Reviewed by NOBODY (OOPS!).
+
+        Remove failure expectation for test that now matches the expectation file.
+
+        * platform/gtk/TestExpectations:
+
 2017-12-05  Fujii Hironori  <Hironori.Fujii@sony.com>
 
         [GTK] Layout test media/track/track-in-band-duplicate-tracks-when-source-changes.html crashes and times out

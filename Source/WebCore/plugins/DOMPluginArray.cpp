@@ -71,8 +71,20 @@ RefPtr<DOMPlugin> DOMPluginArray::namedItem(const AtomicString& propertyName)
 
 Vector<AtomicString> DOMPluginArray::supportedPropertyNames()
 {
-    // FIXME: Should be implemented.
-    return Vector<AtomicString>();
+    PluginData* data = pluginData();
+    if (!data)
+        return { };
+
+    const Vector<PluginInfo>& plugins = data->publiclyVisiblePlugins();
+    unsigned size = plugins.size();
+
+    Vector<AtomicString> result;
+    result.reserveInitialCapacity(size);
+
+    for (unsigned i = 0; i < size; ++i)
+        result.uncheckedAppend(AtomicString(plugins[i].name));
+
+    return result;
 }
 
 void DOMPluginArray::refresh(bool reloadPages)
