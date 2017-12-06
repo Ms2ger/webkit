@@ -3262,8 +3262,6 @@ webkit.org/b/175422 http/tests/blink/sendbeacon/beacon-same-origin.html [ Failur
 
 webkit.org/b/175582 imported/w3c/web-platform-tests/WebCryptoAPI/generateKey/successes.worker.html [ Failure ]
 
-webkit.org/b/175586 imported/w3c/web-platform-tests/XMLHttpRequest/send-network-error-sync-events.sub.htm [ Failure ]
-
 webkit.org/b/175931 fast/canvas/webgl/no-info-log-for-simple-shaders.html [ Failure ]
 
 webkit.org/b/175932 http/tests/media/hls/video-cookie.html [ Failure ]
