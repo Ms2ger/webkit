@@ -84,6 +84,7 @@ static void handleBeforeUnloadEventReturnValue(BeforeUnloadEvent& event, const S
 
 void JSEventListener::handleEvent(ScriptExecutionContext& scriptExecutionContext, Event& event)
 {
+    fprintf(stderr, "JSEventListener::handleEvent: %s\n", event.type().string().utf8().data());
     if (scriptExecutionContext.isJSExecutionForbidden())
         return;
 

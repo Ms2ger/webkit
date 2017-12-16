@@ -69,7 +69,10 @@ public:
     DOMWrapperWorld& isolatedWorld() const { return m_isolatedWorld; }
 
     JSC::JSObject* wrapper() const { return m_wrapper.get(); }
-    void setWrapper(JSC::VM&, JSC::JSObject* wrapper) const { m_wrapper = JSC::Weak<JSC::JSObject>(wrapper); }
+    void setWrapper(JSC::VM&, JSC::JSObject* wrapper) const {
+      fprintf(stderr, "setWrapper(%p)\n", wrapper);
+      m_wrapper = JSC::Weak<JSC::JSObject>(wrapper);
+    }
 
     virtual String sourceURL() const { return String(); }
     virtual TextPosition sourcePosition() const { return TextPosition(); }
@@ -109,6 +112,9 @@ void setDocumentEventHandlerAttribute(JSC::ExecState&, JSC::JSObject&, Document&
 
 inline JSC::JSObject* JSEventListener::jsFunction(ScriptExecutionContext& scriptExecutionContext) const
 {
+    fprintf(stderr, "JSEventListener::jsFunction()\n");
+    fprintf(stderr, "  jsFunction=%p\n", m_jsFunction.get());
+    fprintf(stderr, "  wrapper=%p\n", m_wrapper.get());
     // initializeJSFunction can trigger code that deletes this event listener
     // before we're done. It should always return 0 in this case.
     auto protect = makeRef(const_cast<JSEventListener&>(*this));
