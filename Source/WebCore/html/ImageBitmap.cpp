@@ -499,31 +499,52 @@ private:
 
     void createImageBitmap(RefPtr<ArrayBuffer> arrayBuffer)
     {
-        UNUSED_PARAM(arrayBuffer);
-
         // 3. Read the Blob object's data. If an error occurs during reading of the object,
         //    then reject the promise with an "InvalidStateError" DOMException, and abort
         //    these steps.
+        if (!arrayBuffer) {
+            m_promise.reject(InvalidStateError, "An error occured reading the Blob argument to createImageBitmap");
+            return;
+        }
 
         // 4. Apply the image sniffing rules to determine the file format of the image data,
         //    with MIME type of the Blob (as given by the Blob object's type attribute) giving
         //    the official type.
+        auto officialType = m_blob->type();
 
         // 5. If the image data is not in a supported image file format (e.g. it's not an image
         //    at all), or if the image data is corrupted in some fatal way such that the image
         //    dimensions cannot be obtained (e.g. a vector graphic with no intrinsic size), then
         //    reject the promise with an "InvalidStateError" DOMException, and abort these steps.
+        Image* image = nullptr;
 
         // 6. Create a new ImageBitmap object.
+        auto imageBitmap = ImageBitmap::create();
 
         // 7. Let the ImageBitmap object's bitmap data be the image data read from the Blob object,
         //    cropped to the source rectangle with formatting. If this is an animated image, the
         //    ImageBitmap object's bitmap data must only be taken from the default image of the
         //    animation (the one that the format defines is to be used when animation is not supported
         //    or is disabled), or, if there is no such image, the first frame of the animation.
+        auto sourceRectangle = croppedSourceRectangleWithFormatting(roundedIntSize(image->size()), m_options, m_rect);
+        if (sourceRectangle.hasException()) {
+            m_promise.reject(sourceRectangle.releaseException());
+            return;
+        }
+
+        auto outputSize = outputSizeForSourceRectangle(sourceRectangle.returnValue(), m_options);
+        auto bitmapData = ImageBuffer::create(FloatSize(outputSize.width(), outputSize.height()), bufferRenderingMode);
+
+        FloatRect destRect(FloatPoint(), outputSize);
+        ImagePaintingOptions paintingOptions;
+        paintingOptions.m_interpolationQuality = interpolationQualityForResizeQuality(m_options.resizeQuality);
+
+        bitmapData->context().drawImage(*image, destRect, sourceRectangle.releaseReturnValue(), paintingOptions);
+
+        imageBitmap->m_bitmapData = WTFMove(bitmapData);
 
         // 8. Resolve the promise with the new ImageBitmap object as the value.
-        m_promise.reject(TypeError, "createImageBitmap with ArrayBuffer or Blob is not implemented");
+        m_promise.resolve(imageBitmap);
     }
 
     FileReaderLoader m_blobLoader;
