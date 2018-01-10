@@ -114,6 +114,17 @@ static bool taintsOrigin(CachedImage& cachedImage)
     return false;
 }
 
+static bool taintsOrigin(HTMLVideoElement& video)
+{
+    if (!video.player()->didPassCORSAccessCheck())
+        return true;
+
+    if (!video.hasSingleSecurityOrigin())
+        return true;
+
+    return false;
+}
+
 // https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#cropped-to-the-source-rectangle-with-formatting
 static ExceptionOr<IntRect> croppedSourceRectangleWithFormatting(IntSize inputSize, ImageBitmapOptions& options, std::optional<IntRect> rect)
 {
@@ -363,35 +374,64 @@ void ImageBitmap::createPromise(ScriptExecutionContext&, RefPtr<HTMLCanvasElemen
 }
 
 #if ENABLE(VIDEO)
-void ImageBitmap::createPromise(ScriptExecutionContext&, RefPtr<HTMLVideoElement>& videoElement, ImageBitmapOptions&& options, std::optional<IntRect> rect, ImageBitmap::Promise&& promise)
+void ImageBitmap::createPromise(ScriptExecutionContext&, RefPtr<HTMLVideoElement>& video, ImageBitmapOptions&& options, std::optional<IntRect> rect, ImageBitmap::Promise&& promise)
 {
-    UNUSED_PARAM(videoElement);
-    UNUSED_PARAM(options);
-    UNUSED_PARAM(rect);
-
     // 2. If the video element's networkState attribute is NETWORK_EMPTY, then return
     //    a promise rejected with an "InvalidStateError" DOMException and abort these
     //    steps.
+    if (video->networkState() == HTMLMediaElement::NETWORK_EMPTY) {
+        promise.reject(InvalidStateError, "Cannot create ImageBitmap before the HTMLVideoElement has data");
+        return;
+    }
 
     // 3. If the video element's readyState attribute is either HAVE_NOTHING or
     //    HAVE_METADATA, then return a promise rejected with an "InvalidStateError"
     //    DOMException and abort these steps.
+    if (video->readyState() == HTMLMediaElement::HAVE_NOTHING || video->readyState() == HTMLMediaElement::HAVE_METADATA) {
+        promise.reject(InvalidStateError, "Cannot create ImageBitmap before the HTMLVideoElement has data");
+        return;
+    }
 
     // 4. Create a new ImageBitmap object.
+    auto imageBitmap = create();
 
     // 5. Let the ImageBitmap object's bitmap data be a copy of the frame at the current
     //    playback position, at the media resource's intrinsic width and intrinsic height
     //    (i.e. after any aspect-ratio correction has been applied), cropped to the source
     //    rectangle with formatting.
+    auto size = video->player() ? roundedIntSize(video->player()->naturalSize()) : IntSize();
+    auto maybeSourceRectangle = croppedSourceRectangleWithFormatting(size, options, WTFMove(rect));
+    if (maybeSourceRectangle.hasException()) {
+        promise.reject(maybeSourceRectangle.releaseException());
+        return;
+    }
+    auto sourceRectangle = maybeSourceRectangle.releaseReturnValue();
+
+    auto outputSize = outputSizeForSourceRectangle(sourceRectangle, options);
+    auto bitmapData = ImageBuffer::create(FloatSize(outputSize.width(), outputSize.height()), bufferRenderingMode);
+
+    GraphicsContext& c = bitmapData->context();
+
+    {
+        GraphicsContextStateSaver stateSaver(c);
+        c.clip(FloatRect(FloatPoint(), outputSize));
+        c.translate(outputSize);
+        c.scale(FloatSize(outputSize.width() / sourceRectangle.width(), outputSize.height() / sourceRectangle.height()));
+        c.translate(-sourceRectangle.location());
+        video->paintCurrentFrameInContext(c, FloatRect(FloatPoint(), size));
+    }
+
+    imageBitmap->m_bitmapData = WTFMove(bitmapData);
 
     // 6. If the origin of the video element is not the same origin as the origin specified
     //    by the entry settings object, then set the origin-clean flag of the ImageBitmap
     //    object's bitmap to false.
+    imageBitmap->m_originClean = !taintsOrigin(*video);
 
     // 7. Return a new promise, but continue running these steps in parallel.
 
     // 8. Resolve the promise with the new ImageBitmap object as the value.
-    promise.reject(TypeError, "createImageBitmap with HTMLVideoElement is not implemented");
+    promise.resolve(imageBitmap);
 }
 #endif
 
