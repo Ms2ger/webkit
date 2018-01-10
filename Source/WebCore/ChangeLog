@@ -1,3 +1,18 @@
+2018-02-01  Ms2ger  <Ms2ger@igalia.com>
+
+        Implement createImageBitmap(HTMLVideoElement)
+        https://bugs.webkit.org/show_bug.cgi?id=182388
+
+        Reviewed by NOBODY (OOPS!).
+
+        Tests:
+
+        - web-platform-tests/2dcontext/imagebitmap/createImageBitmap-drawImage.html
+        - web-platform-tests/2dcontext/imagebitmap/createImageBitmap-invalid-args.html
+
+
+        * html/ImageBitmap.cpp:
+
 2018-02-01  Antti Koivisto  <antti@apple.com>
 
         Invalidate style for sibling combinators accurately on class change
