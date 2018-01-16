@@ -326,6 +326,7 @@ void CachedResource::loadFrom(const CachedResource& resource)
 
     setBodyDataFrom(resource);
     setStatus(Status::Cached);
+    fprintf(stderr, "CachedResource::loadFrom(%p): image=%d --> setLoading(false)\n", this, type() == CachedResource::ImageResource);
     setLoading(false);
 }
 
@@ -340,6 +341,9 @@ void CachedResource::setBodyDataFrom(const CachedResource& resource)
 
 void CachedResource::checkNotify()
 {
+    fprintf(stderr, "CachedResource::checkNotify(%p): image=%d\n", this, type() == CachedResource::ImageResource);
+    fprintf(stderr, "    isLoading() = %d\n", isLoading());
+    fprintf(stderr, "    stillNeedsLoad() = %d\n", stillNeedsLoad());
     if (isLoading() || stillNeedsLoad())
         return;
 
@@ -360,6 +364,7 @@ void CachedResource::updateData(const char*, unsigned)
 
 void CachedResource::finishLoading(SharedBuffer*)
 {
+    fprintf(stderr, "CachedResource::finishLoading(%p): image=%d --> setLoading(false)\n", this, type() == CachedResource::ImageResource);
     setLoading(false);
     checkNotify();
 }
@@ -370,6 +375,7 @@ void CachedResource::error(CachedResource::Status status)
     ASSERT(errorOccurred());
     m_data = nullptr;
 
+    fprintf(stderr, "CachedResource::error(%p): image=%d --> setLoading(false)\n", this, type() == CachedResource::ImageResource);
     setLoading(false);
     checkNotify();
 }
@@ -380,6 +386,7 @@ void CachedResource::cancelLoad()
         return;
 
     setStatus(LoadError);
+    fprintf(stderr, "CachedResource::cancelLoad(%p): image=%d --> setLoading(false)\n", this, type() == CachedResource::ImageResource);
     setLoading(false);
     checkNotify();
 }
@@ -501,17 +508,29 @@ void CachedResource::clearLoader()
 
 void CachedResource::addClient(CachedResourceClient& client)
 {
-    if (addClientToSet(client))
+    fprintf(stderr, "CachedResource::addClient(%p): image=%d\n", this, type() == CachedResource::ImageResource);
+    if (addClientToSet(client)) {
+        fprintf(stderr, "    true\n");
         didAddClient(client);
+    } else {
+        fprintf(stderr, "    false\n");
+    }
 }
 
 void CachedResource::didAddClient(CachedResourceClient& client)
 {
+    fprintf(stderr, "CachedResource::didAddClient(%p): image=%d\n", this, type() == CachedResource::ImageResource);
+
+    fprintf(stderr, "    m_decodedDataDeletionTimer.isActive() = %d\n", m_decodedDataDeletionTimer.isActive());
     if (m_decodedDataDeletionTimer.isActive())
         m_decodedDataDeletionTimer.stop();
 
-    if (m_clientsAwaitingCallback.remove(&client))
+    bool x = m_clientsAwaitingCallback.remove(&client);
+    fprintf(stderr, "    m_clientsAwaitingCallback.remove(&client) = %d\n", x);
+    if (x)
         m_clients.add(&client);
+
+    fprintf(stderr, "    isLoading() = %d, stillNeedsLoad() = %d\n", isLoading(), stillNeedsLoad());
     if (!isLoading() && !stillNeedsLoad())
         client.notifyFinished(*this);
 }

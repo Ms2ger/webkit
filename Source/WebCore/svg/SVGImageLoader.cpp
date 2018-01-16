@@ -38,11 +38,18 @@ SVGImageLoader::~SVGImageLoader() = default;
 
 void SVGImageLoader::dispatchLoadEvent()
 {
-    if (image()->errorOccurred())
+    fprintf(stderr, "SVGImageLoader::dispatchLoadEvent(%p)\n", this);
+    if (image()->errorOccurred()) {
+        fprintf(stderr, "    image()->errorOccurred().\n");
         element().dispatchEvent(Event::create(eventNames().errorEvent, false, false));
-    else {
-        if (downcast<SVGImageElement>(element()).externalResourcesRequiredBaseValue())
+    } else {
+        fprintf(stderr, "    no error.\n");
+        if (downcast<SVGImageElement>(element()).externalResourcesRequiredBaseValue()) {
+            fprintf(stderr, "      sending.\n");
             downcast<SVGImageElement>(ImageLoader::element()).sendSVGLoadEventIfPossible(true);
+        } else {
+            fprintf(stderr, "      not sending.\n");
+        }
     }
 }
 

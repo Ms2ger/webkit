@@ -60,10 +60,14 @@ template<typename T> EventSender<T>::EventSender(const AtomicString& eventType)
     : m_eventType(eventType)
     , m_timer(*this, &EventSender::timerFired)
 {
+    fprintf(stderr, "EventSender<T>[%p %s]::EventSender()\n",
+            this, m_eventType.string().utf8().data());
 }
 
 template<typename T> void EventSender<T>::dispatchEventSoon(T& sender)
 {
+    fprintf(stderr, "EventSender<T>[%p %s]::dispatchEventSoon(%p)\n",
+            this, m_eventType.string().utf8().data(), &sender);
     m_dispatchSoonList.append(&sender);
     if (!m_timer.isActive())
         m_timer.startOneShot(0_s);
@@ -71,6 +75,8 @@ template<typename T> void EventSender<T>::dispatchEventSoon(T& sender)
 
 template<typename T> void EventSender<T>::cancelEvent(T& sender)
 {
+    fprintf(stderr, "EventSender<T>[%p %s]::cancelEvent(%p)\n",
+            this, m_eventType.string().utf8().data(), &sender);
     // Remove instances of this sender from both lists.
     // Use loops because we allow multiple instances to get into the lists.
     for (auto& event : m_dispatchSoonList) {
@@ -85,6 +91,9 @@ template<typename T> void EventSender<T>::cancelEvent(T& sender)
 
 template<typename T> void EventSender<T>::dispatchPendingEvents()
 {
+    fprintf(stderr, "EventSender<T>[%p %s]::dispatchPendingEvents(): %d // %d\n",
+            this, m_eventType.string().utf8().data(), (int)m_dispatchingList.size(),
+            (int)m_dispatchSoonList.size());
     // Need to avoid re-entering this function; if new dispatches are
     // scheduled before the parent finishes processing the list, they
     // will set a timer and eventually be processed.
@@ -97,7 +106,9 @@ template<typename T> void EventSender<T>::dispatchPendingEvents()
 
     m_dispatchingList.swap(m_dispatchSoonList);
     for (auto& event : m_dispatchingList) {
-        if (T* sender = event) {
+        T* sender = event;
+        fprintf(stderr, "    sender=%p\n", sender);
+        if (sender) {
             event = nullptr;
             sender->dispatchPendingEvent(this);
         }

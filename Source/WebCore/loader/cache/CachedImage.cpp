@@ -523,7 +523,9 @@ void CachedImage::updateData(const char* data, unsigned length)
 
 void CachedImage::finishLoading(SharedBuffer* data)
 {
+    fprintf(stderr, "CachedImage::finishLoading(%p)\n", this);
     m_data = convertedDataIfNeeded(data);
+    fprintf(stderr, "    m_data=%p\n", m_data);
     if (m_data) {
         setEncodedSize(m_data->size());
         createImage();
@@ -532,6 +534,7 @@ void CachedImage::finishLoading(SharedBuffer* data)
     EncodedDataStatus encodedDataStatus = updateImageData(true);
 
     if (encodedDataStatus == EncodedDataStatus::Error || m_image->isNull()) {
+        fprintf(stderr, "    error\n");
         // Image decoding failed; the image data is malformed.
         error(errorOccurred() ? status() : DecodeError);
         if (inCache())
@@ -539,6 +542,7 @@ void CachedImage::finishLoading(SharedBuffer* data)
         return;
     }
 
+    fprintf(stderr, "    success\n");
     notifyObservers();
     CachedResource::finishLoading(data);
 }

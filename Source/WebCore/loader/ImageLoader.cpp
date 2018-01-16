@@ -164,6 +164,7 @@ void ImageLoader::updateFromElement()
         return;
 
     AtomicString attr = element().imageSourceURL();
+    fprintf(stderr, "Loading image for %p: url=%s\n", &element(), attr.string().utf8().data());
 
     // Avoid loading a URL we already failed to load.
     if (!m_failedLoadURL.isEmpty() && attr == m_failedLoadURL)
@@ -193,6 +194,7 @@ void ImageLoader::updateFromElement()
             document.cachedResourceLoader().setAutoLoadImages(autoLoadOtherImages);
         } else
             newImage = document.cachedResourceLoader().requestImage(WTFMove(request)).value_or(nullptr);
+        fprintf(stderr, "Loading image for %p: newImage=%p\n", &element(), newImage);
 
         // If we do not have an image here, it means that a cross-site
         // violation occurred, or that the image was blocked via Content
@@ -272,6 +274,7 @@ void ImageLoader::updateFromElementIgnoringPreviousError()
 
 void ImageLoader::notifyFinished(CachedResource& resource)
 {
+    fprintf(stderr, "ImageLoader::notifyFinished(%p)\n", &resource);
     ASSERT(m_failedLoadURL.isEmpty());
     ASSERT_UNUSED(resource, &resource == m_image.get());
 
@@ -314,6 +317,8 @@ void ImageLoader::notifyFinished(CachedResource& resource)
 
     if (hasPendingDecodePromises())
         decode();
+
+    fprintf(stderr, "    Will dispatchEventSoon\n");
     loadEventSender().dispatchEventSoon(*this);
 }
 
@@ -482,6 +487,10 @@ void ImageLoader::dispatchPendingBeforeLoadEvent()
 
 void ImageLoader::dispatchPendingLoadEvent()
 {
+    fprintf(stderr, "ImageLoader::dispatchPendingLoadEvent(%p)\n", this);
+    fprintf(stderr, "    m_hasPendingLoadEvent=%d\n", m_hasPendingLoadEvent);
+    fprintf(stderr, "    m_image=%p\n", m_image);
+    fprintf(stderr, "    hasLivingRenderTree=%d\n", element().document().hasLivingRenderTree());
     if (!m_hasPendingLoadEvent)
         return;
     if (!m_image)
