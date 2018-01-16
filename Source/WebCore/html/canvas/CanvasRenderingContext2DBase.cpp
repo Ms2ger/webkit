@@ -1675,10 +1675,10 @@ ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(HTMLVideoElement& vide
 ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(ImageBitmap& imageBitmap, const FloatRect& srcRect, const FloatRect& dstRect)
 {
     if (!imageBitmap.width() || !imageBitmap.height())
-        return Exception { InvalidStateError };
+        return Exception { InvalidStateError, "Can't draw zero-size ImageBitmap" };
 
     if (!srcRect.width() || !srcRect.height())
-        return Exception { IndexSizeError };
+        return Exception { IndexSizeError, "Can't draw ImageBitmap with zero-size source rectangle" };
 
     FloatRect srcBitmapRect = FloatRect(FloatPoint(), FloatSize(imageBitmap.width(), imageBitmap.height()));
 
