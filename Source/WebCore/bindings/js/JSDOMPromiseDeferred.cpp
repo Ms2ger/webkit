@@ -127,6 +127,7 @@ void DeferredPromise::reject(Exception exception)
 
 void DeferredPromise::reject(ExceptionCode ec, const String& message)
 {
+    fprintf(stderr, "DeferredPromise::reject(%s)\n", message.utf8().data());
     if (isSuspended())
         return;
 

@@ -124,6 +124,7 @@ void reportCurrentException(ExecState* exec)
 
 JSValue createDOMException(ExecState* exec, ExceptionCode ec, const String& message)
 {
+    fprintf(stderr, "createDOMException(%s)\n", message.utf8().data());
     if (ec == ExistingExceptionError)
         return jsUndefined();
 

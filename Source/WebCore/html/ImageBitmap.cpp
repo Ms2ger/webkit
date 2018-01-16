@@ -376,10 +376,12 @@ void ImageBitmap::createPromise(ScriptExecutionContext&, RefPtr<HTMLCanvasElemen
 #if ENABLE(VIDEO)
 void ImageBitmap::createPromise(ScriptExecutionContext&, RefPtr<HTMLVideoElement>& video, ImageBitmapOptions&& options, std::optional<IntRect> rect, ImageBitmap::Promise&& promise)
 {
+    fprintf(stderr, "ImageBitmap::createPromise():\n");
     // 2. If the video element's networkState attribute is NETWORK_EMPTY, then return
     //    a promise rejected with an "InvalidStateError" DOMException and abort these
     //    steps.
     if (video->networkState() == HTMLMediaElement::NETWORK_EMPTY) {
+        fprintf(stderr, "ImageBitmap::createPromise(netw)\n");
         promise.reject(InvalidStateError, "Cannot create ImageBitmap before the HTMLVideoElement has data");
         return;
     }
@@ -388,6 +390,7 @@ void ImageBitmap::createPromise(ScriptExecutionContext&, RefPtr<HTMLVideoElement
     //    HAVE_METADATA, then return a promise rejected with an "InvalidStateError"
     //    DOMException and abort these steps.
     if (video->readyState() == HTMLMediaElement::HAVE_NOTHING || video->readyState() == HTMLMediaElement::HAVE_METADATA) {
+        fprintf(stderr, "ImageBitmap::createPromise(ready)\n");
         promise.reject(InvalidStateError, "Cannot create ImageBitmap before the HTMLVideoElement has data");
         return;
     }
@@ -399,7 +402,9 @@ void ImageBitmap::createPromise(ScriptExecutionContext&, RefPtr<HTMLVideoElement
     //    playback position, at the media resource's intrinsic width and intrinsic height
     //    (i.e. after any aspect-ratio correction has been applied), cropped to the source
     //    rectangle with formatting.
+    fprintf(stderr, "    video->player() = %p\n", video->player());
     auto size = video->player() ? roundedIntSize(video->player()->naturalSize()) : IntSize();
+    fprintf(stderr, "    size = (%d, %d)\n", size.width(), size.height());
     auto maybeSourceRectangle = croppedSourceRectangleWithFormatting(size, options, WTFMove(rect));
     if (maybeSourceRectangle.hasException()) {
         promise.reject(maybeSourceRectangle.releaseException());
@@ -408,7 +413,9 @@ void ImageBitmap::createPromise(ScriptExecutionContext&, RefPtr<HTMLVideoElement
     auto sourceRectangle = maybeSourceRectangle.releaseReturnValue();
 
     auto outputSize = outputSizeForSourceRectangle(sourceRectangle, options);
+    fprintf(stderr, "    outputSize = (%d, %d)\n", outputSize.width(), outputSize.height());
     auto bitmapData = ImageBuffer::create(FloatSize(outputSize.width(), outputSize.height()), bufferRenderingMode);
+    fprintf(stderr, "    bitmapData->logicalSize() = (%d, %d)\n", bitmapData->logicalSize().width(), bitmapData->logicalSize().height());
 
     GraphicsContext& c = bitmapData->context();
 
@@ -626,8 +633,9 @@ ImageBitmap::~ImageBitmap() = default;
 
 unsigned ImageBitmap::width() const
 {
-    if (m_detached || !m_bitmapData)
+    if (m_detached || !m_bitmapData) {
         return 0;
+    }
 
     // FIXME: Is this the right width?
     return m_bitmapData->logicalSize().width();
