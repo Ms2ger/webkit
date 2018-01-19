@@ -1628,6 +1628,7 @@ ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(HTMLCanvasElement& sou
 
 ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(HTMLVideoElement& video, const FloatRect& srcRect, const FloatRect& dstRect)
 {
+    fprintf(stderr, "================ CanvasRenderingContext2DBase::drawImage(HTMLVideoElement): start ================\n");
     if (video.readyState() == HTMLMediaElement::HAVE_NOTHING || video.readyState() == HTMLMediaElement::HAVE_METADATA)
         return { };
 
@@ -1667,6 +1668,7 @@ ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(HTMLVideoElement& vide
     stateSaver.restore();
     didDraw(dstRect);
 
+    fprintf(stderr, "================ CanvasRenderingContext2DBase::drawImage(HTMLVideoElement): end ================\n");
     return { };
 }
 
@@ -1674,6 +1676,7 @@ ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(HTMLVideoElement& vide
 
 ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(ImageBitmap& imageBitmap, const FloatRect& srcRect, const FloatRect& dstRect)
 {
+    fprintf(stderr, "================ CanvasRenderingContext2DBase::drawImage(ImageBitmap): start ================\n");
     if (!imageBitmap.width() || !imageBitmap.height())
         return Exception { InvalidStateError };
 
@@ -1683,35 +1686,42 @@ ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(ImageBitmap& imageBitm
     FloatRect srcBitmapRect = FloatRect(FloatPoint(), FloatSize(imageBitmap.width(), imageBitmap.height()));
 
     if (!srcBitmapRect.contains(normalizeRect(srcRect)) || !dstRect.width() || !dstRect.height())
-        return { };
+        return Exception { InvalidStateError, "exn 1" };
 
     GraphicsContext* c = drawingContext();
     if (!c)
-        return { };
+        return Exception { InvalidStateError, "exn 2" };
     if (!state().hasInvertibleTransform)
-        return { };
+        return Exception { InvalidStateError, "exn 3" };
 
     ImageBuffer* buffer = imageBitmap.buffer();
     if (!buffer)
-        return { };
+        return Exception { InvalidStateError, "exn 4" };
 
     checkOrigin(&imageBitmap);
 
     if (rectContainsCanvas(dstRect)) {
+        fprintf(stderr, "DRAWING -- case 1\n");
         c->drawImageBuffer(*buffer, dstRect, srcRect, ImagePaintingOptions(state().globalComposite, state().globalBlend));
         didDrawEntireCanvas();
     } else if (isFullCanvasCompositeMode(state().globalComposite)) {
+        fprintf(stderr, "DRAWING -- case 2\n");
         fullCanvasCompositedDrawImage(*buffer, dstRect, srcRect, state().globalComposite);
         didDrawEntireCanvas();
     } else if (state().globalComposite == CompositeCopy) {
+        fprintf(stderr, "DRAWING -- case 3\n");
         clearCanvas();
         c->drawImageBuffer(*buffer, dstRect, srcRect, ImagePaintingOptions(state().globalComposite, state().globalBlend));
         didDrawEntireCanvas();
     } else {
+        fprintf(stderr, "DRAWING -- case 4\n");
+        fprintf(stderr, "  dest={ %f %f / %f %f }\n", dstRect.x(), dstRect.y(), dstRect.width(), dstRect.height());
+        fprintf(stderr, "  src={ %f %f / %f %f }\n", srcRect.x(), srcRect.y(), srcRect.width(), srcRect.height());
         c->drawImageBuffer(*buffer, dstRect, srcRect, ImagePaintingOptions(state().globalComposite, state().globalBlend));
         didDraw(dstRect);
     }
 
+    fprintf(stderr, "================ CanvasRenderingContext2DBase::drawImage(ImageBitmap): end ================\n");
     return { };
 }
 
@@ -2089,6 +2099,7 @@ GraphicsContext* CanvasRenderingContext2DBase::drawingContext() const
 {
     auto& canvas = downcast<HTMLCanvasElement>(canvasBase());
     if (UNLIKELY(m_usesDisplayListDrawing)) {
+        CRASH();
         if (!m_recordingContext)
             m_recordingContext = std::make_unique<DisplayListDrawingContext>(FloatRect(FloatPoint::zero(), canvas.size()));
         return &m_recordingContext->context;

@@ -96,9 +96,50 @@ ImageGStreamer::ImageGStreamer(GstSample* sample)
     } else
         surface = adoptRef(cairo_image_surface_create_for_data(bufferData, cairoFormat, width, height, stride));
 
+    fprintf(stderr, "Checking surface\n");
+    auto* data = cairo_image_surface_get_data (surface.get());
+    bool isEmpty = true;
+    for (int i = 0; i < width * height; i += 5) {
+        if (!(data[4*i+0] == 0 &&
+              data[4*i+1] == 0 &&
+              data[4*i+2] == 0 &&
+              data[4*i+3] == 0)) {
+            fprintf(stderr, "Found data: rgba(%d %d %d %d)\n",
+              data[4*i+2],
+              data[4*i+1],
+              data[4*i+0],
+              data[4*i+3]);
+            isEmpty = false;
+        }
+    }
+    fprintf(stderr, "Buffer is empty? %d\n", isEmpty);
+
     ASSERT(cairo_surface_status(surface.get()) == CAIRO_STATUS_SUCCESS);
     m_image = BitmapImage::create(WTFMove(surface));
 
+/*
+    bool isEmpty = true;
+    auto buffer_ = m_image->data();
+    fprintf(stderr, "  buffer=%p\n", buffer_);
+    auto data = reinterpret_cast<const uint8_t*>(buffer_->data());
+    fprintf(stderr, "  data=%p\n", data);
+    fprintf(stderr, "Checking buffer %d\n", (int)buffer_->size());
+    for (int i = 0; i < buffer_->size() / 4; ++i) {
+        fprintf(stderr, "  buffer[%d]\n", i);
+        if (!(data[4*i+0] == 0 &&
+              data[4*i+1] == 0 &&
+              data[4*i+2] == 0 &&
+              data[4*i+3] == 255)) {
+            fprintf(stderr, "Found data: rgba(%d %d %d %d)\n",
+              data[4*i+0],
+              data[4*i+1],
+              data[4*i+2],
+              data[4*i+3]);
+            isEmpty = false;
+        }
+    }
+    fprintf(stderr, "Buffer is empty? %d\n", isEmpty);
+*/
     if (GstVideoCropMeta* cropMeta = gst_buffer_get_video_crop_meta(buffer))
         setCropRect(FloatRect(cropMeta->x, cropMeta->y, cropMeta->width, cropMeta->height));
 }

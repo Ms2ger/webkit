@@ -859,26 +859,39 @@ void MediaPlayerPrivateGStreamerBase::setSize(const IntSize& size)
 
 void MediaPlayerPrivateGStreamerBase::paint(GraphicsContext& context, const FloatRect& rect)
 {
-    if (context.paintingDisabled())
+    fprintf(stderr, "MediaPlayerPrivateGStreamerBase::paint():\n");
+    if (context.paintingDisabled()) {
+        fprintf(stderr, "    context.paintingDisabled()\n");
         return;
+    }
 
-    if (!m_player->visible())
+    if (!m_player->visible()) {
+        fprintf(stderr, "    !m_player->visible()\n");
         return;
+    }
 
     WTF::GMutexLocker<GMutex> lock(m_sampleMutex);
-    if (!GST_IS_SAMPLE(m_sample.get()))
+    if (!GST_IS_SAMPLE(m_sample.get())) {
+        fprintf(stderr, "    !GST_IS_SAMPLE(m_sample.get())\n");
         return;
+    }
 
     ImagePaintingOptions paintingOptions(CompositeCopy);
     if (m_renderingCanBeAccelerated)
         paintingOptions.m_orientationDescription.setImageOrientationEnum(m_videoSourceOrientation);
 
     RefPtr<ImageGStreamer> gstImage = ImageGStreamer::createImage(m_sample.get());
-    if (!gstImage)
+    if (!gstImage) {
+        fprintf(stderr, "    !gstImage\n");
         return;
+    }
 
-    if (Image* image = reinterpret_cast<Image*>(gstImage->image()))
-        context.drawImage(*image, rect, gstImage->rect(), paintingOptions);
+    if (Image* image = gstImage->image()) {
+        fprintf(stderr, "    DRAWING\n");
+        auto result = context.drawImage(*image, rect, gstImage->rect(), paintingOptions);
+        fprintf(stderr, "    ... and drew %d\n", result);
+    } else
+        fprintf(stderr, "    !image\n");
 }
 
 #if USE(GSTREAMER_GL)

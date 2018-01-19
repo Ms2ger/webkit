@@ -42,6 +42,7 @@
 #if USE(CG) && PLATFORM(WIN)
 #include <WebKitSystemInterface/WebKitSystemInterface.h>
 #endif
+#include <cairo.h>
 
 namespace WebCore {
 
@@ -55,6 +56,9 @@ BitmapImage::BitmapImage(NativeImagePtr&& image, ImageObserver* observer)
     : Image(observer)
     , m_source(ImageSource::create(WTFMove(image)))
 {
+    auto tx = TextStream();
+    this->dump(tx);
+    fprintf(stderr, tx.release().utf8().data());
 }
 
 BitmapImage::~BitmapImage()
@@ -189,6 +193,11 @@ bool BitmapImage::notSolidColor()
 
 ImageDrawResult BitmapImage::draw(GraphicsContext& context, const FloatRect& destRect, const FloatRect& srcRect, CompositeOperator op, BlendMode mode, DecodingMode decodingMode, ImageOrientationDescription description)
 {
+    fprintf(stderr, "BitmapImage::draw\n");
+    auto tx = TextStream();
+    this->dump(tx);
+    fprintf(stderr, "%s\n", tx.release().utf8().data());
+
     if (destRect.isEmpty() || srcRect.isEmpty())
         return ImageDrawResult::DidNothing;
 
@@ -268,6 +277,7 @@ ImageDrawResult BitmapImage::draw(GraphicsContext& context, const FloatRect& des
     ASSERT(image);
     Color color = singlePixelSolidColor();
     if (color.isValid()) {
+        fprintf(stderr, "ERROR - fillWithSolidColor\n");
         fillWithSolidColor(context, destRect, color, op);
         return result;
     }
@@ -276,12 +286,31 @@ ImageDrawResult BitmapImage::draw(GraphicsContext& context, const FloatRect& des
     if (description.respectImageOrientation() == RespectImageOrientation)
         orientation = frameOrientationAtIndex(m_currentFrame);
 
+    fprintf(stderr, "Checking surface\n");
+    auto* data = cairo_image_surface_get_data (image.get());
+    bool isEmpty = true;
+    for (int i = 0; i < width() * height(); i += 5) {
+        if (!(data[4*i+0] == 0 &&
+              data[4*i+1] == 0 &&
+              data[4*i+2] == 0 &&
+              data[4*i+3] == 0)) {
+            fprintf(stderr, "Found data: rgba(%d %d %d %d)\n",
+              data[4*i+2],
+              data[4*i+1],
+              data[4*i+0],
+              data[4*i+3]);
+            isEmpty = false;
+        }
+    }
+    fprintf(stderr, "Buffer is empty? %d\n", isEmpty);
+
     drawNativeImage(image, context, destRect, srcRect, IntSize(size()), op, mode, orientation);
     m_currentFrameDecodingStatus = frameDecodingStatusAtIndex(m_currentFrame);
 
     if (imageObserver())
         imageObserver()->didDraw(*this);
 
+    fprintf(stderr, "Made it to the eeeeeeeeeeend\n");
     return result;
 }
 

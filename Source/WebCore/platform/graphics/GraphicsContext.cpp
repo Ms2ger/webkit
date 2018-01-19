@@ -713,12 +713,18 @@ ImageDrawResult GraphicsContext::drawImage(Image& image, const FloatRect& destin
 
 ImageDrawResult GraphicsContext::drawImage(Image& image, const FloatRect& destination, const FloatRect& source, const ImagePaintingOptions& imagePaintingOptions)
 {
-    if (paintingDisabled())
+    fprintf(stderr, "GraphicsContext::drawImage\n");
+    if (paintingDisabled()) {
+        fprintf(stderr, "    disabled\n");
         return ImageDrawResult::DidNothing;
+    }
 
-    if (m_impl)
+    if (m_impl) {
+        fprintf(stderr, "    defer to m_impl\n");
         return m_impl->drawImage(image, destination, source, imagePaintingOptions);
+    }
 
+    fprintf(stderr, "    defer to image\n");
     InterpolationQualityMaintainer interpolationQualityForThisScope(*this, imagePaintingOptions.m_interpolationQuality);
     return image.draw(*this, destination, source, imagePaintingOptions.m_compositeOperator, imagePaintingOptions.m_blendMode, imagePaintingOptions.m_decodingMode, imagePaintingOptions.m_orientationDescription);
 }

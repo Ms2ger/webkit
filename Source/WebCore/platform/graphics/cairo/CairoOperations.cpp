@@ -146,15 +146,85 @@ static void prepareForStroking(cairo_t* cr, const Cairo::StrokeSource& strokeSou
 
 static void drawPatternToCairoContext(cairo_t* cr, cairo_pattern_t* pattern, const FloatRect& destRect, float alpha)
 {
+    ASSERT(cairo_status(cr) == CAIRO_STATUS_SUCCESS);
+    {
+        fprintf(stderr, "Checking pattern in drawPatternToCairoContext (alpha=%f)\n", alpha);
+        cairo_surface_t* surface = nullptr;
+        cairo_pattern_get_surface (pattern,
+                                   &surface);
+        if (surface) {
+            auto* data = cairo_image_surface_get_data (surface);
+            int width = cairo_image_surface_get_width (surface);
+            int height = cairo_image_surface_get_height(surface);
+            fprintf(stderr, "Surface %dx%d\n", width, height);
+            if (width == 20 && height == 20) {
+                bool isEmpty = true;
+                for (int i = 0; i < width * height; i += 5) {
+                    if (!(data[4*i+0] == 0 &&
+                          data[4*i+1] == 0 &&
+                          data[4*i+2] == 0 &&
+                          data[4*i+3] == 0)) {
+                        fprintf(stderr, "Found data: rgba(%d %d %d %d)\n",
+                          data[4*i+2],
+                          data[4*i+1],
+                          data[4*i+0],
+                          data[4*i+3]);
+                        isEmpty = false;
+                    }
+                }
+                fprintf(stderr, "Buffer is empty? %d\n", isEmpty);
+            }
+        } else {
+            fprintf(stderr, "No surface\n");
+        }
+    }
+
+
+    ASSERT(cairo_status(cr) == CAIRO_STATUS_SUCCESS);
+
+    fprintf(stderr, "  Translating to { %f %f }\n", destRect.x(), destRect.y());
     cairo_translate(cr, destRect.x(), destRect.y());
     cairo_set_source(cr, pattern);
+    fprintf(stderr, "  Rectangle { 0 0 / %f %f }\n", destRect.width(), destRect.height());
     cairo_rectangle(cr, 0, 0, destRect.width(), destRect.height());
+
+    ASSERT(cairo_status(cr) == CAIRO_STATUS_SUCCESS);
 
     if (alpha < 1) {
         cairo_clip(cr);
         cairo_paint_with_alpha(cr, alpha);
     } else
         cairo_fill(cr);
+
+    ASSERT(cairo_status(cr) == CAIRO_STATUS_SUCCESS);
+
+    {
+        cairo_surface_t* surface = cairo_get_target (cr);
+        cairo_surface_flush (surface);
+        int width = cairo_image_surface_get_width (surface);
+        int height = cairo_image_surface_get_height(surface);
+        auto* data = cairo_image_surface_get_data (surface);
+
+        fprintf(stderr, "cr Surface at %p: %dx%d\n", data, width, height);
+
+        if (width == 20 && height == 20) {
+            bool isEmpty = true;
+            for (int i = 0; i < width * height; i += 5) {
+                if (!(data[4*i+0] == 0 &&
+                      data[4*i+1] == 0 &&
+                      data[4*i+2] == 0 &&
+                      data[4*i+3] == 0)) {
+                    fprintf(stderr, "Found data: rgba(%d %d %d %d)\n",
+                      data[4*i+2],
+                      data[4*i+1],
+                      data[4*i+0],
+                      data[4*i+3]);
+                    isEmpty = false;
+                }
+            }
+            fprintf(stderr, "Buffer is empty? %d\n", isEmpty);
+        }
+    }
 }
 
 static inline void fillRectWithColor(cairo_t* cr, const FloatRect& rect, const Color& color)
@@ -815,6 +885,9 @@ void drawPattern(PlatformContextCairo& platformContext, cairo_surface_t* surface
 
 void drawSurface(PlatformContextCairo& platformContext, cairo_surface_t* surface, const FloatRect& destRect, const FloatRect& originalSrcRect, InterpolationQuality imageInterpolationQuality, float globalAlpha, const ShadowState& shadowState, GraphicsContext& context)
 {
+    fprintf(stderr, "drawSurface():\n");
+    fprintf(stderr, "  dest={ %f %f / %f %f }\n", destRect.x(), destRect.y(), destRect.width(), destRect.height());
+    fprintf(stderr, "  src={ %f %f / %f %f }\n", originalSrcRect.x(), originalSrcRect.y(), originalSrcRect.width(), originalSrcRect.height());
     // Avoid invalid cairo matrix with small values.
     if (std::fabs(destRect.width()) < 0.5f || std::fabs(destRect.height()) < 0.5f)
         return;
@@ -835,6 +908,7 @@ void drawSurface(PlatformContextCairo& platformContext, cairo_surface_t* surface
     float leftPadding = 0;
     float topPadding = 0;
     if (srcRect.x() || srcRect.y() || srcRect.size() != cairoSurfaceSize(surface)) {
+        fprintf(stderr, "  weird case\n");
         // Cairo subsurfaces don't support floating point boundaries well, so we expand the rectangle.
         IntRect expandedSrcRect(enclosingIntRect(srcRect));
 
@@ -870,11 +944,13 @@ void drawSurface(PlatformContextCairo& platformContext, cairo_surface_t* surface
     // of the scale since the original width and height might be negative.
     float scaleX = std::fabs(srcRect.width() / destRect.width());
     float scaleY = std::fabs(srcRect.height() / destRect.height());
+    fprintf(stderr, "matrix = { %f, %f, %f, %f, %f, %f }\n", scaleX, 0., 0., scaleY, leftPadding, topPadding);
     cairo_matrix_t matrix = { scaleX, 0, 0, scaleY, leftPadding, topPadding };
     cairo_pattern_set_matrix(pattern.get(), &matrix);
 
     ShadowBlur shadow({ shadowState.blur, shadowState.blur }, shadowState.offset, shadowState.color, shadowState.ignoreTransforms);
     if (shadow.type() != ShadowBlur::NoShadow) {
+        fprintf(stderr, "Has shadow\n");
         if (GraphicsContext* shadowContext = shadow.beginShadowLayer(context, destRect)) {
             drawPatternToCairoContext(shadowContext->platformContext()->cr(), pattern.get(), destRect, 1);
             shadow.endShadowLayer(context);
@@ -885,6 +961,7 @@ void drawSurface(PlatformContextCairo& platformContext, cairo_surface_t* surface
     cairo_save(cr);
     drawPatternToCairoContext(cr, pattern.get(), destRect, globalAlpha);
     cairo_restore(cr);
+    fprintf(stderr, "End of PlatformContextCairo::drawSurfaceToContext\n");
 }
 
 void drawRect(PlatformContextCairo& platformContext, const FloatRect& rect, float borderThickness, const Color& fillColor, StrokeStyle strokeStyle, const Color& strokeColor)

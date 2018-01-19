@@ -45,6 +45,8 @@
 #include "RenderElement.h"
 #include "SharedBuffer.h"
 #include <wtf/StdLibExtras.h>
+#include <runtime/Uint8ClampedArray.h>
+
 
 namespace WebCore {
 
@@ -392,6 +394,7 @@ void ImageBitmap::createPromise(ScriptExecutionContext&, RefPtr<HTMLCanvasElemen
 #if ENABLE(VIDEO)
 void ImageBitmap::createPromise(ScriptExecutionContext&, RefPtr<HTMLVideoElement>& video, ImageBitmapOptions&& options, std::optional<IntRect> rect, ImageBitmap::Promise&& promise)
 {
+    fprintf(stderr, "================ ImageBitmap::createPromise(): start ================\n");
     // 2. If the video element's networkState attribute is NETWORK_EMPTY, then return
     //    a promise rejected with an "InvalidStateError" DOMException and abort these
     //    steps.
@@ -425,16 +428,22 @@ void ImageBitmap::createPromise(ScriptExecutionContext&, RefPtr<HTMLVideoElement
 
     auto outputSize = outputSizeForSourceRectangle(sourceRectangle, options);
     auto bitmapData = ImageBuffer::create(FloatSize(outputSize.width(), outputSize.height()), bufferRenderingMode);
-
+#if USE(CG) || (ENABLE(ACCELERATED_2D_CANVAS) && USE(GSTREAMER_GL) && USE(CAIRO))
+    CRASH();
+#endif
     GraphicsContext& c = bitmapData->context();
 
     {
         GraphicsContextStateSaver stateSaver(c);
+        fprintf(stderr, "  Clipping to { 0 0 / %d %d }\n", outputSize.width(), outputSize.height());
         c.clip(FloatRect(FloatPoint(), outputSize));
         auto scalingSize = FloatSize(float(outputSize.width()) / float(sourceRectangle.width()),
                                      float(outputSize.height()) / float(sourceRectangle.height()));
+        fprintf(stderr, "  Scaling to { %f %f }\n", scalingSize.width(), scalingSize.height());
         c.scale(scalingSize);
+        fprintf(stderr, "  Translating to to { %d %d }\n", (-sourceRectangle.location()).x(), (-sourceRectangle.location()).y());
         c.translate(-sourceRectangle.location());
+        fprintf(stderr, "  Painting to { 0 0 / %d %d }\n", size.width(), size.height());
         video->paintCurrentFrameInContext(c, FloatRect(FloatPoint(), size));
     }
 
@@ -449,6 +458,8 @@ void ImageBitmap::createPromise(ScriptExecutionContext&, RefPtr<HTMLVideoElement
 
     // 8. Resolve the promise with the new ImageBitmap object as the value.
     promise.resolve(imageBitmap);
+
+    fprintf(stderr, "================ ImageBitmap::createPromise(): end ================\n");
 }
 #endif
 
@@ -649,5 +660,12 @@ std::unique_ptr<ImageBuffer> ImageBitmap::transferOwnershipAndClose()
     m_detached = true;
     return WTFMove(m_bitmapData);
 }
+
+RefPtr<Uint8ClampedArray> ImageBitmap::data()
+{
+    auto rect = IntRect(IntPoint(), m_bitmapData->logicalSize());
+    return m_bitmapData->getUnmultipliedImageData(rect, nullptr, ImageBuffer::LogicalCoordinateSystem);
+}
+
 
 }

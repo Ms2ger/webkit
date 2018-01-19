@@ -219,6 +219,7 @@ ImageBuffer::ImageBuffer(const FloatSize& size, float resolutionScale, ColorSpac
         return;
 
 #if ENABLE(ACCELERATED_2D_CANVAS)
+{
     if (m_data.m_renderingMode == Accelerated) {
         m_data.createCairoGLSurface();
         if (!m_data.m_surface || cairo_surface_status(m_data.m_surface.get()) != CAIRO_STATUS_SUCCESS)
@@ -236,6 +237,7 @@ ImageBuffer::ImageBuffer(const FloatSize& size, float resolutionScale, ColorSpac
         if (!tryFastZeroedMalloc(m_size.height() * stride).getValue(surfaceData))
             return;
 
+        fprintf(stderr, "-----> Creating surface at %p: %dx%d\n", surfaceData, m_size.width(), m_size.height());
         m_data.m_surface = adoptRef(cairo_image_surface_create_for_data(static_cast<unsigned char*>(surfaceData), CAIRO_FORMAT_ARGB32, m_size.width(), m_size.height(), stride));
         cairo_surface_set_user_data(m_data.m_surface.get(), &s_surfaceDataKey, surfaceData, [](void* data) { fastFree(data); });
     }

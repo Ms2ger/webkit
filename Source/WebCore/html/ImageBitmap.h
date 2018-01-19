@@ -71,6 +71,8 @@ public:
     unsigned height() const;
     void close();
 
+    RefPtr<JSC::Uint8ClampedArray> data();
+
     bool isDetached() const { return m_detached; }
 
     ImageBuffer* buffer() { return m_bitmapData.get(); }
