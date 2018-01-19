@@ -79,7 +79,10 @@ public:
     // PlatformMediaResource
     void stop() override;
     void setDefersLoading(bool) override;
-    bool didPassAccessControlCheck() const override { return m_didPassAccessControlCheck; }
+    bool didPassAccessControlCheck() const override {
+        fprintf(stderr, "MediaResource::didPassAccessControlCheck() => %d\n", m_didPassAccessControlCheck);
+        return m_didPassAccessControlCheck;
+    }
 
     // CachedRawResourceClient
     void responseReceived(CachedResource&, const ResourceResponse&) override;

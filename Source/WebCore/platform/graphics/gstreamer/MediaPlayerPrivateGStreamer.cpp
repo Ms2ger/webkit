@@ -2202,8 +2202,15 @@ void MediaPlayerPrivateGStreamer::simulateAudioInterruption()
 
 bool MediaPlayerPrivateGStreamer::didPassCORSAccessCheck() const
 {
-    if (WEBKIT_IS_WEB_SRC(m_source.get()))
-        return webKitSrcPassedCORSAccessCheck(WEBKIT_WEB_SRC(m_source.get()));
+    if (WEBKIT_IS_WEB_SRC(m_source.get())) {
+        bool x = webKitSrcPassedCORSAccessCheck(WEBKIT_WEB_SRC(m_source.get()));
+        fprintf(stderr, "MediaPlayerPrivateGStreamer::didPassCORSAccessCheck(): ");
+        fprintf(stderr, "%d\n", x);
+        return x;
+    }
+
+    fprintf(stderr, "MediaPlayerPrivateGStreamer::didPassCORSAccessCheck(): ");
+    fprintf(stderr, "false\n");
     return false;
 }
 

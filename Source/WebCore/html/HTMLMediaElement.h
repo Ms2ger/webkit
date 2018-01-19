@@ -410,7 +410,11 @@ public:
     // of one of them here.
     using HTMLElement::scriptExecutionContext;
 
-    bool hasSingleSecurityOrigin() const { return !m_player || m_player->hasSingleSecurityOrigin(); }
+    bool hasSingleSecurityOrigin() const {
+        bool x = !m_player || m_player->hasSingleSecurityOrigin();
+        fprintf(stderr, "HTMLMediaElement::hasSingleSecurityOrigin() => %d\n", x);
+        return x;
+    }
     
     WEBCORE_EXPORT bool isFullscreen() const override;
     bool isStandardFullscreen() const;

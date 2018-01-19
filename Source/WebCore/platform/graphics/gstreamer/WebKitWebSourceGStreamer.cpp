@@ -431,6 +431,7 @@ static void webKitWebSrcStart(WebKitWebSrc* src)
     ASSERT(priv->player);
 
     priv->didPassAccessControlCheck = false;
+    fprintf(stderr, "webKitWebSrcStart(): false\n");
 
     if (priv->originalURI.isNull()) {
         GST_ERROR_OBJECT(src, "No URI provided");
@@ -738,6 +739,7 @@ void webKitWebSrcSetMediaPlayer(WebKitWebSrc* src, WebCore::MediaPlayer* player)
 
 bool webKitSrcPassedCORSAccessCheck(WebKitWebSrc* src)
 {
+    fprintf(stderr, "webKitSrcPassedCORSAccessCheck(): %d\n", src->priv->didPassAccessControlCheck);
     return src->priv->didPassAccessControlCheck;
 }
 
@@ -754,6 +756,7 @@ void CachedResourceStreamingClient::responseReceived(PlatformMediaResource&, con
     WebKitWebSrc* src = WEBKIT_WEB_SRC(m_src.get());
     WebKitWebSrcPrivate* priv = src->priv;
     priv->didPassAccessControlCheck = priv->resource->didPassAccessControlCheck();
+    fprintf(stderr, "CachedResourceStreamingClient::responseReceived(): %d\n", priv->didPassAccessControlCheck);
 
     GST_DEBUG_OBJECT(src, "Received response: %d", response.httpStatusCode());
 

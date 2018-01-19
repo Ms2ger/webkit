@@ -114,17 +114,30 @@ static bool taintsOrigin(CachedImage& cachedImage)
     return false;
 }
 
+//    if (url.protocolIsData())
+//        return false;
+
+//    return !m_canvas.securityOrigin()->canRequest(url);
+
 static bool taintsOrigin(HTMLVideoElement& video)
 {
     return false;
 
     // TODO:
-    if (!video.player()->didPassCORSAccessCheck())
-        return true;
+    fprintf(stderr, "taintsOrigin(%p):\n", &video);
+    fprintf(stderr, "  url=%s\n", video.getAttribute(WebCore::HTMLNames::srcAttr).string().utf8().data());
 
-    if (!video.hasSingleSecurityOrigin())
+    if (!video.hasSingleSecurityOrigin()) {
+        fprintf(stderr, "  Multi-origin\n");
         return true;
+    }
 
+    if (!video.player()->didPassCORSAccessCheck()/* && taintsOrigin(video->currentSrc())*/) {
+        fprintf(stderr, "  Failed CORS\n");
+        return true;
+    }
+
+    fprintf(stderr, "  Pass!\n");
     return false;
 }
 

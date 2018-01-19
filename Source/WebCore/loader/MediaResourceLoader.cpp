@@ -150,6 +150,7 @@ void MediaResource::responseReceived(CachedResource& resource, const ResourceRes
     if (m_resource->resourceError().isAccessControl()) {
         static NeverDestroyed<const String> consoleMessage("Cross-origin media resource load denied by Cross-Origin Resource Sharing policy.");
         m_loader->document()->addConsoleMessage(MessageSource::Security, MessageLevel::Error, consoleMessage.get());
+        fprintf(stderr, "MediaResource::responseReceived(): Cross-origin media resource load denied by Cross-Origin Resource Sharing policy.\n");
         m_didPassAccessControlCheck = false;
         if (m_client)
             m_client->accessControlCheckFailed(*this, ResourceError(errorDomainWebKitInternal, 0, response.url(), consoleMessage.get()));
@@ -158,6 +159,7 @@ void MediaResource::responseReceived(CachedResource& resource, const ResourceRes
     }
 
     m_didPassAccessControlCheck = m_resource->options().mode == FetchOptions::Mode::Cors;
+    fprintf(stderr, "MediaResource::responseReceived(): mode=%d\n", (int)m_resource->options().mode);
     if (m_client)
         m_client->responseReceived(*this, response);
 
