@@ -160,6 +160,7 @@ enum SerializationTag {
     DOMMatrixReadOnlyTag = 40,
     DOMMatrixTag = 41,
     DOMQuadTag = 42,
+    ImageBitmapTag = 43,
     ErrorTag = 255
 };
 
@@ -339,6 +340,7 @@ static const unsigned StringDataIs8BitFlag = 0x80000000;
  *    | DOMRect
  *    | DOMMatrix
  *    | DOMQuad
+ *    | ImageBitmap
  *
  * Inside wrapped crypto key, data is serialized in this format:
  *
@@ -436,6 +438,11 @@ static const unsigned StringDataIs8BitFlag = 0x80000000;
  * DOMQuadData :-
  *      <p1:DOMPointData> <p2:DOMPointData> <p3:DOMPointData> <p4:DOMPointData>
  *
+ * ImageBitmap :-
+ *      ImageBitmapTag ImageBitmapData
+ *
+ * ImageBitmapData :-
+ *      <originClean:bool>
  */
 
 using DeserializationResult = std::pair<JSC::JSValue, SerializationReturnCode>;
@@ -872,6 +879,14 @@ private:
         dumpDOMPoint(quad.p4());
     }
 
+    void dumpImageBitmap(JSObject* obj)
+    {
+        write(ImageBitmapTag);
+
+        auto& bitmap = jsCast<JSImageBitmap*>(obj)->wrapped();
+        // ...
+    }
+
     bool dumpIfTerminal(JSValue value, SerializationReturnCode& code)
     {
         if (!value.isCell()) {
@@ -1065,6 +1080,10 @@ private:
             }
             if (obj->inherits(vm, JSDOMQuad::info())) {
                 dumpDOMQuad(obj);
+                return true;
+            }
+            if (obj->inherits(vm, JSImageBitmap::info())) {
+                dumpImageBitmap(obj);
                 return true;
             }
             return false;
