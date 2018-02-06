@@ -443,7 +443,7 @@ IntSize ShadowBlur::calculateLayerBoundingRect(GraphicsContext& context, const F
     // out region, set the origin accordingly to the full bounding rect's top-left corner.
     float translationX = -shadowedRect.x() + inflation.width() - fabsf(clippedOut.width());
     float translationY = -shadowedRect.y() + inflation.height() - fabsf(clippedOut.height());
-    m_layerContextTranslation = FloatSize(translationX, translationY);
+    m_layerContextTranslation = FloatPoint(translationX, translationY);
 
     return expandedIntSize(layerRect.size());
 }

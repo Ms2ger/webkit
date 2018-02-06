@@ -1836,8 +1836,7 @@ template<class T> void CanvasRenderingContext2DBase::fullCanvasCompositedDrawIma
     adjustedDest.setLocation(FloatPoint(0, 0));
     AffineTransform effectiveTransform = c->getCTM();
     IntRect transformedAdjustedRect = enclosingIntRect(effectiveTransform.mapRect(adjustedDest));
-    buffer->context().translate(-transformedAdjustedRect.location());
-    buffer->context().translate(croppedOffset);
+    buffer->context().translate(-transformedAdjustedRect.location() + croppedOffset);
     buffer->context().concatCTM(effectiveTransform);
     drawImageToContext(image, buffer->context(), adjustedDest, src, CompositeSourceOver);
 

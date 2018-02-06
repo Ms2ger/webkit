@@ -111,7 +111,7 @@ private:
     FloatRect m_sourceRect; // Sub-rect of m_layerImage that contains the shadow pixels.
     FloatPoint m_layerOrigin; // Top-left corner of the (possibly clipped) bounding rect to draw the shadow to.
     FloatSize m_layerSize; // Size of m_layerImage pixels that need blurring.
-    FloatSize m_layerContextTranslation; // Translation to apply to m_layerContext for the shadow to be correctly clipped.
+    FloatPoint m_layerContextTranslation; // Translation to apply to m_layerContext for the shadow to be correctly clipped.
 
     bool m_shadowsIgnoreTransforms { false };
 };

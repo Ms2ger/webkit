@@ -180,7 +180,7 @@ void PageOverlay::drawRect(GraphicsContext& graphicsContext, const IntRect& dirt
     if (m_overlayType == PageOverlay::OverlayType::Document) {
         if (FrameView* frameView = m_page->mainFrame().view()) {
             auto offset = frameView->scrollOrigin();
-            graphicsContext.translate(toFloatSize(offset));
+            graphicsContext.translate(FloatPoint(offset));
             paintRect.moveBy(-offset);
         }
     }
