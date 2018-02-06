@@ -915,6 +915,7 @@ ExceptionOr<Storage*> DOMWindow::localStorage() const
 
 ExceptionOr<void> DOMWindow::postMessage(JSC::ExecState& state, DOMWindow& incumbentWindow, JSC::JSValue messageValue, const String& targetOrigin, Vector<JSC::Strong<JSC::JSObject>>&& transfer)
 {
+    fprintf(stderr, "DOMWindow::postMessage\n");
     if (!isCurrentlyDisplayedInFrame())
         return { };
 

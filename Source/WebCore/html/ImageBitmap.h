@@ -79,6 +79,8 @@ public:
 
     std::unique_ptr<ImageBuffer> transferOwnershipAndClose();
 
+    static Vector<std::pair<std::unique_ptr<ImageBuffer>, bool>> detachBitmaps(Vector<RefPtr<ImageBitmap>>&&);
+
 private:
     friend class PendingImageBitmap;
 

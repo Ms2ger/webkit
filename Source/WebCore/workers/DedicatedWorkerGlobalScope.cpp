@@ -63,6 +63,7 @@ EventTargetInterface DedicatedWorkerGlobalScope::eventTargetInterface() const
 
 ExceptionOr<void> DedicatedWorkerGlobalScope::postMessage(JSC::ExecState& state, JSC::JSValue messageValue, Vector<JSC::Strong<JSC::JSObject>>&& transfer)
 {
+    fprintf(stderr, "DedicatedWorkerGlobalScope::postMessage\n");
     Vector<RefPtr<MessagePort>> ports;
     auto message = SerializedScriptValue::create(state, messageValue, WTFMove(transfer), ports, SerializationContext::WorkerPostMessage);
     if (message.hasException())
