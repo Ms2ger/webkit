@@ -52,7 +52,7 @@ JSC::JSValue JSMessageEvent::data(JSC::ExecState& state) const
             return data ? data : JSC::jsNull();
         }, [this, &state] (const Ref<SerializedScriptValue>& data) {
             // FIXME: Is it best to handle errors by returning null rather than throwing an exception?
-            return data->deserialize(state, globalObject(), wrapped().ports(), SerializationErrorMode::NonThrowing);
+            return data->deserialize(state, globalObject(), wrapped().ports(), { }, SerializationErrorMode::NonThrowing);
         }, [&state] (const String& data) {
             return toJS<IDLDOMString>(state, data);
         }, [this, &state] (const Ref<Blob>& data) {
