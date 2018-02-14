@@ -42,6 +42,7 @@
 #include <WebCore/ServiceWorkerFetchResult.h>
 #include <WebCore/ServiceWorkerJobData.h>
 #include <WebCore/ServiceWorkerRegistrationData.h>
+#include <WebCore/ServiceWorkerRegistrationKey.h>
 
 using namespace PAL;
 using namespace WebCore;
