@@ -58,8 +58,12 @@ bool SWServerJobQueue::isCurrentlyProcessingJob(const ServiceWorkerJobDataIdenti
 
 void SWServerJobQueue::scriptFetchFinished(SWServer::Connection& connection, const ServiceWorkerFetchResult& result)
 {
-    if (!isCurrentlyProcessingJob(result.jobDataIdentifier))
+    LOG(ServiceWorker, "SWServerJobQueue handling scriptFetchFinished for current job %s in client", result.jobDataIdentifier.loggingString().utf8().data());
+
+    if (!isCurrentlyProcessingJob(result.jobDataIdentifier)) {
+        LOG(ServiceWorker, "!isCurrentlyProcessingJob()");
         return;
+    }
 
     auto& job = firstJob();
 
@@ -69,6 +73,7 @@ void SWServerJobQueue::scriptFetchFinished(SWServer::Connection& connection, con
     auto* newestWorker = registration->getNewestWorker();
 
     if (!result.scriptError.isNull()) {
+        LOG(ServiceWorker, "error");
         // Invoke Reject Job Promise with job and TypeError.
         m_server.rejectJob(job, ExceptionData { TypeError, makeString("Script URL ", job.scriptURL.string(), " fetch resulted in error: ", result.scriptError.localizedDescription()) });
 
@@ -87,6 +92,7 @@ void SWServerJobQueue::scriptFetchFinished(SWServer::Connection& connection, con
     // flag set, and script's source text is a byte-for-byte match with newestWorker's script resource's source
     // text, then:
     if (newestWorker && equalIgnoringFragmentIdentifier(newestWorker->scriptURL(), job.scriptURL) && result.script == newestWorker->script()) {
+        LOG(ServiceWorker, "same script");
         // FIXME: for non classic scripts, check the script’s module record's [[ECMAScriptCode]].
 
         // Invoke Resolve Job Promise with job and registration.
@@ -98,6 +104,7 @@ void SWServerJobQueue::scriptFetchFinished(SWServer::Connection& connection, con
     }
 
     // FIXME: Support the proper worker type (classic vs module)
+    LOG(ServiceWorker, "update worker");
     m_server.updateWorker(connection, job.identifier(), *registration, job.scriptURL, result.script, result.contentSecurityPolicy, WorkerType::Classic);
 }
 

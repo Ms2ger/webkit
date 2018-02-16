@@ -19,8 +19,10 @@ if (self.testRunner) {
     // Let's restrict calling testharness timeout() to wptserve tests for the moment.
     // That will limit the impact to a small number of tests.
     // The risk is that testharness timeout() might be called to late on slow bots to finish properly.
-    if (testRunner.timeout && (location.port == 8800 || location.port == 9443))
+    if (testRunner.timeout && (location.port == 8800 || location.port == 9443)) {
+        self.timeoutstr = `setTimeout: ${testRunner.timeout * 0.9}`
         setTimeout(timeout, testRunner.timeout * 0.9);
+    }
 }
 
 if (self.internals && internals.setICECandidateFiltering)
@@ -53,7 +55,7 @@ if (self.testRunner) {
     */
     add_completion_callback(function (tests, harness_status) {
         var results = document.createElement("pre");
-        var resultStr = "\n";
+        var resultStr = "\n" + self.timeoutstr + "\n";
 
         // Sanitizes the given text for display in test results.
         function sanitize(text) {

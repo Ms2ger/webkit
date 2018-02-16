@@ -339,8 +339,10 @@ void SWServer::scriptFetchFinished(Connection& connection, const ServiceWorkerFe
     ASSERT(m_connections.contains(result.jobDataIdentifier.connectionIdentifier));
 
     auto jobQueue = m_jobQueues.get(result.registrationKey);
-    if (!jobQueue)
+    if (!jobQueue) {
+        LOG(ServiceWorker, "No jobQ!");
         return;
+    }
 
     jobQueue->scriptFetchFinished(connection, result);
 }
@@ -483,6 +485,7 @@ void SWServer::removeClientServiceWorkerRegistration(Connection& connection, Ser
 {
     auto* registration = m_registrationsByID.get(identifier);
     if (!registration) {
+        CRASH();
         LOG_ERROR("Request to remove client-side ServiceWorkerRegistration from non-existent server-side registration");
         return;
     }
@@ -492,11 +495,13 @@ void SWServer::removeClientServiceWorkerRegistration(Connection& connection, Ser
 
 void SWServer::updateWorker(Connection&, const ServiceWorkerJobDataIdentifier& jobDataIdentifier, SWServerRegistration& registration, const URL& url, const String& script, const ContentSecurityPolicyResponseHeaders& contentSecurityPolicy, WorkerType type)
 {
+    LOG(ServiceWorker, "updateWorker() for id=%s", jobDataIdentifier.loggingString().utf8().data());
     tryInstallContextData({ jobDataIdentifier, registration.data(), generateObjectIdentifier<ServiceWorkerIdentifierType>(), script, contentSecurityPolicy, url, type, false });
 }
 
 void SWServer::tryInstallContextData(ServiceWorkerContextData&& data)
 {
+    LOG(ServiceWorker, "tryInstallContextData() for id=%s", data.jobDataIdentifier ? data.jobDataIdentifier.value().loggingString().utf8().data() : "??");
     // Right now we only ever keep up to one connection to one SW context process.
     // And it should always exist if we're trying to install context data.
     auto* connection = SWServerToContextConnection::globalServerToContextConnection();
@@ -527,13 +532,16 @@ void SWServer::serverToContextConnectionCreated()
 
 void SWServer::installContextData(const ServiceWorkerContextData& data)
 {
+    LOG(ServiceWorker, "installContextData() for id=%s", data.jobDataIdentifier ? data.jobDataIdentifier.value().loggingString().utf8().data() : "??");
     ASSERT_WITH_MESSAGE(!data.loadedFromDisk, "Workers we just read from disk should only be launched as needed");
 
     if (data.jobDataIdentifier) {
         // Abort if the job that scheduled this has been cancelled.
         auto* jobQueue = m_jobQueues.get(data.registration.key);
-        if (!jobQueue || !jobQueue->isCurrentlyProcessingJob(*data.jobDataIdentifier))
+        if (!jobQueue || !jobQueue->isCurrentlyProcessingJob(*data.jobDataIdentifier)) {
+            LOG(ServiceWorker, ">> Abort if the job that scheduled this has been cancelled.");
             return;
+        }
     }
 
     auto* connection = SWServerToContextConnection::globalServerToContextConnection();
@@ -549,6 +557,9 @@ void SWServer::installContextData(const ServiceWorkerContextData& data)
     auto result = m_runningOrTerminatingWorkers.add(data.serviceWorkerIdentifier, WTFMove(worker));
     ASSERT_UNUSED(result, result.isNewEntry);
 
+    LOG(ServiceWorker, "Calling installServiceWorkerContext() for id=%s / worker=%s",
+                       data.jobDataIdentifier ? data.jobDataIdentifier.value().loggingString().utf8().data() : "??",
+                       data.serviceWorkerIdentifier.loggingString().utf8().data());
     connection->installServiceWorkerContext(data, m_sessionID);
 }
 

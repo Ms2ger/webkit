@@ -11,7 +11,7 @@ const current = document.querySelector('#c').contentWindow;
 const relevant = document.querySelector('#r').contentWindow;
 
 window.testRegister = options => {
-    return current.navigator.serviceWorker.register.call(relevant.navigator.serviceWorker, 'test-sw.js', options);
+    return current.navigator.serviceWorker.register('test-sw.js', options);
 };
 
 window.testGetRegistration = () => {

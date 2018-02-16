@@ -117,7 +117,10 @@ WebSWContextManagerConnection::WebSWContextManagerConnection(Ref<IPC::Connection
     updatePreferencesStore(store);
 }
 
-WebSWContextManagerConnection::~WebSWContextManagerConnection() = default;
+WebSWContextManagerConnection::~WebSWContextManagerConnection()
+{
+    LOG(ServiceWorker, "~WebSWContextManagerConnection");
+}
 
 void WebSWContextManagerConnection::updatePreferencesStore(const WebPreferencesStore& store)
 {

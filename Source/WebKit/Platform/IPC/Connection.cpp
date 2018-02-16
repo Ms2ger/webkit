@@ -819,8 +819,11 @@ bool Connection::canSendOutgoingMessages() const
 
 void Connection::sendOutgoingMessages()
 {
-    if (!canSendOutgoingMessages())
+    fprintf(stderr, "Connection::sendOutgoingMessages()\n");
+    if (!canSendOutgoingMessages()) {
+        fprintf(stderr, "    cannot\n");
         return;
+    }
 
     while (true) {
         std::unique_ptr<Encoder> message;
@@ -832,8 +835,12 @@ void Connection::sendOutgoingMessages()
             message = m_outgoingMessages.takeFirst();
         }
 
-        if (!sendOutgoingMessage(WTFMove(message)))
+        fprintf(stderr, "    sending message: %s\n", message->messageName().toString().data());
+
+        if (!sendOutgoingMessage(WTFMove(message))) {
+            fprintf(stderr, "    failed\n");
             break;
+        }
     }
 }
 
