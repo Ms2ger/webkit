@@ -3,7 +3,35 @@
 <script src="/resources/testharness.js"></script>
 <script src="/resources/testharnessreport.js"></script>
 <script src="resources/test-helpers.sub.js"></script>
-<script src="resources/registration-tests-basic.js"></script>
 <script>
-registration_tests_basic((script, options) => navigator.serviceWorker.register(script, options), true);
+// Basic registration tests that succeed. We don't want too many successful
+// registration tests in the same file since starting a service worker can be
+// slow.
+  promise_test(function(t) {
+      var script = 'resources/registration-worker.js';
+      var scope = 'resources/registration/normal';
+      return navigator.serviceWorker.register(script, {scope: scope})
+        .then(function(registration) {
+            assert_true(
+              registration instanceof ServiceWorkerRegistration,
+              'Successfully registered.');
+            return registration.unregister();
+          });
+    }, 'Registering normal scope');
+
+  promise_test(function(t) {
+      var script = 'resources/registration-worker.js';
+      var scope = 'resources/registration/normal';
+      return navigator.serviceWorker.register(script, {scope: scope})
+        .then(function(registration) {
+            assert_true(
+              registration instanceof ServiceWorkerRegistration,
+              'Successfully registered.');
+            return registration.unregister();
+          });
+    }, 'Registering normal scope 2');
+
+
+</script>
+<script>
 </script>

@@ -52,8 +52,8 @@
 #include <wtf/RunLoop.h>
 #include <wtf/Scope.h>
 
-#define CONTAINER_RELEASE_LOG_IF_ALLOWED(fmt, ...) RELEASE_LOG_IF(isAlwaysOnLoggingAllowed(), ServiceWorker, "%p - ServiceWorkerContainer::" fmt, this, ##__VA_ARGS__)
-#define CONTAINER_RELEASE_LOG_ERROR_IF_ALLOWED(fmt, ...) RELEASE_LOG_ERROR_IF(isAlwaysOnLoggingAllowed(), ServiceWorker, "%p - ServiceWorkerContainer::" fmt, this, ##__VA_ARGS__)
+#define CONTAINER_RELEASE_LOG_IF_ALLOWED(fmt, ...) fprintf(stderr, "%p - ServiceWorkerContainer::" fmt "\n", this, ##__VA_ARGS__)
+#define CONTAINER_RELEASE_LOG_ERROR_IF_ALLOWED(fmt, ...) fprintf(stderr, "%p - ServiceWorkerContainer::" fmt "\n", this, ##__VA_ARGS__)
 
 namespace WebCore {
 
@@ -166,7 +166,7 @@ void ServiceWorkerContainer::addRegistration(const String& relativeScriptURL, co
         return;
     }
 
-    CONTAINER_RELEASE_LOG_IF_ALLOWED("addRegistration: Registering service worker. Job ID: %llu", jobData.identifier().jobIdentifier.toUInt64());
+    CONTAINER_RELEASE_LOG_IF_ALLOWED("addRegistration: Registering service worker. Job ID: %s", jobData.identifier().loggingString().utf8().data());
 
     jobData.clientCreationURL = context->url();
     jobData.topOrigin = SecurityOriginData::fromSecurityOrigin(context->topOrigin());
@@ -197,7 +197,7 @@ void ServiceWorkerContainer::removeRegistration(const URL& scopeURL, Ref<Deferre
     jobData.type = ServiceWorkerJobType::Unregister;
     jobData.scopeURL = scopeURL;
 
-    CONTAINER_RELEASE_LOG_IF_ALLOWED("removeRegistration: Unregistering service worker. Job ID: %llu", jobData.identifier().jobIdentifier.toUInt64());
+    CONTAINER_RELEASE_LOG_IF_ALLOWED("removeRegistration: Unregistering service worker. Job ID: %s", jobData.identifier().loggingString().utf8().data());
 
     scheduleJob(ServiceWorkerJob::create(*this, WTFMove(promise), WTFMove(jobData)));
 }
@@ -223,7 +223,7 @@ void ServiceWorkerContainer::updateRegistration(const URL& scopeURL, const URL& 
     jobData.scopeURL = scopeURL;
     jobData.scriptURL = scriptURL;
 
-    CONTAINER_RELEASE_LOG_IF_ALLOWED("removeRegistration: Updating service worker. Job ID: %llu", jobData.identifier().jobIdentifier.toUInt64());
+    CONTAINER_RELEASE_LOG_IF_ALLOWED("removeRegistration: Updating service worker. Job ID: %s", jobData.identifier().loggingString().utf8().data());
 
     scheduleJob(ServiceWorkerJob::create(*this, WTFMove(promise), WTFMove(jobData)));
 }
@@ -376,7 +376,7 @@ void ServiceWorkerContainer::jobFailedWithException(ServiceWorkerJob& job, const
         jobDidFinish(job);
     });
 
-    CONTAINER_RELEASE_LOG_ERROR_IF_ALLOWED("jobFailedWithException: Job %llu failed with error %s", job.identifier().toUInt64(), exception.message().utf8().data());
+    CONTAINER_RELEASE_LOG_ERROR_IF_ALLOWED("jobFailedWithException: Job %s failed with error %s", job.identifier().loggingString().utf8().data(), exception.message().utf8().data());
 
     if (!job.promise())
         return;
@@ -410,10 +410,10 @@ void ServiceWorkerContainer::jobResolvedWithRegistration(ServiceWorkerJob& job, 
     });
 
     if (job.data().type == ServiceWorkerJobType::Register)
-        CONTAINER_RELEASE_LOG_IF_ALLOWED("jobResolvedWithRegistration: Registration job %llu succeeded", job.identifier().toUInt64());
+        CONTAINER_RELEASE_LOG_IF_ALLOWED("jobResolvedWithRegistration: Registration job %s succeeded", job.identifier().loggingString().utf8().data());
     else {
         ASSERT(job.data().type == ServiceWorkerJobType::Update);
-        CONTAINER_RELEASE_LOG_IF_ALLOWED("jobResolvedWithRegistration: Update job %llu succeeded", job.identifier().toUInt64());
+        CONTAINER_RELEASE_LOG_IF_ALLOWED("jobResolvedWithRegistration: Update job %s succeeded", job.identifier().loggingString().utf8().data());
     }
 
     WTF::Function<void()> notifyWhenResolvedIfNeeded = [] { };
@@ -463,7 +463,7 @@ void ServiceWorkerContainer::jobResolvedWithUnregistrationResult(ServiceWorkerJo
         jobDidFinish(job);
     });
 
-    CONTAINER_RELEASE_LOG_IF_ALLOWED("jobResolvedWithUnregistrationResult: Unregister job %llu finished. Success? %d", job.identifier().toUInt64(), unregistrationResult);
+    CONTAINER_RELEASE_LOG_IF_ALLOWED("jobResolvedWithUnregistrationResult: Unregister job %s finished. Success? %d", job.identifier().loggingString().utf8().data(), unregistrationResult);
 
     auto* context = scriptExecutionContext();
     if (!context) {
@@ -482,7 +482,7 @@ void ServiceWorkerContainer::startScriptFetchForJob(ServiceWorkerJob& job, Fetch
     ASSERT(m_creationThread.ptr() == &Thread::current());
 #endif
 
-    CONTAINER_RELEASE_LOG_IF_ALLOWED("startScriptFetchForJob: Starting script fetch for job %llu", job.identifier().toUInt64());
+    CONTAINER_RELEASE_LOG_IF_ALLOWED("startScriptFetchForJob: Starting script fetch for job %s", job.identifier().loggingString().utf8().data());
 
     auto* context = scriptExecutionContext();
     if (!context) {
@@ -503,9 +503,10 @@ void ServiceWorkerContainer::jobFinishedLoadingScript(ServiceWorkerJob& job, con
     ASSERT(m_creationThread.ptr() == &Thread::current());
 #endif
 
-    CONTAINER_RELEASE_LOG_IF_ALLOWED("jobFinishedLoadingScript: Successfuly finished fetching script for job %llu", job.identifier().toUInt64());
+    CONTAINER_RELEASE_LOG_IF_ALLOWED("jobFinishedLoadingScript: Successfuly finished fetching script for job %s", job.identifier().loggingString().utf8().data());
 
-    callOnMainThread([connection = m_swConnection, jobDataIdentifier = job.data().identifier(), registrationKey = job.data().registrationKey().isolatedCopy(), script = script.isolatedCopy(), contentSecurityPolicy = contentSecurityPolicy.isolatedCopy()] {
+    callOnMainThread([connection = m_swConnection, jobDataIdentifier = job.data().identifier(), registrationKey = job.data().registrationKey().isolatedCopy(), script = script.isolatedCopy(), contentSecurityPolicy = contentSecurityPolicy.isolatedCopy(),this] {
+        CONTAINER_RELEASE_LOG_IF_ALLOWED("Calling finishFetchingScriptInServer with job data %s", jobDataIdentifier.loggingString().utf8().data());
         connection->finishFetchingScriptInServer({ jobDataIdentifier, registrationKey, script, contentSecurityPolicy, { } });
     });
 }
@@ -517,7 +518,7 @@ void ServiceWorkerContainer::jobFailedLoadingScript(ServiceWorkerJob& job, const
 #endif
     ASSERT_WITH_MESSAGE(job.promise() || job.data().type == ServiceWorkerJobType::Update, "Only soft updates have no promise");
 
-    CONTAINER_RELEASE_LOG_ERROR_IF_ALLOWED("jobFinishedLoadingScript: Failed to fetch script for job %llu, error: %s", job.identifier().toUInt64(), error.localizedDescription().utf8().data());
+    CONTAINER_RELEASE_LOG_ERROR_IF_ALLOWED("jobFailedLoadingScript: Failed to fetch script for job %s, error: %s", job.identifier().loggingString().utf8().data(), error.localizedDescription().utf8().data());
 
     if (exception && job.promise())
         job.promise()->reject(*exception);
@@ -628,6 +629,8 @@ DocumentOrWorkerIdentifier ServiceWorkerContainer::contextIdentifier()
 
 bool ServiceWorkerContainer::isAlwaysOnLoggingAllowed() const
 {
+    return true;
+
     auto* context = scriptExecutionContext();
     if (!context)
         return false;

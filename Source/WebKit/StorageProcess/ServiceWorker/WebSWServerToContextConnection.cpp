@@ -53,12 +53,16 @@ uint64_t WebSWServerToContextConnection::messageSenderDestinationID()
 
 void WebSWServerToContextConnection::connectionClosed()
 {
+    fprintf(stderr, "[%p] WebSWServerToContextConnection::connectionClosed()\n", this);
     // FIXME: Do what here...?
 }
 
 void WebSWServerToContextConnection::installServiceWorkerContext(const ServiceWorkerContextData& data, PAL::SessionID sessionID)
 {
-    send(Messages::WebSWContextManagerConnection::InstallServiceWorker { data, sessionID });
+    fprintf(stderr, "[%p] send(Messages::WebSWContextManagerConnection::InstallServiceWorker) for worker %s\n", this, data.serviceWorkerIdentifier.loggingString().utf8().data());
+    auto x = send(Messages::WebSWContextManagerConnection::InstallServiceWorker { data, sessionID });
+    fprintf(stderr, "[%p]     %d\n", this, x);
+    
 }
 
 void WebSWServerToContextConnection::fireInstallEvent(ServiceWorkerIdentifier serviceWorkerIdentifier)

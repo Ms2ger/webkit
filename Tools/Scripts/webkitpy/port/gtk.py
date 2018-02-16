@@ -217,7 +217,8 @@ class GtkPort(Port):
         self._leakdetector.parse_and_print_leaks_detail(leaks_files)
 
     def show_results_html_file(self, results_filename):
-        self._run_script("run-minibrowser", [path.abspath_to_uri(self.host.platform, results_filename)])
+        #self._run_script("run-minibrowser", [path.abspath_to_uri(self.host.platform, results_filename)])
+        pass
 
     def check_sys_deps(self, needs_http):
         return super(GtkPort, self).check_sys_deps(needs_http) and self._driver_class().check_driver(self)

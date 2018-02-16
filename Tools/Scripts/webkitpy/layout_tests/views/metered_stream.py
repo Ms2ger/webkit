@@ -77,6 +77,7 @@ class MeteredStream(object):
         self.cleanup()
 
     def cleanup(self):
+#        self.flush()
         if self._logger:
             self._logger.removeHandler(self._log_handler)
             self._log_handler = None
