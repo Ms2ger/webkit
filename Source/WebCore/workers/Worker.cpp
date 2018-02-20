@@ -116,7 +116,8 @@ Worker::~Worker()
 ExceptionOr<void> Worker::postMessage(JSC::ExecState& state, JSC::JSValue messageValue, Vector<JSC::Strong<JSC::JSObject>>&& transfer)
 {
     Vector<RefPtr<MessagePort>> ports;
-    auto message = SerializedScriptValue::create(state, messageValue, WTFMove(transfer), ports, SerializationContext::WorkerPostMessage);
+    Vector<RefPtr<ImageBitmap>> imageBitmaps;
+    auto message = SerializedScriptValue::create(state, messageValue, WTFMove(transfer), ports, imageBitmaps, SerializationContext::WorkerPostMessage);
     if (message.hasException())
         return message.releaseException();
 
@@ -124,6 +125,8 @@ ExceptionOr<void> Worker::postMessage(JSC::ExecState& state, JSC::JSValue messag
     auto channels = MessagePort::disentanglePorts(WTFMove(ports));
     if (channels.hasException())
         return channels.releaseException();
+
+    auto buffers = ImageBitmap::detachBitmaps(WTFMove(imageBitmaps));
 
     m_contextProxy.postMessageToWorkerGlobalScope({ message.releaseReturnValue(), channels.releaseReturnValue() });
     return { };

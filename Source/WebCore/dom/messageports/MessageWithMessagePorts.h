@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include "ImageBuffer.h"
 #include "MessagePortIdentifier.h"
 #include "SerializedScriptValue.h"
 #include <wtf/RefPtr.h>
@@ -38,6 +39,7 @@ typedef Vector<std::pair<WebCore::MessagePortIdentifier, WebCore::MessagePortIde
 struct MessageWithMessagePorts {
     RefPtr<SerializedScriptValue> message;
     TransferredMessagePortArray transferredPorts;
+    Vector<std::pair<std::unique_ptr<ImageBuffer>, bool>> transferredBitmaps;
 
     template<class Encoder> void encode(Encoder&) const;
     template<class Decoder> static std::optional<MessageWithMessagePorts> decode(Decoder&);
@@ -48,7 +50,7 @@ template<class Encoder>
 void MessageWithMessagePorts::encode(Encoder& encoder) const
 {
     ASSERT(message);
-    encoder << message->toWireBytes() << transferredPorts;
+    encoder << message->toWireBytes() << transferredPorts << transferredBitmaps;
 }
 
 template<class Decoder>
@@ -61,6 +63,9 @@ std::optional<MessageWithMessagePorts> MessageWithMessagePorts::decode(Decoder& 
         return std::nullopt;
 
     if (!decoder.decode(result.transferredPorts))
+        return std::nullopt;
+
+    if (!decoder.decode(result.transferredBitmaps))
         return std::nullopt;
 
     result.message = SerializedScriptValue::createFromWireBytes(WTFMove(wireBytes));

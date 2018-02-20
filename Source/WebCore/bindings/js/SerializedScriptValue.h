@@ -63,7 +63,7 @@ class SerializedScriptValue : public ThreadSafeRefCounted<SerializedScriptValue>
 public:
     WEBCORE_EXPORT static RefPtr<SerializedScriptValue> create(JSC::ExecState&, JSC::JSValue, SerializationErrorMode = SerializationErrorMode::Throwing);
 
-    WEBCORE_EXPORT static ExceptionOr<Ref<SerializedScriptValue>> create(JSC::ExecState&, JSC::JSValue, Vector<JSC::Strong<JSC::JSObject>>&& transfer, Vector<RefPtr<MessagePort>>&, SerializationContext = SerializationContext::Default);
+    WEBCORE_EXPORT static ExceptionOr<Ref<SerializedScriptValue>> create(JSC::ExecState&, JSC::JSValue, Vector<JSC::Strong<JSC::JSObject>>&& transfer, Vector<RefPtr<MessagePort>>&, Vector<RefPtr<ImageBitmap>>&, SerializationContext = SerializationContext::Default);
 
     WEBCORE_EXPORT static RefPtr<SerializedScriptValue> create(StringView);
     static Ref<SerializedScriptValue> adopt(Vector<uint8_t>&& buffer)

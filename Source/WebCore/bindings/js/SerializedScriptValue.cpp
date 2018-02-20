@@ -3294,11 +3294,10 @@ RefPtr<SerializedScriptValue> SerializedScriptValue::create(ExecState& exec, JSV
             ));
 }
 
-ExceptionOr<Ref<SerializedScriptValue>> SerializedScriptValue::create(ExecState& state, JSValue value, Vector<JSC::Strong<JSC::JSObject>>&& transferList, Vector<RefPtr<MessagePort>>& messagePorts, SerializationContext context)
+ExceptionOr<Ref<SerializedScriptValue>> SerializedScriptValue::create(ExecState& state, JSValue value, Vector<JSC::Strong<JSC::JSObject>>&& transferList, Vector<RefPtr<MessagePort>>& messagePorts, Vector<RefPtr<ImageBitmap>>& imageBitmaps, SerializationContext context)
 {
     VM& vm = state.vm();
     Vector<RefPtr<JSC::ArrayBuffer>> arrayBuffers;
-    Vector<RefPtr<ImageBitmap>> imageBitmaps;
     for (auto& transferable : transferList) {
         if (auto arrayBuffer = toPossiblySharedArrayBuffer(vm, transferable.get())) {
             if (arrayBuffer->isNeutered())
@@ -3318,6 +3317,9 @@ ExceptionOr<Ref<SerializedScriptValue>> SerializedScriptValue::create(ExecState&
         }
 
         if (auto imageBitmap = JSImageBitmap::toWrapped(vm, transferable.get())) {
+            if (imageBitmap->isDetached())
+                return Exception { DataCloneError };
+
             imageBitmaps.append(WTFMove(imageBitmap));
             continue;
         }
@@ -3331,7 +3333,7 @@ ExceptionOr<Ref<SerializedScriptValue>> SerializedScriptValue::create(ExecState&
     WasmModuleArray wasmModules;
 #endif
     std::unique_ptr<ArrayBufferContentsArray> sharedBuffers = std::make_unique<ArrayBufferContentsArray>();
-    auto code = CloneSerializer::serialize(&state, value, messagePorts, arrayBuffers, imageBitmaps, 
+    auto code = CloneSerializer::serialize(&state, value, messagePorts, arrayBuffers, imageBitmaps,
 #if ENABLE(WEBASSEMBLY)
         wasmModules, 
 #endif

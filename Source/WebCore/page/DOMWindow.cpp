@@ -936,7 +936,8 @@ ExceptionOr<void> DOMWindow::postMessage(JSC::ExecState& state, DOMWindow& incum
     }
 
     Vector<RefPtr<MessagePort>> ports;
-    auto messageData = SerializedScriptValue::create(state, messageValue, WTFMove(transfer), ports, SerializationContext::WindowPostMessage);
+    Vector<RefPtr<ImageBitmap>> imageBitmaps;
+    auto messageData = SerializedScriptValue::create(state, messageValue, WTFMove(transfer), ports, imageBitmaps, SerializationContext::WindowPostMessage);
     if (messageData.hasException())
         return messageData.releaseException();
 
