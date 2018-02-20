@@ -915,6 +915,7 @@ ExceptionOr<Storage*> DOMWindow::localStorage() const
 
 ExceptionOr<void> DOMWindow::postMessage(JSC::ExecState& state, DOMWindow& incumbentWindow, JSC::JSValue messageValue, const String& targetOrigin, Vector<JSC::Strong<JSC::JSObject>>&& transfer)
 {
+    fprintf(stderr, "DOMWindow::postMessage\n");
     if (!isCurrentlyDisplayedInFrame())
         return { };
 
@@ -940,6 +941,8 @@ ExceptionOr<void> DOMWindow::postMessage(JSC::ExecState& state, DOMWindow& incum
     auto messageData = SerializedScriptValue::create(state, messageValue, WTFMove(transfer), ports, imageBitmaps, SerializationContext::WindowPostMessage);
     if (messageData.hasException())
         return messageData.releaseException();
+
+    fprintf(stderr, "    imageBitmaps: %zu\n", imageBitmaps.size());
 
     auto disentangledPorts = MessagePort::disentanglePorts(WTFMove(ports));
     if (disentangledPorts.hasException())
