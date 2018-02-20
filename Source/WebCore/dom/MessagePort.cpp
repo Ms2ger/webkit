@@ -127,7 +127,8 @@ ExceptionOr<void> MessagePort::postMessage(JSC::ExecState& state, JSC::JSValue m
     registerLocalActivity();
 
     Vector<RefPtr<MessagePort>> ports;
-    auto messageData = SerializedScriptValue::create(state, messageValue, WTFMove(transfer), ports);
+    Vector<RefPtr<ImageBitmap>> imageBitmaps;
+    auto messageData = SerializedScriptValue::create(state, messageValue, WTFMove(transfer), ports, imageBitmaps);
     if (messageData.hasException())
         return messageData.releaseException();
 
