@@ -115,11 +115,14 @@ Worker::~Worker()
 
 ExceptionOr<void> Worker::postMessage(JSC::ExecState& state, JSC::JSValue messageValue, Vector<JSC::Strong<JSC::JSObject>>&& transfer)
 {
+    fprintf(stderr, "Worker::postMessage\n");
     Vector<RefPtr<MessagePort>> ports;
     Vector<RefPtr<ImageBitmap>> imageBitmaps;
     auto message = SerializedScriptValue::create(state, messageValue, WTFMove(transfer), ports, imageBitmaps, SerializationContext::WorkerPostMessage);
     if (message.hasException())
         return message.releaseException();
+
+    fprintf(stderr, "    $$imageBitmaps: %zu\n", imageBitmaps.size());
 
     // Disentangle the port in preparation for sending it to the remote context.
     auto channels = MessagePort::disentanglePorts(WTFMove(ports));

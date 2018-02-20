@@ -132,6 +132,8 @@ ExceptionOr<void> MessagePort::postMessage(JSC::ExecState& state, JSC::JSValue m
     if (messageData.hasException())
         return messageData.releaseException();
 
+    fprintf(stderr, "    --imageBitmaps: %zu\n", imageBitmaps.size());
+
     if (!isEntangled())
         return { };
     ASSERT(m_scriptExecutionContext);

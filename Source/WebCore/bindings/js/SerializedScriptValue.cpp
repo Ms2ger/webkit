@@ -885,13 +885,16 @@ private:
 
     void dumpImageBitmap(JSObject* obj, SerializationReturnCode& code)
     {
+        fprintf(stderr, "dumpImageBitmap()\n");
         auto index = m_transferredImageBitmaps.find(obj);
         if (index != m_transferredImageBitmaps.end()) {
+            fprintf(stderr, "  Writing\n");
             write(ImageBitmapTransferTag);
             write(index->value);
             return;
         }
 
+        fprintf(stderr, "  Not found --> not writing\n");
         // Copying ImageBitmaps is not yet supported.
         code = SerializationReturnCode::ValidationError;
     }
@@ -2634,13 +2637,25 @@ private:
 
     JSValue readImageBitmap()
     {
+        fprintf(stderr, "readImageBitmap()\n");
         uint32_t index;
         bool indexSuccessfullyRead = read(index);
-        if (!indexSuccessfullyRead || index >= m_imageBitmaps.size()) {
+        if (!indexSuccessfullyRead) {
+            fprintf(stderr, "  failure to read\n");
             fail();
             return JSValue();
         }
-        return getJSValue(m_imageBitmaps[index].get());
+
+        if (index >= m_imageBitmaps.size()) {
+            fprintf(stderr, "  failure: %d >= %d\n", index, m_imageBitmaps.size());
+            CRASH();
+            fail();
+            return JSValue();
+        }
+
+        auto bitmap = m_imageBitmaps[index].get();
+        fprintf(stderr, "  Success (%p)\n", bitmap);
+        return getJSValue(bitmap);
     }
 
     JSValue readTerminal()
@@ -3317,6 +3332,7 @@ ExceptionOr<Ref<SerializedScriptValue>> SerializedScriptValue::create(ExecState&
         }
 
         if (auto imageBitmap = JSImageBitmap::toWrapped(vm, transferable.get())) {
+            fprintf(stderr, "Found ImageBitmap in transferList (detached=%d)\n", imageBitmap->isDetached());
             if (imageBitmap->isDetached())
                 return Exception { DataCloneError };
 
