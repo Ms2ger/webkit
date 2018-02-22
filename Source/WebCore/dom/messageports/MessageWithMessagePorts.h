@@ -47,6 +47,7 @@ struct MessageWithMessagePorts {
 template<class Encoder>
 void MessageWithMessagePorts::encode(Encoder& encoder) const
 {
+    fprintf(stderr, "MessageWithMessagePorts::encode\n");
     ASSERT(message);
     encoder << message->toWireBytes() << transferredPorts;
 }
@@ -54,6 +55,7 @@ void MessageWithMessagePorts::encode(Encoder& encoder) const
 template<class Decoder>
 std::optional<MessageWithMessagePorts> MessageWithMessagePorts::decode(Decoder& decoder)
 {
+    fprintf(stderr, "MessageWithMessagePorts::decode\n");
     MessageWithMessagePorts result;
 
     Vector<uint8_t> wireBytes;
