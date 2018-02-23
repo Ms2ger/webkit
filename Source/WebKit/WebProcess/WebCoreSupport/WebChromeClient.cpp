@@ -248,6 +248,7 @@ void WebChromeClient::focusedFrameChanged(Frame* frame)
 
 Page* WebChromeClient::createWindow(Frame& frame, const FrameLoadRequest& request, const WindowFeatures& windowFeatures, const NavigationAction& navigationAction)
 {
+    fprintf(stderr, "WebChromeClient::createWindow\n");
 #if ENABLE(FULLSCREEN_API)
     if (frame.document() && frame.document()->webkitCurrentFullScreenElement())
         frame.document()->webkitCancelFullScreen();

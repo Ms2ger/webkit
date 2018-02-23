@@ -36,6 +36,7 @@
 #include "BrowserTab.h"
 #include <gdk/gdkkeysyms.h>
 #include <string.h>
+#include <wtf/Assertions.h>
 
 struct _BrowserWindow {
     GtkWindow parent;

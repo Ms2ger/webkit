@@ -162,6 +162,7 @@ GtkWidget* webkit_web_view_new_with_context(WebKitWebContext* context)
  */
 GtkWidget* webkit_web_view_new_with_related_view(WebKitWebView* webView)
 {
+    fprintf(stderr, "webkit_web_view_new_with_related_view(%p)\n", &webkitWebViewGetPage(webView));
     g_return_val_if_fail(WEBKIT_IS_WEB_VIEW(webView), nullptr);
 
     return GTK_WIDGET(g_object_new(WEBKIT_TYPE_WEB_VIEW,

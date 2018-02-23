@@ -1018,14 +1018,20 @@ Ref<WebPageProxy> WebProcessPool::createWebPage(PageClient& pageClient, Ref<API:
     }
 
     RefPtr<WebProcessProxy> process;
+    fprintf(stderr, "createWebPage: ");
     if (m_haveInitialEmptyProcess) {
+        fprintf(stderr, "initial empty");
         process = m_processes.last();
         m_haveInitialEmptyProcess = false;
     } else if (pageConfiguration->relatedPage()) {
+        fprintf(stderr, "related page(%p)", pageConfiguration->relatedPage());
         // Sharing processes, e.g. when creating the page via window.open().
         process = &pageConfiguration->relatedPage()->process();
-    } else
+    } else {
+        fprintf(stderr, "new process");
         process = &createNewWebProcessRespectingProcessCountLimit(pageConfiguration->websiteDataStore()->websiteDataStore());
+    }
+    fprintf(stderr, "\n");
 
 #if ENABLE(SERVICE_WORKER)
     ASSERT(process.get() != m_serviceWorkerProcess);
