@@ -3186,7 +3186,7 @@ SerializedScriptValue::SerializedScriptValue(Vector<uint8_t>&& buffer)
 {
 }
 
-SerializedScriptValue::SerializedScriptValue(Vector<uint8_t>&& buffer, const Vector<String>& blobURLs, std::unique_ptr<ArrayBufferContentsArray> arrayBufferContentsArray, std::unique_ptr<ArrayBufferContentsArray> sharedBufferContentsArray
+SerializedScriptValue::SerializedScriptValue(Vector<uint8_t>&& buffer, const Vector<String>& blobURLs, std::unique_ptr<ArrayBufferContentsArray> arrayBufferContentsArray, std::unique_ptr<ArrayBufferContentsArray> sharedBufferContentsArray, Vector<std::pair<std::unique_ptr<ImageBuffer>, bool>>&& imageBuffers
 #if ENABLE(WEBASSEMBLY)
         , std::unique_ptr<WasmModuleArray> wasmModulesArray
 #endif
@@ -3194,6 +3194,7 @@ SerializedScriptValue::SerializedScriptValue(Vector<uint8_t>&& buffer, const Vec
     : m_data(WTFMove(buffer))
     , m_arrayBufferContentsArray(WTFMove(arrayBufferContentsArray))
     , m_sharedBufferContentsArray(WTFMove(sharedBufferContentsArray))
+    , m_imageBuffers(WTFMove(imageBuffers))
 #if ENABLE(WEBASSEMBLY)
     , m_wasmModulesArray(WTFMove(wasmModulesArray))
 #endif
@@ -3302,7 +3303,7 @@ RefPtr<SerializedScriptValue> SerializedScriptValue::create(ExecState& exec, JSV
     if (code != SerializationReturnCode::SuccessfullyCompleted)
         return nullptr;
 
-    return adoptRef(*new SerializedScriptValue(WTFMove(buffer), blobURLs, nullptr, nullptr
+    return adoptRef(*new SerializedScriptValue(WTFMove(buffer), blobURLs, nullptr, nullptr, { }
 #if ENABLE(WEBASSEMBLY)
         , nullptr
 #endif
@@ -3376,7 +3377,9 @@ ExceptionOr<Ref<SerializedScriptValue>> SerializedScriptValue::create(ExecState&
     if (arrayBufferContentsArray.hasException())
         return arrayBufferContentsArray.releaseException();
 
-    return adoptRef(*new SerializedScriptValue(WTFMove(buffer), blobURLs, arrayBufferContentsArray.releaseReturnValue(), context == SerializationContext::WorkerPostMessage ? WTFMove(sharedBuffers) : nullptr
+    auto imageBuffers = ImageBitmap::detachBitmaps(WTFMove(imageBitmaps));
+
+    return adoptRef(*new SerializedScriptValue(WTFMove(buffer), blobURLs, arrayBufferContentsArray.releaseReturnValue(), context == SerializationContext::WorkerPostMessage ? WTFMove(sharedBuffers) : nullptr, WTFMove(imageBuffers)
 #if ENABLE(WEBASSEMBLY)
                 , std::make_unique<WasmModuleArray>(wasmModules)
 #endif
