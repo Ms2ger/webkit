@@ -3309,6 +3309,16 @@ RefPtr<SerializedScriptValue> SerializedScriptValue::create(ExecState& exec, JSV
             ));
 }
 
+static bool containsDuplicates(const Vector<RefPtr<ImageBitmap>>& imageBitmaps)
+{
+    HashSet<ImageBitmap*> visited;
+    for (auto& imageBitmap : imageBitmaps) {
+        if (!visited.add(imageBitmap.get()))
+            return true;
+    }
+    return false;
+}
+
 ExceptionOr<Ref<SerializedScriptValue>> SerializedScriptValue::create(ExecState& state, JSValue value, Vector<JSC::Strong<JSC::JSObject>>&& transferList, Vector<RefPtr<MessagePort>>& messagePorts, SerializationContext context)
 {
     VM& vm = state.vm();
@@ -3343,6 +3353,9 @@ ExceptionOr<Ref<SerializedScriptValue>> SerializedScriptValue::create(ExecState&
 
         return Exception { DataCloneError };
     }
+
+    if (containsDuplicates(imageBitmaps))
+        return Exception { DataCloneError };
 
     Vector<uint8_t> buffer;
     Vector<String> blobURLs;
