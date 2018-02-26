@@ -64,6 +64,7 @@ public:
     static void createPromise(ScriptExecutionContext&, Source&&, ImageBitmapOptions&&, int sx, int sy, int sw, int sh, Promise&&);
 
     static Ref<ImageBitmap> create(IntSize);
+    static Ref<ImageBitmap> create(std::pair<std::unique_ptr<ImageBuffer>, bool>&&);
 
     ~ImageBitmap();
 

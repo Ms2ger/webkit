@@ -59,6 +59,13 @@ Ref<ImageBitmap> ImageBitmap::create(IntSize size)
     return create(ImageBuffer::create(FloatSize(size.width(), size.height()), bufferRenderingMode));
 }
 
+Ref<ImageBitmap> ImageBitmap::create(std::pair<std::unique_ptr<ImageBuffer>, bool>&& buffer)
+{
+    auto imageBitmap = create(WTFMove(buffer.first));
+    imageBitmap->m_originClean = buffer.second;
+    return imageBitmap;
+}
+
 Ref<ImageBitmap> ImageBitmap::create(std::unique_ptr<ImageBuffer>&& buffer)
 {
     return adoptRef(*new ImageBitmap(WTFMove(buffer)));
@@ -73,10 +80,24 @@ void ImageBitmap::createPromise(ScriptExecutionContext& scriptExecutionContext, 
     );
 }
 
-/* static */
-Vector<std::pair<std::unique_ptr<ImageBuffer>, bool>> ImageBitmap::detachBitmaps(Vector<RefPtr<ImageBitmap>>&&)
+static void printb(const Vector<std::pair<std::unique_ptr<ImageBuffer>, bool>>& b)
 {
-    return { };
+    fprintf(stderr, "[");
+    for (auto& buf: b)
+        fprintf(stderr, "(%p, %s), ", buf.first.get(), buf.second ? "true" : "false");
+    fprintf(stderr, "; %zu]\n", b.size());
+}
+
+/* static */
+Vector<std::pair<std::unique_ptr<ImageBuffer>, bool>> ImageBitmap::detachBitmaps(Vector<RefPtr<ImageBitmap>>&& bitmaps)
+{
+    Vector<std::pair<std::unique_ptr<ImageBuffer>, bool>> buffers;
+    printb(buffers);
+    for (auto& bitmap : bitmaps) {
+        buffers.append(std::make_pair(bitmap->transferOwnershipAndClose(), bitmap->originClean()));
+    }
+    printb(buffers);
+    return buffers;
 }
 
 
