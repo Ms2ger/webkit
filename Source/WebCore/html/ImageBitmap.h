@@ -37,12 +37,14 @@ class Blob;
 class HTMLCanvasElement;
 class HTMLImageElement;
 class HTMLVideoElement;
+class ImageBitmapImageObserver;
 class ImageBuffer;
 class ImageData;
 class IntRect;
 class IntSize;
 class PendingImageBitmap;
 class ScriptExecutionContext;
+class URL;
 struct ImageBitmapOptions;
 
 class ImageBitmap : public ScriptWrappable, public RefCounted<ImageBitmap> {
@@ -80,6 +82,7 @@ public:
     std::unique_ptr<ImageBuffer> transferOwnershipAndClose();
 
 private:
+    friend class ImageBitmapImageObserver;
     friend class PendingImageBitmap;
 
     static Ref<ImageBitmap> create(std::unique_ptr<ImageBuffer>&&);
@@ -93,6 +96,7 @@ private:
     static void createPromise(ScriptExecutionContext&, RefPtr<ImageBitmap>&, ImageBitmapOptions&&, std::optional<IntRect>, Promise&&);
     static void createPromise(ScriptExecutionContext&, RefPtr<Blob>&, ImageBitmapOptions&&, std::optional<IntRect>, Promise&&);
     static void createPromise(ScriptExecutionContext&, RefPtr<ImageData>&, ImageBitmapOptions&&, std::optional<IntRect>, Promise&&);
+    static void createFromBuffer(Ref<ArrayBuffer>&&, String mimeType, long long expectedContentLength, const URL&, ImageBitmapOptions&&, std::optional<IntRect>, Promise&&);
 
     std::unique_ptr<ImageBuffer> m_bitmapData;
     bool m_detached { false };
