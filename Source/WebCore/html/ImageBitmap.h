@@ -34,6 +34,7 @@
 namespace WebCore {
 
 class Blob;
+class BlobImageObserver;
 class HTMLCanvasElement;
 class HTMLImageElement;
 class HTMLVideoElement;
@@ -80,6 +81,7 @@ public:
     std::unique_ptr<ImageBuffer> transferOwnershipAndClose();
 
 private:
+    friend class BlobImageObserver;
     friend class PendingImageBitmap;
 
     static Ref<ImageBitmap> create(std::unique_ptr<ImageBuffer>&&);
