@@ -819,9 +819,9 @@ bool Connection::canSendOutgoingMessages() const
 
 void Connection::sendOutgoingMessages()
 {
-    fprintf(stderr, "Connection::sendOutgoingMessages()\n");
+//    fprintf(stderr, "Connection::sendOutgoingMessages()\n");
     if (!canSendOutgoingMessages()) {
-        fprintf(stderr, "    cannot\n");
+//        fprintf(stderr, "    cannot\n");
         return;
     }
 
@@ -835,10 +835,10 @@ void Connection::sendOutgoingMessages()
             message = m_outgoingMessages.takeFirst();
         }
 
-        fprintf(stderr, "    sending message: %s\n", message->messageName().toString().data());
+//        fprintf(stderr, "    sending message: %s\n", message->messageName().toString().data());
 
         if (!sendOutgoingMessage(WTFMove(message))) {
-            fprintf(stderr, "    failed\n");
+//            fprintf(stderr, "    failed\n");
             break;
         }
     }

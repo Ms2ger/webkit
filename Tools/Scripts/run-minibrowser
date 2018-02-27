@@ -52,7 +52,7 @@ if (isGtk()) {
     die "Can't find $launcherPath" unless -x $launcherPath;
     @jhbuildWrapper = wrapperPrefixIfNeeded();
     print "Starting MiniBrowser.\n";
-    exec @jhbuildWrapper, "gdb", "--args", $launcherPath, @ARGV or die;
+    exec @jhbuildWrapper, $launcherPath, @ARGV or die;
 } elsif (isWPE()) {
     # Check to see that all the frameworks are built.
     checkFrameworks();
