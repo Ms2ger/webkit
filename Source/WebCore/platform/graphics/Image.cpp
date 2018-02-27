@@ -34,6 +34,7 @@
 #include "Length.h"
 #include "MIMETypeRegistry.h"
 #include "SharedBuffer.h"
+#include "SVGImage.h"
 #include "URL.h"
 #include <math.h>
 #include <wtf/MainThread.h>
@@ -61,10 +62,43 @@ Image& Image::nullImage()
     return nullImage;
 }
 
+RefPtr<Image> Image::create(ImageObserver& observer)
+{
+    auto mimeType = observer.mimeType();
+    if (mimeType == "image/svg+xml")
+        return SVGImage::create(observer);
+
+    auto url = observer.sourceUrl();
+    if (isPDFResource(mimeType, url) || isPostScriptResource(mimeType, url)) {
+#if USE(CG) && !USE(WEBKIT_IMAGE_DECODERS)
+        return PDFDocumentImage::create(&observer);
+#else
+        return nullptr;
+#endif
+    }
+
+    return BitmapImage::create(&observer);
+}
+
 bool Image::supportsType(const String& type)
 {
     return MIMETypeRegistry::isSupportedImageResourceMIMEType(type);
 } 
+
+bool Image::isPDFResource(const String& mimeType, const URL& url)
+{
+    if (mimeType.isEmpty())
+        return url.path().endsWithIgnoringASCIICase(".pdf");
+    return MIMETypeRegistry::isPDFMIMEType(mimeType);
+}
+
+bool Image::isPostScriptResource(const String& mimeType, const URL& url)
+{
+    if (mimeType.isEmpty())
+        return url.path().endsWithIgnoringASCIICase(".ps");
+    return MIMETypeRegistry::isPostScriptMIMEType(mimeType);
+}
+
 
 EncodedDataStatus Image::setData(RefPtr<SharedBuffer>&& data, bool allDataReceived)
 {
