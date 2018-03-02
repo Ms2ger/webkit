@@ -120,6 +120,7 @@ bool ServiceWorkerThreadProxy::postTaskForModeToWorkerGlobalScope(ScriptExecutio
     if (m_isTerminatingOrTerminated)
         return false;
 
+    ASSERT(!m_serviceWorkerThread.isHashTableEmptyValue());
     m_serviceWorkerThread->runLoop().postTaskForMode(WTFMove(task), mode);
     return true;
 }
