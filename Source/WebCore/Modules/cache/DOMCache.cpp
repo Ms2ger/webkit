@@ -309,6 +309,7 @@ void DOMCache::putWithResponseData(DOMPromiseDeferred<void>&& promise, Ref<Fetch
 
 void DOMCache::put(RequestInfo&& info, Ref<FetchResponse>&& response, DOMPromiseDeferred<void>&& promise)
 {
+    fprintf(stderr, "DOMCache::put(%p)\n", *reinterpret_cast<FetchResponse**>(&response));
     if (UNLIKELY(!scriptExecutionContext()))
         return;
 

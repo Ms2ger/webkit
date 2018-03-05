@@ -1340,7 +1340,9 @@ void WebProcessProxy::checkRemotePortForActivity(const WebCore::MessagePortIdent
 void WebProcessProxy::checkProcessLocalPortForActivity(const MessagePortIdentifier& port, CompletionHandler<void(MessagePortChannelProvider::HasActivity)>&& callback)
 {
     static uint64_t currentCallbackIdentifier;
-    auto result = m_localPortActivityCompletionHandlers.ensure(++currentCallbackIdentifier, [callback = WTFMove(callback)]() mutable {
+    auto ident = ++currentCallbackIdentifier;
+    fprintf(stderr, "[COMPL] [%p] checkProcessLocalPortForActivity(%d)\n", this, ident);
+    auto result = m_localPortActivityCompletionHandlers.ensure(ident, [callback = WTFMove(callback)]() mutable {
         return WTFMove(callback);
     });
     ASSERT_UNUSED(result, result.isNewEntry);
@@ -1350,6 +1352,7 @@ void WebProcessProxy::checkProcessLocalPortForActivity(const MessagePortIdentifi
 
 void WebProcessProxy::didCheckProcessLocalPortForActivity(uint64_t callbackIdentifier, bool isLocallyReachable)
 {
+    fprintf(stderr, "[COMPL] [%p] didCheckProcessLocalPortForActivity(%d)\n", this, callbackIdentifier);
     auto callback = m_localPortActivityCompletionHandlers.take(callbackIdentifier);
     if (!callback)
         return;
