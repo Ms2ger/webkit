@@ -96,6 +96,7 @@ private:
     static void createPromise(ScriptExecutionContext&, RefPtr<ImageBitmap>&, ImageBitmapOptions&&, std::optional<IntRect>, Promise&&);
     static void createPromise(ScriptExecutionContext&, RefPtr<Blob>&, ImageBitmapOptions&&, std::optional<IntRect>, Promise&&);
     static void createPromise(ScriptExecutionContext&, RefPtr<ImageData>&, ImageBitmapOptions&&, std::optional<IntRect>, Promise&&);
+    static void createPromise(ScriptExecutionContext&, RefPtr<OffscreenCanvas>&, ImageBitmapOptions&&, std::optional<IntRect>, Promise&&);
     static void createFromBuffer(Ref<ArrayBuffer>&&, String mimeType, long long expectedContentLength, const URL&, ImageBitmapOptions&&, std::optional<IntRect>, Promise&&);
 
     std::unique_ptr<ImageBuffer> m_bitmapData;

@@ -669,6 +669,10 @@ void ImageBitmap::createPromise(ScriptExecutionContext&, RefPtr<ImageData>& imag
     promise.resolve(WTFMove(imageBitmap));
 }
 
+void ImageBitmap::createPromise(ScriptExecutionContext&, RefPtr<OffscreenCanvas>& imageData, ImageBitmapOptions&& options, std::optional<IntRect> rect, ImageBitmap::Promise&& promise)
+{
+}
+
 ImageBitmap::ImageBitmap(std::unique_ptr<ImageBuffer>&& buffer)
     : m_bitmapData(WTFMove(buffer))
 {
