@@ -642,22 +642,31 @@ void ImageBitmap::createPromise(ScriptExecutionContext& scriptExecutionContext, 
 
 void ImageBitmap::createPromise(ScriptExecutionContext&, RefPtr<ImageData>& imageData, ImageBitmapOptions&& options, std::optional<IntRect> rect, ImageBitmap::Promise&& promise)
 {
-    UNUSED_PARAM(imageData);
-    UNUSED_PARAM(options);
-    UNUSED_PARAM(rect);
+    auto data = imageData->data();
+    if (data->isNeutered() || !data->unsharedBuffer()) {
+        promise.reject(InvalidStateError, "Cannot create ImageBitmap from a detached ImageData");
+        return;
+    }
 
-    // 2. If the image object's data attribute value's [[Detached]] internal slot value
-    //    is true, return a promise rejected with an "InvalidStateError" DOMException
-    //    and abort these steps.
+    auto sourceRectangle = croppedSourceRectangleWithFormatting(existingImageBitmap->buffer()->logicalSize(), options, WTFMove(rect));
+    if (sourceRectangle.hasException()) {
+        promise.reject(sourceRectangle.releaseException());
+        return;
+    }
 
-    // 3. Create a new ImageBitmap object.
+    auto outputSize = outputSizeForSourceRectangle(sourceRectangle.returnValue(), options);
+    auto bitmapData = ImageBuffer::create(FloatSize(outputSize.width(), outputSize.height()), bufferRenderingMode);
 
-    // 4. Let the ImageBitmap object's bitmap data be the image data given by the ImageData
-    //    object, cropped to the source rectangle with formatting.
+    bitmapData->putByteArray(*data->unsharedBuffer(), AlphaPremultiplication::Unpremultiplied, const IntSize& sourceSize, const IntRect& sourceRect, const IntPoint& destPoint, CoordinateSystem = LogicalCoordinateSystem);
 
-    // 5. Return a new promise, but continue running these steps in parallel.
-    // 6. Resolve the promise with the new ImageBitmap object as the value.
-    promise.reject(TypeError, "createImageBitmap with ImageData is not implemented");
+
+    bitmapData->context().drawImage(*imageForRender, destRect, sourceRectangle.releaseReturnValue(), paintingOptions);
+
+    auto imageBitmap = create(WTFMove(bitmapData));
+
+    imageBitmap->m_originClean = existingImageBitmap->originClean();
+
+    promise.resolve(WTFMove(imageBitmap));
 }
 
 ImageBitmap::ImageBitmap(std::unique_ptr<ImageBuffer>&& buffer)
