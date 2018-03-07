@@ -530,7 +530,7 @@ template <> bool writeLittleEndian<uint8_t>(Vector<uint8_t>& buffer, const uint8
 
 class CloneSerializer : CloneBase {
 public:
-    static SerializationReturnCode serialize(ExecState* exec, JSValue value, Vector<RefPtr<MessagePort>>& messagePorts, Vector<RefPtr<JSC::ArrayBuffer>>& arrayBuffers,
+    static SerializationReturnCode serialize(ExecState* exec, JSValue value, const Vector<RefPtr<MessagePort>>& messagePorts, const Vector<RefPtr<JSC::ArrayBuffer>>& arrayBuffers,
 #if ENABLE(WEBASSEMBLY)
             WasmModuleArray& wasmModules,
 #endif
@@ -563,7 +563,7 @@ public:
 private:
     typedef HashMap<JSObject*, uint32_t> ObjectPool;
 
-    CloneSerializer(ExecState* exec, Vector<RefPtr<MessagePort>>& messagePorts, Vector<RefPtr<JSC::ArrayBuffer>>& arrayBuffers,
+    CloneSerializer(ExecState* exec, const Vector<RefPtr<MessagePort>>& messagePorts, const Vector<RefPtr<JSC::ArrayBuffer>>& arrayBuffers,
 #if ENABLE(WEBASSEMBLY)
             WasmModuleArray& wasmModules,
 #endif
@@ -584,7 +584,7 @@ private:
     }
 
     template <class T>
-    void fillTransferMap(Vector<RefPtr<T>>& input, ObjectPool& result)
+    void fillTransferMap(const Vector<RefPtr<T>>& input, ObjectPool& result)
     {
         if (input.isEmpty())
             return;
@@ -1019,13 +1019,11 @@ private:
                 write(CryptoKeyTag);
                 Vector<uint8_t> serializedKey;
                 Vector<String> dummyBlobURLs;
-                Vector<RefPtr<MessagePort>> dummyMessagePorts;
-                Vector<RefPtr<JSC::ArrayBuffer>> dummyArrayBuffers;
 #if ENABLE(WEBASSEMBLY)
                 WasmModuleArray dummyModules;
 #endif
                 ArrayBufferContentsArray dummySharedBuffers;
-                CloneSerializer rawKeySerializer(m_exec, dummyMessagePorts, dummyArrayBuffers,
+                CloneSerializer rawKeySerializer(m_exec, { }, { },
 #if ENABLE(WEBASSEMBLY)
                     dummyModules,
 #endif
@@ -3219,13 +3217,11 @@ RefPtr<SerializedScriptValue> SerializedScriptValue::create(ExecState& exec, JSV
 {
     Vector<uint8_t> buffer;
     Vector<String> blobURLs;
-    Vector<RefPtr<MessagePort>> dummyMessagePorts;
-    Vector<RefPtr<JSC::ArrayBuffer>> dummyArrayBuffers;
 #if ENABLE(WEBASSEMBLY)
     WasmModuleArray dummyModules;
 #endif
     ArrayBufferContentsArray dummySharedBuffers;
-    auto code = CloneSerializer::serialize(&exec, value, dummyMessagePorts, dummyArrayBuffers,
+    auto code = CloneSerializer::serialize(&exec, value, { }, { },
 #if ENABLE(WEBASSEMBLY)
         dummyModules,
 #endif
