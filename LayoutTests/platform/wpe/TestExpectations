@@ -29,8 +29,6 @@ webkit.org/b/87633 http/tests/appcache/deferred-events-delete-while-raising-time
 webkit.org/b/87633 http/tests/appcache/deferred-events-delete-while-raising.html [ Pass Failure ]
 webkit.org/b/87633 http/tests/appcache/deferred-events.html [ Pass Failure ]
 
-webkit.org/b/145253 http/tests/appcache/different-https-origin-resource-main.html  [ Failure ]
-
 # Implement testRunner.setUseDeferredFrameLoading
 webkit.org/b/93980 http/tests/appcache/load-from-appcache-defer-resume-crash.html [ Failure ]
 webkit.org/b/168569 http/tests/appcache/main-resource-fallback-for-network-error-crash.html [ Timeout ]
