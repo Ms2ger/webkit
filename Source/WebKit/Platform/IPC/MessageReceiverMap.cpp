@@ -115,11 +115,13 @@ bool MessageReceiverMap::dispatchMessage(Connection& connection, Decoder& decode
     if (MessageReceiver* messageReceiver = m_globalMessageReceivers.get(decoder.messageReceiverName())) {
         ASSERT(!decoder.destinationID());
 
+        messageReceiver->beforeDidReceiveMessage(connection, decoder);
         messageReceiver->didReceiveMessage(connection, decoder);
         return true;
     }
 
     if (MessageReceiver* messageReceiver = m_messageReceivers.get(std::make_pair(decoder.messageReceiverName(), decoder.destinationID()))) {
+        messageReceiver->beforeDidReceiveMessage(connection, decoder);
         messageReceiver->didReceiveMessage(connection, decoder);
         return true;
     }
