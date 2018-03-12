@@ -41,6 +41,7 @@ public:
     }
 
     virtual void didReceiveMessage(Connection&, Decoder&) = 0;
+    virtual void beforeDidReceiveMessage(Connection&, Decoder&) {};
     virtual void didReceiveSyncMessage(Connection&, Decoder&, std::unique_ptr<Encoder>&)
     {
         ASSERT_NOT_REACHED();

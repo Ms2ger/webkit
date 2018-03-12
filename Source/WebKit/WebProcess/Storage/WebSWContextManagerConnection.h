@@ -55,6 +55,10 @@ public:
     ~WebSWContextManagerConnection();
 
     void didReceiveMessage(IPC::Connection&, IPC::Decoder&) final;
+    void beforeDidReceiveMessage(IPC::Connection& connection, IPC::Decoder& decoder) final
+    {
+        fprintf(stderr, "WebSWContextManagerConnection::didReceiveMessage(conn=%p, %s)\n", &connection, decoder.messageName().toString().data());
+    }
     void didReceiveSyncMessage(IPC::Connection&, IPC::Decoder&, std::unique_ptr<IPC::Encoder>&) final;
 
     void removeFrameLoaderClient(ServiceWorkerFrameLoaderClient&);
