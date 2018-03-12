@@ -39,6 +39,7 @@ namespace WebKit {
 WebSWServerToContextConnection::WebSWServerToContextConnection(Ref<IPC::Connection>&& connection)
     : m_ipcConnection(WTFMove(connection))
 {
+    fprintf(stderr, "WebSWServerToContextConnection: %p\n", m_ipcConnection.ptr());
 }
 
 IPC::Connection* WebSWServerToContextConnection::messageSenderConnection()
@@ -58,6 +59,7 @@ void WebSWServerToContextConnection::connectionClosed()
 
 void WebSWServerToContextConnection::installServiceWorkerContext(const ServiceWorkerContextData& data, PAL::SessionID sessionID)
 {
+    fprintf(stderr, "WebSWServerToContextConnection::installServiceWorkerContext for worker %s\n", data.serviceWorkerIdentifier.loggingString().utf8().data());
     send(Messages::WebSWContextManagerConnection::InstallServiceWorker { data, sessionID });
 }
 

@@ -23,11 +23,14 @@ promise_test(t => {
     let registration;
 
     return loadPromise.then(() => {
+        console.log("T1 S1")
         return frames[0].testRegister();
     }).then(r => {
+        console.log("T1 S2")
         registration = r;
         return wait_for_state(t, registration.installing, 'activated');
     }).then(_ => {
+        console.log("T1 S3")
         assert_equals(registration.active.scriptURL, normalizeURL('relevant/test-sw.js'), 'the script URL should be parsed against the relevant global');
         assert_equals(registration.scope, normalizeURL('relevant/'), 'the default scope URL should be parsed against the parsed script URL');
 
@@ -39,11 +42,14 @@ promise_test(t => {
     let registration;
 
     return loadPromise.then(() => {
+        console.log("T2 S1")
         return frames[0].testRegister({ scope: 'scope' });
     }).then(r => {
+        console.log("T2 S2")
         registration = r;
         return wait_for_state(t, registration.installing, 'activated');
     }).then(_ => {
+        console.log("T2 S3")
         assert_equals(registration.active.scriptURL, normalizeURL('relevant/test-sw.js'), 'the script URL should be parsed against the relevant global');
         assert_equals(registration.scope, normalizeURL('relevant/scope'), 'the given scope URL should be parsed against the relevant global');
 
@@ -55,12 +61,15 @@ promise_test(t => {
     let registration;
 
     return loadPromise.then(() => {
+        console.log("T3 S1")
         return navigator.serviceWorker.register(normalizeURL('relevant/test-sw.js'));
     }).then(r => {
+        console.log("T3 S2")
         registration = r;
         return frames[0].testGetRegistration();
     })
     .then(gottenRegistration => {
+        console.log("T3 S3")
         assert_not_equals(registration, null, 'the registration should not be null');
         assert_not_equals(gottenRegistration, null, 'the registration from the other frame should not be null');
         assert_equals(gottenRegistration.scope, registration.scope,
