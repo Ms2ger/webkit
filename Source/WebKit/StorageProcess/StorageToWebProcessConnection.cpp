@@ -122,6 +122,9 @@ void StorageToWebProcessConnection::didReceiveSyncMessage(IPC::Connection& conne
 
 void StorageToWebProcessConnection::didClose(IPC::Connection& connection)
 {
+    fprintf(stderr, "StorageToWebProcessConnection::didClose\n");
+//    CRASH();
+
     UNUSED_PARAM(connection);
 
 #if ENABLE(SERVICE_WORKER)
@@ -154,6 +157,9 @@ void StorageToWebProcessConnection::didClose(IPC::Connection& connection)
 
 void StorageToWebProcessConnection::didReceiveInvalidMessage(IPC::Connection&, IPC::StringReference messageReceiverName, IPC::StringReference messageName)
 {
+    fprintf(stderr, "StorageToWebProcessConnection::didReceiveInvalidMessage(%s, %s)\n",
+        messageReceiverName.toString().data(),
+        messageName.toString().data());
 
 }
 

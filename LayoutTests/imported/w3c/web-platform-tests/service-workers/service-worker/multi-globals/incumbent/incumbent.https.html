@@ -11,10 +11,12 @@ const current = document.querySelector('#c').contentWindow;
 const relevant = document.querySelector('#r').contentWindow;
 
 window.testRegister = options => {
+    console.log("testRegister")
     return current.navigator.serviceWorker.register.call(relevant.navigator.serviceWorker, 'test-sw.js', options);
 };
 
 window.testGetRegistration = () => {
+    console.log("testGetRegistration")
     return current.navigator.serviceWorker.getRegistration.call(relevant.navigator.serviceWorker, 'test-sw.js');
 };
 </script>

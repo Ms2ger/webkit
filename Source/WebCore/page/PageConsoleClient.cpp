@@ -121,7 +121,7 @@ void PageConsoleClient::addMessage(std::unique_ptr<Inspector::ConsoleMessage>&& 
     if (consoleMessage->source() != MessageSource::CSS && !m_page.usesEphemeralSession()) {
         m_page.chrome().client().addMessageToConsole(consoleMessage->source(), consoleMessage->level(), consoleMessage->message(), consoleMessage->line(), consoleMessage->column(), consoleMessage->url());
 
-        if (m_page.settings().logsPageMessagesToSystemConsoleEnabled() || shouldPrintExceptions())
+        if (true || m_page.settings().logsPageMessagesToSystemConsoleEnabled() || shouldPrintExceptions())
             ConsoleClient::printConsoleMessage(MessageSource::ConsoleAPI, MessageType::Log, consoleMessage->level(), consoleMessage->message(), consoleMessage->url(), consoleMessage->line(), consoleMessage->column());
     }
 
@@ -178,7 +178,7 @@ void PageConsoleClient::messageWithTypeAndLevel(MessageType type, MessageLevel l
     if (gotMessage)
         m_page.chrome().client().addMessageToConsole(MessageSource::ConsoleAPI, level, messageText, lineNumber, columnNumber, url);
 
-    if (m_page.settings().logsPageMessagesToSystemConsoleEnabled() || PageConsoleClient::shouldPrintExceptions())
+    if (true || m_page.settings().logsPageMessagesToSystemConsoleEnabled() || PageConsoleClient::shouldPrintExceptions())
         ConsoleClient::printConsoleMessageWithArguments(MessageSource::ConsoleAPI, type, level, exec, WTFMove(arguments));
 }
 

@@ -242,6 +242,7 @@ Connection::Connection(Identifier identifier, bool isServer, Client& client)
     , m_waitingForMessage(nullptr)
     , m_shouldWaitForSyncReplies(true)
 {
+    fprintf(stderr, "ctor conn=%p\n", this);
     ASSERT(RunLoop::isMain());
 
     platformInitialize(identifier);
@@ -254,6 +255,7 @@ Connection::Connection(Identifier identifier, bool isServer, Client& client)
 
 Connection::~Connection()
 {
+    fprintf(stderr, "dtor conn=%p\n", this);
     ASSERT(!isValid());
 }
 
@@ -756,6 +758,7 @@ bool Connection::hasIncomingSyncMessage()
 
 void Connection::postConnectionDidCloseOnConnectionWorkQueue()
 {
+    fprintf(stderr, "Connection::postConnectionDidCloseOnConnectionWorkQueue(%p)\n", this);
     m_connectionQueue->dispatch([protectedThis = makeRef(*this)]() mutable {
         protectedThis->connectionDidClose();
     });
@@ -763,6 +766,8 @@ void Connection::postConnectionDidCloseOnConnectionWorkQueue()
 
 void Connection::connectionDidClose()
 {
+    fprintf(stderr, "Connection::connectionDidClose(%p)\n", this);
+
     // The connection is now invalid.
     platformInvalidate();
 

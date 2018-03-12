@@ -79,7 +79,7 @@ function wait_for_update(test, registration) {
 function wait_for_state(test, worker, state) {
   if (!worker || worker.state == undefined) {
     return Promise.reject(new Error(
-      'wait_for_state must be passed a ServiceWorker'));
+      `wait_for_state must be passed a ServiceWorker, got ${worker}`));
   }
   if (worker.state === state)
     return Promise.resolve(state);

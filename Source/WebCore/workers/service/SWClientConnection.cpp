@@ -47,6 +47,7 @@ SWClientConnection::~SWClientConnection() = default;
 
 void SWClientConnection::scheduleJob(DocumentOrWorkerIdentifier contextIdentifier, const ServiceWorkerJobData& jobData)
 {
+    fprintf(stderr, "SWClientConnection::scheduleJob(%s)\n", jobData.identifier().loggingString().utf8().data());
     ASSERT(isMainThread());
 
     auto addResult = m_scheduledJobSources.add(jobData.identifier().jobIdentifier, contextIdentifier);

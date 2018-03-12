@@ -118,6 +118,7 @@ ServiceWorker* ServiceWorkerContainer::controller() const
 
 void ServiceWorkerContainer::addRegistration(const String& relativeScriptURL, const RegistrationOptions& options, Ref<DeferredPromise>&& promise)
 {
+    fprintf(stderr, "ServiceWorkerContainer::addRegistration\n");
     auto* context = scriptExecutionContext();
     if (m_isStopped || !context->sessionID().isValid()) {
         promise->reject(Exception(InvalidStateError));
@@ -176,7 +177,9 @@ void ServiceWorkerContainer::addRegistration(const String& relativeScriptURL, co
     jobData.type = ServiceWorkerJobType::Register;
     jobData.registrationOptions = options;
 
-    scheduleJob(ServiceWorkerJob::create(*this, WTFMove(promise), WTFMove(jobData)));
+    auto job = ServiceWorkerJob::create(*this, WTFMove(promise), WTFMove(jobData));
+    fprintf(stderr, "  scheduling job %s\n", job->data().identifier().loggingString().utf8().data());
+    scheduleJob(WTFMove(job));
 }
 
 void ServiceWorkerContainer::removeRegistration(const URL& scopeURL, Ref<DeferredPromise>&& promise)
@@ -631,6 +634,8 @@ DocumentOrWorkerIdentifier ServiceWorkerContainer::contextIdentifier()
 
 bool ServiceWorkerContainer::isAlwaysOnLoggingAllowed() const
 {
+    return true;
+
     auto* context = scriptExecutionContext();
     if (!context)
         return false;
