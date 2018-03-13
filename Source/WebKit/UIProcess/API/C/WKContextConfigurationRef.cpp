@@ -78,6 +78,16 @@ void WKContextConfigurationSetIndexedDBDatabaseDirectory(WKContextConfigurationR
     toImpl(configuration)->setIndexedDBDatabaseDirectory(toImpl(indexedDBDatabaseDirectory)->string());
 }
 
+WKStringRef WKContextConfigurationCopyServiceWorkerRegistrationDirectory(WKContextConfigurationRef configuration)
+{
+    return toCopiedAPI(toImpl(configuration)->serviceWorkerRegistrationDirectory());
+}
+
+void WKContextConfigurationSetServiceWorkerRegistrationDirectory(WKContextConfigurationRef configuration, WKStringRef serviceWorkerRegistrationDirectory)
+{
+    toImpl(configuration)->setServiceWorkerRegistrationDirectory(toImpl(serviceWorkerRegistrationDirectory)->string());
+}
+
 WKStringRef WKContextConfigurationCopyInjectedBundlePath(WKContextConfigurationRef configuration)
 {
     return toCopiedAPI(toImpl(configuration)->injectedBundlePath());

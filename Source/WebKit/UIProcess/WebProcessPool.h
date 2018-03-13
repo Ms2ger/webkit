@@ -649,6 +649,7 @@ private:
         String mediaKeyStorageDirectory;
         String uiProcessBundleResourcePath;
         String indexedDatabaseDirectory;
+        String serviceWorkerRegistrationDirectory;
 
 #if PLATFORM(IOS)
         String cookieStorageDirectory;
