@@ -45,6 +45,8 @@ public:
     void start(GSocket*, GIOCondition, RunLoop&, Function<gboolean (GIOCondition)>&&);
     void stop();
 
+//    bool m_crash { false };
+
 private:
     static gboolean socketSourceCallback(GSocket*, GIOCondition, GSocketMonitor*);
 

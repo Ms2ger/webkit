@@ -122,7 +122,7 @@ void StorageToWebProcessConnection::didReceiveSyncMessage(IPC::Connection& conne
 
 void StorageToWebProcessConnection::didClose(IPC::Connection& connection)
 {
-    fprintf(stderr, "StorageToWebProcessConnection::didClose\n");
+    fprintf(stderr, "StorageToWebProcessConnection::didClose(%p)\n", &connection);
 //    CRASH();
 
     UNUSED_PARAM(connection);

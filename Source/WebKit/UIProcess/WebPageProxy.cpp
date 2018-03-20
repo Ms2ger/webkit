@@ -5577,6 +5577,9 @@ String WebPageProxy::currentURL() const
 
 void WebPageProxy::processDidTerminate(ProcessTerminationReason reason)
 {
+
+    fprintf(stderr, "WebPageProxy::processDidTerminate reason=%d\n", (int)reason);
+
     ASSERT(m_isValid);
 
 #if PLATFORM(IOS)

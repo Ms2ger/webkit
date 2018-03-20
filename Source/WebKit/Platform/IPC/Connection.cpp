@@ -760,6 +760,7 @@ void Connection::postConnectionDidCloseOnConnectionWorkQueue()
 {
     fprintf(stderr, "Connection::postConnectionDidCloseOnConnectionWorkQueue(%p)\n", this);
     m_connectionQueue->dispatch([protectedThis = makeRef(*this)]() mutable {
+        fprintf(stderr, "Callback in Connection::postConnectionDidCloseOnConnectionWorkQueue(%p)\n", protectedThis.ptr());
         protectedThis->connectionDidClose();
     });
 }

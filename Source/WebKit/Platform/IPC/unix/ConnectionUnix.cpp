@@ -309,12 +309,14 @@ void Connection::readyReadHandler()
 
             if (m_isConnected) {
                 WTFLogAlways("Error receiving IPC message on socket %d in process %d: %s", m_socketDescriptor, getpid(), strerror(errno));
+                fprintf(stderr, "[%p] Error receiving IPC message on socket %d in process %d: %s\n", this, m_socketDescriptor, getpid(), strerror(errno));
                 connectionDidClose();
             }
             return;
         }
 
         if (!bytesRead) {
+            fprintf(stderr, "[%p] No bytes read\n", this);
             connectionDidClose();
             return;
         }
@@ -342,6 +344,7 @@ bool Connection::open()
 #if USE(GLIB)
     m_readSocketMonitor.start(m_socket.get(), G_IO_IN, m_connectionQueue->runLoop(), [protectedThis] (GIOCondition condition) -> gboolean {
         if (condition & G_IO_HUP || condition & G_IO_ERR || condition & G_IO_NVAL) {
+            fprintf(stderr, "[%p] Condition=%#x (%p)\n", protectedThis.get(), condition, &protectedThis->m_readSocketMonitor);
             protectedThis->connectionDidClose();
             return G_SOURCE_REMOVE;
         }
