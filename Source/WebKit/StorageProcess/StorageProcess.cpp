@@ -248,6 +248,7 @@ void StorageProcess::createStorageToWebProcessConnection(bool isServiceWorkerPro
 {
 #if USE(UNIX_DOMAIN_SOCKETS)
     IPC::Connection::SocketPair socketPair = IPC::Connection::createPlatformConnection();
+    fprintf(stderr, "StorageProcess::createStorageToWebProcessConnection: se=%d cl=%d\n", socketPair.server, socketPair.client);
     m_storageToWebProcessConnections.append(StorageToWebProcessConnection::create(socketPair.server));
     parentProcessConnection()->send(Messages::StorageProcessProxy::DidCreateStorageToWebProcessConnection(IPC::Attachment(socketPair.client)), 0);
 #elif OS(DARWIN)

@@ -242,7 +242,7 @@ Connection::Connection(Identifier identifier, bool isServer, Client& client)
     , m_waitingForMessage(nullptr)
     , m_shouldWaitForSyncReplies(true)
 {
-    fprintf(stderr, "ctor conn=%p\n", this);
+    fprintf(stderr, "ctor conn=%p ID=%d\n", this, identifier);
     ASSERT(RunLoop::isMain());
 
     platformInitialize(identifier);
@@ -255,7 +255,7 @@ Connection::Connection(Identifier identifier, bool isServer, Client& client)
 
 Connection::~Connection()
 {
-    fprintf(stderr, "dtor conn=%p\n", this);
+    fprintf(stderr, "dtor conn=%p ID=%d\n", this, m_socketDescriptor);
     ASSERT(!isValid());
 }
 
@@ -377,6 +377,10 @@ std::unique_ptr<Encoder> Connection::createSyncMessageEncoder(StringReference me
 
 bool Connection::sendMessage(std::unique_ptr<Encoder> encoder, OptionSet<SendOption> sendOptions)
 {
+    if (encoder->messageName() == "InstallServiceWorker") {
+        fprintf(stderr, "sendMessage InstallServiceWorker [%p]\n", this);
+    }
+
     if (!isValid())
         return false;
 
@@ -914,6 +918,10 @@ void Connection::dispatchMessage(Decoder& decoder)
 
 void Connection::dispatchMessage(std::unique_ptr<Decoder> message)
 {
+    if (message->messageName() == "InstallServiceWorker") {
+        fprintf(stderr, "Dispatching InstallServiceWorker [%p]\n", this);
+    }
+
     if (!isValid())
         return;
 

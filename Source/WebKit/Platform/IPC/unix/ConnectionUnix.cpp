@@ -102,6 +102,8 @@ void Connection::platformInitialize(Identifier identifier)
 
 void Connection::platformInvalidate()
 {
+    fprintf(stderr, "Connection::platformInvalidate(%p)\n", this);
+
 #if USE(GLIB)
     // In the GLib platform the socket descriptor is owned by GSocket.
     m_socket = nullptr;
@@ -345,6 +347,7 @@ bool Connection::open()
     m_readSocketMonitor.start(m_socket.get(), G_IO_IN, m_connectionQueue->runLoop(), [protectedThis] (GIOCondition condition) -> gboolean {
         if (condition & G_IO_HUP || condition & G_IO_ERR || condition & G_IO_NVAL) {
             fprintf(stderr, "[%p] Condition=%#x (%p)\n", protectedThis.get(), condition, &protectedThis->m_readSocketMonitor);
+            WTFReportBacktrace();
             protectedThis->connectionDidClose();
             return G_SOURCE_REMOVE;
         }

@@ -59,7 +59,7 @@ void WebSWServerToContextConnection::connectionClosed()
 
 void WebSWServerToContextConnection::installServiceWorkerContext(const ServiceWorkerContextData& data, PAL::SessionID sessionID)
 {
-    fprintf(stderr, "WebSWServerToContextConnection::installServiceWorkerContext for worker %s\n", data.serviceWorkerIdentifier.loggingString().utf8().data());
+    fprintf(stderr, "WebSWServerToContextConnection::installServiceWorkerContext for worker %s => %p\n", data.serviceWorkerIdentifier.loggingString().utf8().data(), m_ipcConnection.ptr());
     send(Messages::WebSWContextManagerConnection::InstallServiceWorker { data, sessionID });
 }
 

@@ -320,6 +320,7 @@ private:
     std::unique_ptr<UnixMessage> m_pendingOutputMessage;
 #if USE(GLIB)
     GRefPtr<GSocket> m_socket;
+public:
     GSocketMonitor m_readSocketMonitor;
     GSocketMonitor m_writeSocketMonitor;
 #endif

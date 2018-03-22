@@ -33,12 +33,13 @@ namespace IPC {
 
 GSocketMonitor::~GSocketMonitor()
 {
+    //fprintf(stderr, "~GSocketMonitor(%p) source=%p\n", this, m_source.get());
     stop();
 }
 
 gboolean GSocketMonitor::socketSourceCallback(GSocket*, GIOCondition condition, GSocketMonitor* monitor)
 {
-    fprintf(stderr, "GSocketMonitor::socketSourceCallback(%p)\n", monitor);
+    //fprintf(stderr, "GSocketMonitor::socketSourceCallback(%p)\n", monitor);
     if (g_cancellable_is_cancelled(monitor->m_cancellable.get()))
         return G_SOURCE_REMOVE;
     return monitor->m_callback(condition);
@@ -50,7 +51,7 @@ void GSocketMonitor::start(GSocket* socket, GIOCondition condition, RunLoop& run
 
     m_cancellable = adoptGRef(g_cancellable_new());
     m_source = adoptGRef(g_socket_create_source(socket, condition, m_cancellable.get()));
-    fprintf(stderr, "GSocketMonitor::start(%p) source=%p\n", this, m_source.get());
+    //fprintf(stderr, "GSocketMonitor::start(%p) source=%p\n", this, m_source.get());
     g_source_set_name(m_source.get(), "[WebKit] Socket monitor");
     m_callback = WTFMove(callback);
     g_source_set_callback(m_source.get(), reinterpret_cast<GSourceFunc>(socketSourceCallback), this, nullptr);
@@ -60,7 +61,7 @@ void GSocketMonitor::start(GSocket* socket, GIOCondition condition, RunLoop& run
 
 void GSocketMonitor::stop()
 {
-    fprintf(stderr, "GSocketMonitor::stop(%p) source=%p\n", this, m_source.get());
+    //fprintf(stderr, "GSocketMonitor::stop(%p) source=%p\n", this, m_source.get());
     if (!m_source)
         return;
 

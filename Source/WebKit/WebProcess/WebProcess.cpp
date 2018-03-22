@@ -1200,6 +1200,7 @@ WebToStorageProcessConnection& WebProcess::ensureWebToStorageProcessConnection(P
 
 #if USE(UNIX_DOMAIN_SOCKETS)
         IPC::Connection::Identifier connectionIdentifier = encodedConnectionIdentifier.releaseFileDescriptor();
+        fprintf(stderr, "WebProcess::ensureWebToStorageProcessConnection(): got cl=%d\n", connectionIdentifier);
 #elif OS(DARWIN)
         IPC::Connection::Identifier connectionIdentifier(encodedConnectionIdentifier.port());
 #elif OS(WINDOWS)

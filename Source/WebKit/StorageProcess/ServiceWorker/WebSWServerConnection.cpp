@@ -71,14 +71,15 @@ WebSWServerConnection::WebSWServerConnection(SWServer& server, IPC::Connection& 
 
 WebSWServerConnection::~WebSWServerConnection()
 {
-    StorageProcess::singleton().unregisterSWServerConnection(*this);
-    for (auto keyValue : m_clientOrigins)
-        server().unregisterServiceWorkerClient(keyValue.value, keyValue.key);
+    fprintf(stderr, "~WebSWServerConnection(%p)\n", this);
 }
 
 void WebSWServerConnection::disconnectedFromWebProcess()
 {
-    notImplemented();
+    fprintf(stderr, "WebSWServerConnection::disconnectedFromWebProcess(%p)\n", this);
+    StorageProcess::singleton().unregisterSWServerConnection(*this);
+    for (auto keyValue : m_clientOrigins)
+        server().unregisterServiceWorkerClient(keyValue.value, keyValue.key);
 }
 
 void WebSWServerConnection::rejectJobInClient(ServiceWorkerJobIdentifier jobIdentifier, const ExceptionData& exceptionData)

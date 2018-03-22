@@ -165,6 +165,7 @@ void StorageProcessProxy::didCreateStorageToWebProcessConnection(const IPC::Atta
     RefPtr<Messages::WebProcessProxy::GetStorageProcessConnection::DelayedReply> reply = m_pendingConnectionReplies.takeFirst();
 
 #if USE(UNIX_DOMAIN_SOCKETS)
+    fprintf(stderr, "StorageProcessProxy::didCreateStorageToWebProcessConnection(): got cl=%d\n", connectionIdentifier.fileDescriptor());
     reply->send(connectionIdentifier);
 #elif OS(DARWIN)
     reply->send(IPC::Attachment(connectionIdentifier.port(), MACH_MSG_TYPE_MOVE_SEND));
