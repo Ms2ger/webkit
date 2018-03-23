@@ -7771,6 +7771,7 @@ static MessageLevel messageLevelFromWTFLogLevel(WTFLogLevel level)
 
 void Document::didLogMessage(const WTFLogChannel& channel, WTFLogLevel level, Vector<JSONLogValue>&& logMessages)
 {
+    return;
     if (!page())
         return;
 

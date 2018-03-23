@@ -32,35 +32,50 @@ function makeOffscreenCanvas() {
     });
 }
 
+let videoPromise = new Promise(function(resolve, reject) {
+    var video = document.createElement("video");
+    video.onloadeddata = video.ontimeupdate = video.oncanplay = video.oncanplaythrough = function(e) {
+        console.log("normal video: " + e.type)
+    };
+    video.oncanplaythrough = function() {
+        console.log("loaded normal video")
+        resolve(video);
+    };
+    video.onerror = reject;
+    video.src = getVideoURI("/images/pattern");
+});
+
 function makeVideo() {
-    return new Promise(function(resolve, reject) {
-        var video = document.createElement("video");
-        video.oncanplaythrough = function() {
-            resolve(video);
-        };
-        video.onerror = reject;
-        video.src = getVideoURI("/images/pattern");
-    });
+    return videoPromise;
 }
 
-function makeDataUrlVideo() {
-    const toDataUrl = (type, buffer) => {
-        const encoded = btoa(String.fromCodePoint(...new Uint8Array(buffer)));
-        return `data:${type};base64,${encoded}`
+let dataUrlVideoPromise = videoPromise.then(() => fetch(getVideoURI("/images/pattern")))
+    .then(response => {
+        console.log("got response")
+        return Promise.all([response.headers.get("Content-Type"), response.arrayBuffer()])
+    })
+    .then(([type, data]) => {
+        return new Promise(function(resolve, reject) {
+            console.log("creating video")
+            const toDataUrl = (type, buffer) => {
+                const encoded = btoa(String.fromCodePoint(...new Uint8Array(buffer)));
+                return `data:${type};base64,${encoded}`
+            };
+            var video = document.createElement("video");
+    video.onloadeddata = video.ontimeupdate = video.oncanplay = video.oncanplaythrough = function(e) {
+        console.log("data video: " + e.type)
     };
-
-    return fetch(getVideoURI("/images/pattern"))
-        .then(response => Promise.all([response.headers.get("Content-Type"), response.arrayBuffer()]))
-        .then(([type, data]) => {
-            return new Promise(function(resolve, reject) {
-                var video = document.createElement("video");
-                video.oncanplaythrough = function() {
-                    resolve(video);
-                };
-                video.onerror = reject;
-                video.src = toDataUrl(type, data);
-            });
+            video.oncanplaythrough = function() {
+                console.log("loaded data video")
+                resolve(video);
+            };
+            video.onerror = reject;
+            video.src = toDataUrl(type, data);
         });
+    });
+
+function makeDataUrlVideo() {
+    return dataUrlVideoPromise;
 }
 
 function makeMakeHTMLImage(src) {

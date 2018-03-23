@@ -131,8 +131,14 @@ public:
         //  on some systems, so don't allow it.
         UNUSED_PARAM(channel);
 #else
-        if (!willLog(channel, WTFLogLevelAlways))
-            return;
+
+        //fprintf(stderr, "Got message with name %s\n", channel.name);
+        if (strcmp(channel.name, "Media") != 0) {
+            if (!willLog(channel, WTFLogLevelAlways))
+                return;
+        } else {
+            fprintf(stderr, "Got message with name Media, would log it=%d\n", willLog(channel, WTFLogLevelAlways));
+        }
 
         log(channel, WTFLogLevelAlways, arguments...);
 #endif

@@ -7863,7 +7863,10 @@ WTFLogChannel& HTMLMediaElement::logChannel() const
 bool HTMLMediaElement::willLog(WTFLogLevel level) const
 {
 #if !RELEASE_LOG_DISABLED
-    return m_logger->willLog(logChannel(), level);
+    bool x= m_logger->willLog(logChannel(), level);
+    fprintf(stderr, "mediua willlog=%d\n", x);
+    
+    return x;
 #else
     UNUSED_PARAM(level);
     return false;

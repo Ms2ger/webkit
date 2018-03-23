@@ -1,3 +1,11 @@
+CONSOLE MESSAGE: line 38: normal video: loadeddata
+CONSOLE MESSAGE: line 38: normal video: canplay
+CONSOLE MESSAGE: line 41: loaded normal video
+CONSOLE MESSAGE: line 54: got response
+CONSOLE MESSAGE: line 59: creating video
+CONSOLE MESSAGE: line 66: data video: loadeddata
+CONSOLE MESSAGE: line 66: data video: canplay
+CONSOLE MESSAGE: line 69: loaded data video
 CONSOLE MESSAGE: line 137: Canvas area exceeds the maximum limit (width * height > 268435456).
 
 PASS createImageBitmap with a an HTMLCanvasElement source and sw set to 0 
