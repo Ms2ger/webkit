@@ -54,7 +54,6 @@ static uint32_t IDNScriptWhiteList[(USCRIPT_CODE_LIMIT + 31) / 32];
 
 namespace WebCore {
 
-
 static BOOL readIDNScriptWhiteListFile(NSString *filename)
 {
     if (!filename)
@@ -91,7 +90,7 @@ static BOOL readIDNScriptWhiteListFile(NSString *filename)
     return YES;
 }
 
-static BOOL allCharactersInIDNScriptWhiteList(const UChar *buffer, int32_t length)
+static void loadIDNScriptWhiteList()
 {
     static dispatch_once_t flag;
     dispatch_once(&flag, ^{
@@ -109,222 +108,6 @@ static BOOL allCharactersInIDNScriptWhiteList(const UChar *buffer, int32_t lengt
         if (!readIDNScriptWhiteListFile([bundle pathForResource:@"IDNScriptWhiteList" ofType:@"txt"]))
             CRASH();
     });
-    
-    int32_t i = 0;
-    std::optional<UChar32> previousCodePoint;
-    while (i < length) {
-        UChar32 c;
-        U16_NEXT(buffer, i, length, c)
-        UErrorCode error = U_ZERO_ERROR;
-        UScriptCode script = uscript_getScript(c, &error);
-        if (error != U_ZERO_ERROR) {
-            LOG_ERROR("got ICU error while trying to look at scripts: %d", error);
-            return NO;
-        }
-        if (script < 0) {
-            LOG_ERROR("got negative number for script code from ICU: %d", script);
-            return NO;
-        }
-        if (script >= USCRIPT_CODE_LIMIT)
-            return NO;
-
-        size_t index = script / 32;
-        uint32_t mask = 1 << (script % 32);
-        if (!(IDNScriptWhiteList[index] & mask))
-            return NO;
-        
-        if (isLookalikeCharacter(previousCodePoint, c))
-            return NO;
-        previousCodePoint = c;
-    }
-    return YES;
-}
-
-static bool isSecondLevelDomainNameAllowedByTLDRules(const UChar* buffer, int32_t length, const WTF::Function<bool(UChar)>& characterIsAllowed)
-{
-    ASSERT(length > 0);
-
-    for (int32_t i = length - 1; i >= 0; --i) {
-        UChar ch = buffer[i];
-        
-        if (characterIsAllowed(ch))
-            continue;
-        
-        // Only check the second level domain. Lower level registrars may have different rules.
-        if (ch == '.')
-            break;
-        
-        return false;
-    }
-    return true;
-}
-
-#define CHECK_RULES_IF_SUFFIX_MATCHES(suffix, function) \
-    { \
-        static const int32_t suffixLength = sizeof(suffix) / sizeof(suffix[0]); \
-        if (length > suffixLength && 0 == memcmp(buffer + length - suffixLength, suffix, sizeof(suffix))) \
-            return isSecondLevelDomainNameAllowedByTLDRules(buffer, length - suffixLength, function); \
-    }
-
-static bool isRussianDomainNameCharacter(UChar ch)
-{
-    // Only modern Russian letters, digits and dashes are allowed.
-    return (ch >= 0x0430 && ch <= 0x044f) || ch == 0x0451 || isASCIIDigit(ch) || ch == '-';
-}
-
-static BOOL allCharactersAllowedByTLDRules(const UChar* buffer, int32_t length)
-{
-    // Skip trailing dot for root domain.
-    if (buffer[length - 1] == '.')
-        length--;
-
-    // http://cctld.ru/files/pdf/docs/rules_ru-rf.pdf
-    static const UChar cyrillicRF[] = {
-        '.',
-        0x0440, // CYRILLIC SMALL LETTER ER
-        0x0444  // CYRILLIC SMALL LETTER EF
-    };
-    CHECK_RULES_IF_SUFFIX_MATCHES(cyrillicRF, isRussianDomainNameCharacter);
-
-    // http://rusnames.ru/rules.pl
-    static const UChar cyrillicRUS[] = {
-        '.',
-        0x0440, // CYRILLIC SMALL LETTER ER
-        0x0443, // CYRILLIC SMALL LETTER U
-        0x0441  // CYRILLIC SMALL LETTER ES
-    };
-    CHECK_RULES_IF_SUFFIX_MATCHES(cyrillicRUS, isRussianDomainNameCharacter);
-
-    // http://ru.faitid.org/projects/moscow/documents/moskva/idn
-    static const UChar cyrillicMOSKVA[] = {
-        '.',
-        0x043C, // CYRILLIC SMALL LETTER EM
-        0x043E, // CYRILLIC SMALL LETTER O
-        0x0441, // CYRILLIC SMALL LETTER ES
-        0x043A, // CYRILLIC SMALL LETTER KA
-        0x0432, // CYRILLIC SMALL LETTER VE
-        0x0430  // CYRILLIC SMALL LETTER A
-    };
-    CHECK_RULES_IF_SUFFIX_MATCHES(cyrillicMOSKVA, isRussianDomainNameCharacter);
-
-    // http://www.dotdeti.ru/foruser/docs/regrules.php
-    static const UChar cyrillicDETI[] = {
-        '.',
-        0x0434, // CYRILLIC SMALL LETTER DE
-        0x0435, // CYRILLIC SMALL LETTER IE
-        0x0442, // CYRILLIC SMALL LETTER TE
-        0x0438  // CYRILLIC SMALL LETTER I
-    };
-    CHECK_RULES_IF_SUFFIX_MATCHES(cyrillicDETI, isRussianDomainNameCharacter);
-
-    // http://corenic.org - rules not published. The word is Russian, so only allowing Russian at this time,
-    // although we may need to revise the checks if this ends up being used with other languages spoken in Russia.
-    static const UChar cyrillicONLAYN[] = {
-        '.',
-        0x043E, // CYRILLIC SMALL LETTER O
-        0x043D, // CYRILLIC SMALL LETTER EN
-        0x043B, // CYRILLIC SMALL LETTER EL
-        0x0430, // CYRILLIC SMALL LETTER A
-        0x0439, // CYRILLIC SMALL LETTER SHORT I
-        0x043D  // CYRILLIC SMALL LETTER EN
-    };
-    CHECK_RULES_IF_SUFFIX_MATCHES(cyrillicONLAYN, isRussianDomainNameCharacter);
-
-    // http://corenic.org - same as above.
-    static const UChar cyrillicSAYT[] = {
-        '.',
-        0x0441, // CYRILLIC SMALL LETTER ES
-        0x0430, // CYRILLIC SMALL LETTER A
-        0x0439, // CYRILLIC SMALL LETTER SHORT I
-        0x0442  // CYRILLIC SMALL LETTER TE
-    };
-    CHECK_RULES_IF_SUFFIX_MATCHES(cyrillicSAYT, isRussianDomainNameCharacter);
-
-    // http://pir.org/products/opr-domain/ - rules not published. According to the registry site,
-    // the intended audience is "Russian and other Slavic-speaking markets".
-    // Chrome appears to only allow Russian, so sticking with that for now.
-    static const UChar cyrillicORG[] = {
-        '.',
-        0x043E, // CYRILLIC SMALL LETTER O
-        0x0440, // CYRILLIC SMALL LETTER ER
-        0x0433  // CYRILLIC SMALL LETTER GHE
-    };
-    CHECK_RULES_IF_SUFFIX_MATCHES(cyrillicORG, isRussianDomainNameCharacter);
-
-    // http://cctld.by/rules.html
-    static const UChar cyrillicBEL[] = {
-        '.',
-        0x0431, // CYRILLIC SMALL LETTER BE
-        0x0435, // CYRILLIC SMALL LETTER IE
-        0x043B  // CYRILLIC SMALL LETTER EL
-    };
-    CHECK_RULES_IF_SUFFIX_MATCHES(cyrillicBEL, [](UChar ch) {
-        // Russian and Byelorussian letters, digits and dashes are allowed.
-        return (ch >= 0x0430 && ch <= 0x044f) || ch == 0x0451 || ch == 0x0456 || ch == 0x045E || ch == 0x2019 || isASCIIDigit(ch) || ch == '-';
-    });
-
-    // http://www.nic.kz/docs/poryadok_vnedreniya_kaz_ru.pdf
-    static const UChar cyrillicKAZ[] = {
-        '.',
-        0x049B, // CYRILLIC SMALL LETTER KA WITH DESCENDER
-        0x0430, // CYRILLIC SMALL LETTER A
-        0x0437  // CYRILLIC SMALL LETTER ZE
-    };
-    CHECK_RULES_IF_SUFFIX_MATCHES(cyrillicKAZ, [](UChar ch) {
-        // Kazakh letters, digits and dashes are allowed.
-        return (ch >= 0x0430 && ch <= 0x044f) || ch == 0x0451 || ch == 0x04D9 || ch == 0x0493 || ch == 0x049B || ch == 0x04A3 || ch == 0x04E9 || ch == 0x04B1 || ch == 0x04AF || ch == 0x04BB || ch == 0x0456 || isASCIIDigit(ch) || ch == '-';
-    });
-
-    // http://uanic.net/docs/documents-ukr/Rules%20of%20UKR_v4.0.pdf
-    static const UChar cyrillicUKR[] = {
-        '.',
-        0x0443, // CYRILLIC SMALL LETTER U
-        0x043A, // CYRILLIC SMALL LETTER KA
-        0x0440  // CYRILLIC SMALL LETTER ER
-    };
-    CHECK_RULES_IF_SUFFIX_MATCHES(cyrillicUKR, [](UChar ch) {
-        // Russian and Ukrainian letters, digits and dashes are allowed.
-        return (ch >= 0x0430 && ch <= 0x044f) || ch == 0x0451 || ch == 0x0491 || ch == 0x0404 || ch == 0x0456 || ch == 0x0457 || isASCIIDigit(ch) || ch == '-';
-    });
-
-    // http://www.rnids.rs/data/DOKUMENTI/idn-srb-policy-termsofuse-v1.4-eng.pdf
-    static const UChar cyrillicSRB[] = {
-        '.',
-        0x0441, // CYRILLIC SMALL LETTER ES
-        0x0440, // CYRILLIC SMALL LETTER ER
-        0x0431  // CYRILLIC SMALL LETTER BE
-    };
-    CHECK_RULES_IF_SUFFIX_MATCHES(cyrillicSRB, [](UChar ch) {
-        // Serbian letters, digits and dashes are allowed.
-        return (ch >= 0x0430 && ch <= 0x0438) || (ch >= 0x043A && ch <= 0x0448) || ch == 0x0452 || ch == 0x0458 || ch == 0x0459 || ch == 0x045A || ch == 0x045B || ch == 0x045F || isASCIIDigit(ch) || ch == '-';
-    });
-
-    // http://marnet.mk/doc/pravilnik-mk-mkd.pdf
-    static const UChar cyrillicMKD[] = {
-        '.',
-        0x043C, // CYRILLIC SMALL LETTER EM
-        0x043A, // CYRILLIC SMALL LETTER KA
-        0x0434  // CYRILLIC SMALL LETTER DE
-    };
-    CHECK_RULES_IF_SUFFIX_MATCHES(cyrillicMKD, [](UChar ch) {
-        // Macedonian letters, digits and dashes are allowed.
-        return (ch >= 0x0430 && ch <= 0x0438) || (ch >= 0x043A && ch <= 0x0448) || ch == 0x0453 || ch == 0x0455 || ch == 0x0458 || ch == 0x0459 || ch == 0x045A || ch == 0x045C || ch == 0x045F || isASCIIDigit(ch) || ch == '-';
-    });
-
-    // https://www.mon.mn/cs/
-    static const UChar cyrillicMON[] = {
-        '.',
-        0x043C, // CYRILLIC SMALL LETTER EM
-        0x043E, // CYRILLIC SMALL LETTER O
-        0x043D  // CYRILLIC SMALL LETTER EN
-    };
-    CHECK_RULES_IF_SUFFIX_MATCHES(cyrillicMON, [](UChar ch) {
-        // Mongolian letters, digits and dashes are allowed.
-        return (ch >= 0x0430 && ch <= 0x044f) || ch == 0x0451 || ch == 0x04E9 || ch == 0x04AF || isASCIIDigit(ch) || ch == '-';
-    });
-
-    // Not a known top level domain with special rules.
-    return NO;
 }
 
 // Return value of nil means no mapping is necessary.
@@ -338,9 +121,6 @@ static NSString *mapHostNameWithRange(NSString *string, NSRange range, BOOL enco
     if (![string length])
         return nil;
     
-    UChar sourceBuffer[HOST_NAME_BUFFER_LENGTH];
-    UChar destinationBuffer[HOST_NAME_BUFFER_LENGTH];
-    
     if (encode && [string rangeOfString:@"%" options:NSLiteralSearch range:range].location != NSNotFound) {
         NSString *substring = [string substringWithRange:range];
         substring = CFBridgingRelease(CFURLCreateStringByReplacingPercentEscapes(NULL, (CFStringRef)substring, CFSTR("")));
@@ -349,25 +129,16 @@ static NSString *mapHostNameWithRange(NSString *string, NSRange range, BOOL enco
             range = NSMakeRange(0, [string length]);
         }
     }
-    
-    int length = range.length;
-    [string getCharacters:sourceBuffer range:range];
-    
-    UErrorCode uerror = U_ZERO_ERROR;
-    UIDNAInfo processingDetails = UIDNA_INFO_INITIALIZER;
-    int32_t numCharactersConverted = (encode ? uidna_nameToASCII : uidna_nameToUnicode)(&URLParser::internationalDomainNameTranscoder(), sourceBuffer, length, destinationBuffer, HOST_NAME_BUFFER_LENGTH, &processingDetails, &uerror);
-    if (length && (U_FAILURE(uerror) || processingDetails.errors)) {
+
+    loadIDNScriptWhiteList();
+
+    NSString *substring = [string substringWithRange:range];
+    NSString *convertedString = URLParser::ICUConvertHostName(substring, encode, IDNScriptWhiteList);
+    if (![convertedString length]) {
         *error = YES;
         return nil;
     }
-    
-    if (numCharactersConverted == length && !memcmp(sourceBuffer, destinationBuffer, length * sizeof(UChar)))
-        return nil;
-    
-    if (!encode && !allCharactersInIDNScriptWhiteList(destinationBuffer, numCharactersConverted) && !allCharactersAllowedByTLDRules(destinationBuffer, numCharactersConverted))
-        return nil;
-    
-    return makeString ? [NSString stringWithCharacters:destinationBuffer length:numCharactersConverted] : string;
+    return [convertedString isEqualToString:substring] ? nil : (makeString ? convertedString : string);
 }
 
 BOOL hostNameNeedsDecodingWithRange(NSString *string, NSRange range, BOOL *error)
@@ -863,13 +634,13 @@ static CFStringRef createStringWithEscapedUnsafeCharacters(CFStringRef string)
     
     Vector<UChar, URL_BYTES_BUFFER_LENGTH> outBuffer;
     
-    std::optional<UChar32> previousCodePoint;
+    UChar32 previousCodePoint = INT32_MAX;
     CFIndex i = 0;
     while (i < length) {
         UChar32 c;
         U16_NEXT(sourceBuffer, i, length, c)
         
-        if (isLookalikeCharacter(previousCodePoint, c)) {
+        if (previousCodePoint != INT32_MAX && URLParser::isLookalikeCharacter(c, previousCodePoint)) {
             uint8_t utf8Buffer[4];
             CFIndex offset = 0;
             UBool failure = false;

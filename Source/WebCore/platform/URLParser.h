@@ -27,6 +27,7 @@
 
 #include "TextEncoding.h"
 #include "URL.h"
+#include <unicode/uscript.h>
 #include <wtf/Expected.h>
 #include <wtf/Forward.h>
 
@@ -50,6 +51,9 @@ public:
 
     static const UIDNA& internationalDomainNameTranscoder();
     static bool isInUserInfoEncodeSet(UChar);
+
+    template<typename CharacterType> static bool isLookalikeCharacter(CharacterType, CharacterType anotherCharacter);
+    static String ICUConvertHostName(const String& hostName, bool encode, const uint32_t (&IDNScriptWhiteList)[(USCRIPT_CODE_LIMIT + 31) / 32]);
 
     WEBCORE_EXPORT static bool isSpecialScheme(const String& scheme);
     WEBCORE_EXPORT static std::optional<String> maybeCanonicalizeScheme(const String& scheme);
