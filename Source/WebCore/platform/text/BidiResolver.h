@@ -896,6 +896,7 @@ void BidiResolverBase<Iterator, Run, DerivedClass>::createBidiRunsForLine(const 
                         m_direction = m_status.lastStrong == U_LEFT_TO_RIGHT ? U_LEFT_TO_RIGHT : U_EUROPEAN_NUMBER;
                         break;
                     default:
+                        fprintf(stderr, "Unexpected m_status.eor=%d\n", m_status.eor);
                         ASSERT_NOT_REACHED();
                 }
                 appendRun();
