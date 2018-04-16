@@ -1060,6 +1060,8 @@ void HTMLMediaElement::mediaPlayerActiveSourceBuffersChanged(const MediaPlayer*)
 
 void HTMLMediaElement::scheduleEvent(const AtomicString& eventName)
 {
+    ALWAYS_LOG(LOGIDENTIFIER, "Scheduling event: ", eventName, " at ", (intptr_t)this);
+
     RefPtr<Event> event = Event::create(eventName, false, true);
 
     // Don't set the event target, the event queue will set it in GenericEventQueue::timerFired and setting it here
@@ -1507,7 +1509,7 @@ void HTMLMediaElement::selectMediaResource()
             // will have to pick a media engine based on the file extension.
             ContentType contentType;
             loadResource(absoluteURL, contentType, String());
-            ALWAYS_LOG(LOGIDENTIFIER, "using 'src' attribute url");
+            ALWAYS_LOG(LOGIDENTIFIER, "using 'src' attribute url: ", absoluteURL);
 
             // 6. Failed with attribute: Reaching this step indicates that the media resource failed to load
             //    or that the given URL could not be resolved. Queue a task to run the dedicated media source failure steps.
@@ -5695,19 +5697,23 @@ void HTMLMediaElement::mediaPlayerCurrentPlaybackTargetIsWirelessChanged(MediaPl
     updateMediaState(UpdateState::Asynchronously);
     updateSleepDisabling();
 }
+#endif
 
 void HTMLMediaElement::dispatchEvent(Event& event)
 {
+#if ENABLE(WIRELESS_PLAYBACK_TARGET)
     if (event.type() == eventNames().webkitcurrentplaybacktargetiswirelesschangedEvent) {
         m_failedToPlayToWirelessTarget = false;
         scheduleDelayedAction(CheckPlaybackTargetCompatablity);
     }
+#endif
 
-    DEBUG_LOG(LOGIDENTIFIER, "dispatching '", event.type(), "'");
+    ALWAYS_LOG(LOGIDENTIFIER, "dispatching '", event.type(), "'");
 
     HTMLElement::dispatchEvent(event);
 }
 
+#if ENABLE(WIRELESS_PLAYBACK_TARGET)
 bool HTMLMediaElement::addEventListener(const AtomicString& eventType, Ref<EventListener>&& listener, const AddEventListenerOptions& options)
 {
     if (eventType != eventNames().webkitplaybacktargetavailabilitychangedEvent)

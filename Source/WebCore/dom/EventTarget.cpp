@@ -219,12 +219,16 @@ static const AtomicString& legacyType(const Event& event)
 
 void EventTarget::fireEventListeners(Event& event)
 {
+    LOG(Events, "EventTarget::fireEventListeners(evt) %s", event.type().string().utf8().data());
+
     ASSERT_WITH_SECURITY_IMPLICATION(ScriptDisallowedScope::isEventAllowedInMainThread());
     ASSERT(event.isInitialized());
 
     auto* data = eventTargetData();
-    if (!data)
+    if (!data) {
+        LOG(Events, "  Early return 1");
         return;
+    }
 
     SetForScope<bool> firingEventListenersScope(data->isFiringEventListeners, true);
 
@@ -252,6 +256,7 @@ void EventTarget::fireEventListeners(Event& event)
 // Note that removal still has an effect due to the removed field in RegisteredEventListener.
 void EventTarget::fireEventListeners(Event& event, EventListenerVector listeners)
 {
+    LOG(Events, "EventTarget::fireEventListeners(evt, listeners) %s (%zu)", event.type().string().utf8().data(), listeners.size());
     Ref<EventTarget> protectedThis(*this);
     ASSERT(!listeners.isEmpty());
     ASSERT(scriptExecutionContext());
@@ -286,6 +291,7 @@ void EventTarget::fireEventListeners(Event& event, EventListenerVector listeners
         if (registeredListener->isPassive())
             event.setInPassiveListener(true);
 
+        LOG(Events, "  handling event (type=%d)", registeredListener->callback().type());
         InspectorInstrumentation::willHandleEvent(context, event, *registeredListener);
         registeredListener->callback().handleEvent(context, event);
         InspectorInstrumentation::didHandleEvent(context);

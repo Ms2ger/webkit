@@ -34,7 +34,7 @@ function makeOffscreenCanvas() {
 
 let videoPromise = new Promise(function(resolve, reject) {
     var video = document.createElement("video");
-    video.onloadeddata = video.ontimeupdate = video.oncanplay = video.oncanplaythrough = function(e) {
+    video.onloadeddata = video.ontimeupdate = video.oncanplay = video.onloadedmetadata = function(e) {
         console.log("normal video: " + e.type)
     };
     video.oncanplaythrough = function() {
@@ -62,9 +62,9 @@ let dataUrlVideoPromise = videoPromise.then(() => fetch(getVideoURI("/images/pat
                 return `data:${type};base64,${encoded}`
             };
             var video = document.createElement("video");
-    video.onloadeddata = video.ontimeupdate = video.oncanplay = video.oncanplaythrough = function(e) {
-        console.log("data video: " + e.type)
-    };
+            video.onloadeddata = video.ontimeupdate = video.oncanplay = video.onloadedmetadata = function(e) {
+                console.log("data video: " + e.type)
+            };
             video.oncanplaythrough = function() {
                 console.log("loaded data video")
                 resolve(video);
@@ -149,15 +149,6 @@ function makeBlob() {
 }
 
 var imageSourceTypes = [
-    { name: 'an HTMLCanvasElement', factory: makeCanvas },
     { name: 'an HTMLVideoElement',  factory: makeVideo },
     { name: 'an HTMLVideoElement from a data URL', factory: makeDataUrlVideo },
-    { name: 'a bitmap HTMLImageElement', factory: makeMakeHTMLImage("/images/pattern.png") },
-    { name: 'a vector HTMLImageElement', factory: makeMakeHTMLImage("/images/pattern.svg") },
-    { name: 'a bitmap SVGImageElement', factory: makeMakeSVGImage("/images/pattern.png") },
-    { name: 'a vector SVGImageElement', factory: makeMakeSVGImage("/images/pattern.svg") },
-    { name: 'an OffscreenCanvas',   factory: makeOffscreenCanvas },
-    { name: 'an ImageData',         factory: makeImageData },
-    { name: 'an ImageBitmap',       factory: makeImageBitmap },
-    { name: 'a Blob',               factory: makeBlob },
 ];

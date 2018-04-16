@@ -2310,12 +2310,18 @@ void Node::notifyMutationObserversNodeWillDetach()
 
 void Node::handleLocalEvents(Event& event)
 {
-    if (!hasEventTargetData())
+    LOG(Events, "Node::handleLocalEvents %s", event.type().string().utf8().data());
+
+    if (!hasEventTargetData()) {
+        LOG(Events, "  Early return 1");
         return;
+    }
 
     // FIXME: Should we deliver wheel events to disabled form controls or not?
-    if (is<Element>(*this) && downcast<Element>(*this).isDisabledFormControl() && event.isMouseEvent() && !event.isWheelEvent())
+    if (is<Element>(*this) && downcast<Element>(*this).isDisabledFormControl() && event.isMouseEvent() && !event.isWheelEvent()) {
+        LOG(Events, "  Early return 1");
         return;
+    }
 
     fireEventListeners(event);
 }

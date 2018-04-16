@@ -75,6 +75,8 @@ static void callDefaultEventHandlersInBubblingOrder(Event& event, const EventPat
 
 static void dispatchEventInDOM(Event& event, const EventPath& path)
 {
+    LOG(Events, "EventDispatcher::dispatchEventInDOM %s", event.type().string().utf8().data());
+
     // Trigger capturing event handlers, starting at the top and working our way down.
     event.setEventPhase(Event::CAPTURING_PHASE);
 

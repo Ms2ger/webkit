@@ -37,37 +37,8 @@ function testDrawImageBitmap(source, args = [], { resizeWidth = 20, resizeHeight
 
 for (let { name, factory } of imageSourceTypes) {
     promise_test(function() {
-        return factory().then(function(img) {
-            return testDrawImageBitmap(img);
-        });
+        return factory()
     }, `createImageBitmap from ${name}, and drawImage on the created ImageBitmap`);
-
-    promise_test(function() {
-        return factory().then(function(img) {
-            const options = { resizeWidth: 10, resizeHeight: 10 };
-            return testDrawImageBitmap(img, [options], options);
-        });
-    }, `createImageBitmap from ${name} scaled down, and drawImage on the created ImageBitmap`);
-
-    promise_test(function() {
-        return factory().then(function(img) {
-            const options = { resizeWidth: 40, resizeHeight: 40 };
-            return testDrawImageBitmap(img, [options], options);
-        });
-    }, `createImageBitmap from ${name} scaled up, and drawImage on the created ImageBitmap`);
-
-    promise_test(function() {
-        return factory().then(function(img) {
-            const options = { resizeWidth: 10, resizeHeight: 40 };
-            return testDrawImageBitmap(img, [options], options);
-        });
-    }, `createImageBitmap from ${name} resized, and drawImage on the created ImageBitmap`);
-
-    promise_test(function() {
-        return factory().then(function(img) {
-            return testDrawImageBitmap(img, [20, 20, -20, -20]);
-        });
-    }, `createImageBitmap from ${name} with negative sw/sh, and drawImage on the created ImageBitmap`);
 }
 </script>
 </body>

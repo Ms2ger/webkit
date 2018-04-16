@@ -98,6 +98,8 @@ static void handleBeforeUnloadEventReturnValue(BeforeUnloadEvent& event, const S
 
 void JSEventListener::handleEvent(ScriptExecutionContext& scriptExecutionContext, Event& event)
 {
+    fprintf(stderr, "JSEventListener::handleEvent %s\n", event.type().string().utf8().data());
+
     if (scriptExecutionContext.isJSExecutionForbidden())
         return;
 
@@ -165,6 +167,7 @@ void JSEventListener::handleEvent(ScriptExecutionContext& scriptExecutionContext
 
         JSValue thisValue = handleEventFunction == jsFunction ? toJS(exec, globalObject, event.currentTarget()) : jsFunction;
         NakedPtr<JSC::Exception> exception;
+        fprintf(stderr, "  ==> calling\n");
         JSValue retval = scriptExecutionContext.isDocument()
             ? JSMainThreadExecState::profiledCall(exec, JSC::ProfilingReason::Other, handleEventFunction, callType, callData, thisValue, args, exception)
             : JSC::profiledCall(exec, JSC::ProfilingReason::Other, handleEventFunction, callType, callData, thisValue, args, exception);

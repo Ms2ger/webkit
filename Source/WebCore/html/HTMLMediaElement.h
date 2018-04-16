@@ -670,9 +670,9 @@ private:
     void mediaPlayerCurrentPlaybackTargetIsWirelessChanged(MediaPlayer*) override;
     void enqueuePlaybackTargetAvailabilityChangedEvent();
 
+#endif
     using EventTarget::dispatchEvent;
     void dispatchEvent(Event&) override;
-#endif
 
 #if ENABLE(MEDIA_SESSION)
     void setSessionInternal(MediaSession&);
