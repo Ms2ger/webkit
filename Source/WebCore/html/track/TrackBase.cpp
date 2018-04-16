@@ -30,6 +30,9 @@
 #include <wtf/Language.h>
 #include <wtf/text/StringBuilder.h>
 
+#include <wtf/CryptographicallyRandomNumber.h>
+
+
 #if ENABLE(VIDEO_TRACK)
 
 #include "HTMLMediaElement.h"

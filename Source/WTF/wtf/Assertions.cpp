@@ -491,7 +491,7 @@ static void setStateOfAllChannels(WTFLogChannel* channels[], size_t channelCount
 
 void WTFInitializeLogChannelStatesFromString(WTFLogChannel* channels[], size_t count, const char* logLevel)
 {
-#if !RELEASE_LOG_DISABLED
+#if !RELEASE_LOG_DISABLED && USE(OS_LOG)
     for (size_t i = 0; i < count; ++i) {
         WTFLogChannel* channel = channels[i];
         channel->osLogChannel = os_log_create(channel->subsystem, channel->name);

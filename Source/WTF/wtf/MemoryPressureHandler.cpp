@@ -34,7 +34,7 @@
 
 namespace WTF {
 
-#if RELEASE_LOG_DISABLED
+#if RELEASE_LOG_DISABLED || !USE(OS_LOG)
 WTFLogChannel LogMemoryPressure = { WTFLogChannelOn, "MemoryPressure", WTFLogLevelError };
 #else
 WTFLogChannel LogMemoryPressure = { WTFLogChannelOn, "MemoryPressure", WTFLogLevelError, LOG_CHANNEL_WEBKIT_SUBSYSTEM, OS_LOG_DEFAULT };
@@ -260,7 +260,7 @@ void MemoryPressureHandler::memoryPressureStatusChanged()
 
 void MemoryPressureHandler::ReliefLogger::logMemoryUsageChange()
 {
-#if !RELEASE_LOG_DISABLED
+#if !RELEASE_LOG_DISABLED && USE(OS_LOG)
 #define STRING_SPECIFICATION "%{public}s"
 #define MEMORYPRESSURE_LOG(...) RELEASE_LOG(MemoryPressure, __VA_ARGS__)
 #else

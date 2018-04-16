@@ -99,7 +99,7 @@ extern "C" void _ReadWriteBarrier(void);
 #endif
 
 #ifndef RELEASE_LOG_DISABLED
-#define RELEASE_LOG_DISABLED !(USE(OS_LOG))
+#define RELEASE_LOG_DISABLED 0
 #endif
 
 #if COMPILER(GCC_OR_CLANG)
@@ -154,7 +154,7 @@ typedef struct {
     WTFLogChannelState state;
     const char* name;
     WTFLogLevel level;
-#if !RELEASE_LOG_DISABLED
+#if !RELEASE_LOG_DISABLED && USE(OS_LOG)
     const char* subsystem;
     __unsafe_unretained os_log_t osLogChannel;
 #endif
@@ -171,7 +171,7 @@ typedef struct {
     extern WTFLogChannel LOG_CHANNEL(name);
 
 #if !defined(DEFINE_LOG_CHANNEL)
-#if RELEASE_LOG_DISABLED
+#if RELEASE_LOG_DISABLED || !USE(OS_LOG)
 #define DEFINE_LOG_CHANNEL(name, subsystem) \
     WTFLogChannel LOG_CHANNEL(name) = { WTFLogChannelOff, #name, WTFLogLevelError };
 #else
@@ -451,7 +451,7 @@ WTF_EXPORT_PRIVATE NO_RETURN_DUE_TO_CRASH void WTFCrashWithSecurityImplication(v
 
 #define RELEASE_LOG_WITH_LEVEL(channel, level, ...) ((void)0)
 #define RELEASE_LOG_WITH_LEVEL_IF(isAllowed, channel, level, ...) do { if (isAllowed) RELEASE_LOG_WITH_LEVEL(channel, level, __VA_ARGS__); } while (0)
-#else
+#elif USE(OS_LOG)
 #define RELEASE_LOG(channel, ...) os_log(LOG_CHANNEL(channel).osLogChannel, __VA_ARGS__)
 #define RELEASE_LOG_ERROR(channel, ...) os_log_error(LOG_CHANNEL(channel).osLogChannel, __VA_ARGS__)
 #define RELEASE_LOG_INFO(channel, ...) os_log_info(LOG_CHANNEL(channel).osLogChannel, __VA_ARGS__)
@@ -469,6 +469,26 @@ WTF_EXPORT_PRIVATE NO_RETURN_DUE_TO_CRASH void WTFCrashWithSecurityImplication(v
     if ((isAllowed) && LOG_CHANNEL(channel).level >= (logLevel)) \
         os_log(LOG_CHANNEL(channel).osLogChannel, __VA_ARGS__); \
 } while (0)
+#else
+#define RELEASE_LOG_WITH_LEVEL(channel, logLevel, ...) \
+    do { \
+        WTFLogWithLevel(&LOG_CHANNEL(channel), (logLevel), __VA_ARGS__); \
+    } while (0)
+
+#define RELEASE_LOG_WITH_LEVEL_IF(isAllowed, channel, logLevel, ...) \
+    do { \
+        if (isAllowed) \
+            WTFLogWithLevel(&LOG_CHANNEL(channel), (logLevel), __VA_ARGS__); \
+    } while (0)
+
+#define RELEASE_LOG(channel, ...)       RELEASE_LOG_WITH_LEVEL(channel, WTFLogLevelWarning, __VA_ARGS__)
+#define RELEASE_LOG_ERROR(channel, ...) RELEASE_LOG_WITH_LEVEL(channel, WTFLogLevelError,   __VA_ARGS__)
+#define RELEASE_LOG_INFO(channel, ...)  RELEASE_LOG_WITH_LEVEL(channel, WTFLogLevelInfo,    __VA_ARGS__)
+
+#define RELEASE_LOG_IF(      isAllowed, channel, ...) do { if (isAllowed) RELEASE_LOG(      channel, __VA_ARGS__); } while (0)
+#define RELEASE_LOG_ERROR_IF(isAllowed, channel, ...) do { if (isAllowed) RELEASE_LOG_ERROR(channel, __VA_ARGS__); } while (0)
+#define RELEASE_LOG_INFO_IF(isAllowed, channel, ...) do { if (isAllowed) RELEASE_LOG_INFO(channel, __VA_ARGS__); } while (0)
+
 #endif
 
 

@@ -39,7 +39,7 @@ void RefCountedLeakCounter::decrement() { }
 #else
 
 #define LOG_CHANNEL_PREFIX Log
-#if RELEASE_LOG_DISABLED
+#if RELEASE_LOG_DISABLED || !USE(OS_LOG)
 static WTFLogChannel LogRefCountedLeaks = { WTFLogChannelOn, "RefCountedLeaks", WTFLogLevelError };
 #else
 static WTFLogChannel LogRefCountedLeaks = { WTFLogChannelOn, "RefCountedLeaks", WTFLogLevelError, LOG_CHANNEL_WEBKIT_SUBSYSTEM, OS_LOG_DEFAULT };

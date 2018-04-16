@@ -237,7 +237,7 @@ private:
     {
         String logMessage = makeString(LogArgument<Argument>::toString(arguments)...);
 
-#if RELEASE_LOG_DISABLED
+#if RELEASE_LOG_DISABLED || !USE(OS_LOG)
         WTFLog(&channel, "%s", logMessage.utf8().data());
 #else
         os_log(channel.osLogChannel, "%{public}s", logMessage.utf8().data());
