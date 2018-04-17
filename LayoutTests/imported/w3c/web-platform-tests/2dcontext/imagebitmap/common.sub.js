@@ -42,7 +42,7 @@ let videoPromise = new Promise(function(resolve, reject) {
         resolve(video);
     };
     video.onerror = reject;
-    video.src = getVideoURI("/images/pattern");
+    video.src = getVideoURI("/images/pattern"); window.video0 = video;
 });
 
 function makeVideo() {
@@ -70,7 +70,7 @@ let dataUrlVideoPromise = videoPromise.then(() => fetch(getVideoURI("/images/pat
                 resolve(video);
             };
             video.onerror = reject;
-            video.src = toDataUrl(type, data);
+            video.src = toDataUrl(type, data); window.video1 = video;
         });
     });
 
