@@ -100,8 +100,10 @@ void JSEventListener::handleEvent(ScriptExecutionContext& scriptExecutionContext
 {
     fprintf(stderr, "JSEventListener::handleEvent %s\n", event.type().string().utf8().data());
 
-    if (scriptExecutionContext.isJSExecutionForbidden())
+    if (scriptExecutionContext.isJSExecutionForbidden()) {
+        fprintf(stderr, "  ==> RETURN 1\n");
         return;
+    }
 
     VM& vm = scriptExecutionContext.vm();
     JSLockHolder lock(vm);
@@ -112,12 +114,16 @@ void JSEventListener::handleEvent(ScriptExecutionContext& scriptExecutionContext
     // exception.
 
     JSObject* jsFunction = this->jsFunction(scriptExecutionContext);
-    if (!jsFunction)
+    if (!jsFunction) {
+        fprintf(stderr, "  ==> RETURN 2\n");
         return;
+    }
 
     JSDOMGlobalObject* globalObject = toJSDOMGlobalObject(scriptExecutionContext, m_isolatedWorld);
-    if (!globalObject)
+    if (!globalObject) {
+        fprintf(stderr, "  ==> RETURN 3\n");
         return;
+    }
 
     if (scriptExecutionContext.isDocument()) {
         JSDOMWindow* window = jsCast<JSDOMWindow*>(globalObject);
@@ -137,6 +143,7 @@ void JSEventListener::handleEvent(ScriptExecutionContext& scriptExecutionContext
 
     CallData callData;
     CallType callType = getCallData(handleEventFunction, callData);
+    fprintf(stderr, "  ==> callType = %d\n", (unsigned)callType);
 
     // If jsFunction is not actually a function, see if it implements the EventListener interface and use that
     if (callType == CallType::None) {
@@ -151,6 +158,7 @@ void JSEventListener::handleEvent(ScriptExecutionContext& scriptExecutionContext
         callType = getCallData(handleEventFunction, callData);
     }
 
+    fprintf(stderr, "  ==> callType = %d\n", (unsigned)callType);
     if (callType != CallType::None) {
         Ref<JSEventListener> protectedThis(*this);
 
