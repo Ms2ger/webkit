@@ -96,7 +96,7 @@ template<typename CharacterType> inline bool isASCIIDigitOrValidHostCharacter(Ch
 
 
 
-static BOOL isLookalikeCharacter(std::optional<UChar32> previousCodePoint, UChar32 charCode)
+static bool isLookalikeCharacter(std::optional<UChar32> previousCodePoint, UChar32 charCode)
 {
     // This function treats the following as unsafe, lookalike characters:
     // any non-printable character, any character considered as whitespace,
@@ -110,7 +110,7 @@ static BOOL isLookalikeCharacter(std::optional<UChar32> previousCodePoint, UChar
     // on characters that have not been processed by ICU, so they are needed here.
     
     if (!u_isprint(charCode) || u_isUWhiteSpace(charCode) || u_hasBinaryProperty(charCode, UCHAR_DEFAULT_IGNORABLE_CODE_POINT))
-        return YES;
+        return true;
     
     switch (charCode) {
         case 0x00BC: /* VULGAR FRACTION ONE QUARTER */
@@ -230,7 +230,7 @@ static BOOL isLookalikeCharacter(std::optional<UChar32> previousCodePoint, UChar
         case 0x1F511: /* KEY */
         case 0x1F512: /* LOCK */
         case 0x1F513: /* OPEN LOCK */
-            return YES;
+            return true;
         case 0x0307: /* COMBINING DOT ABOVE */
             return previousCodePoint == 0x0237 /* LATIN SMALL LETTER DOTLESS J */
                 || previousCodePoint == 0x0131 /* LATIN SMALL LETTER DOTLESS I */
@@ -243,7 +243,7 @@ static BOOL isLookalikeCharacter(std::optional<UChar32> previousCodePoint, UChar
                 && !isASCIIDigitOrValidHostCharacter(previousCodePoint.value())
                 && !isArmenianScriptCharacter(previousCodePoint.value());
         case '.':
-            return NO;
+            return false;
         default:
             return previousCodePoint
                 && isArmenianLookalikeCharacter(previousCodePoint.value())
