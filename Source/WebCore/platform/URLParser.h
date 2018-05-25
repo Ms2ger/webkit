@@ -51,6 +51,8 @@ public:
     static const UIDNA& internationalDomainNameTranscoder();
     static bool isInUserInfoEncodeSet(UChar);
 
+    static bool isLookalikeCharacter(std::optional<UChar32>, UChar32);
+
     WEBCORE_EXPORT static bool isSpecialScheme(const String& scheme);
     WEBCORE_EXPORT static std::optional<String> maybeCanonicalizeScheme(const String& scheme);
 

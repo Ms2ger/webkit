@@ -54,203 +54,6 @@ static uint32_t IDNScriptWhiteList[(USCRIPT_CODE_LIMIT + 31) / 32];
 
 namespace WebCore {
 
-static bool isArmenianLookalikeCharacter(UChar32 codePoint)
-{
-    return codePoint == 0x0548 || codePoint == 0x054D || codePoint == 0x0578 || codePoint == 0x057D;
-}
-
-static bool isArmenianScriptCharacter(UChar32 codePoint)
-{
-    UErrorCode error = U_ZERO_ERROR;
-    UScriptCode script = uscript_getScript(codePoint, &error);
-    if (error != U_ZERO_ERROR) {
-        LOG_ERROR("got ICU error while trying to look at scripts: %d", error);
-        return false;
-    }
-
-    return script == USCRIPT_ARMENIAN;
-}
-
-
-template<typename CharacterType> inline bool isASCIIDigitOrValidHostCharacter(CharacterType charCode)
-{
-    if (!isASCIIDigitOrPunctuation(charCode))
-        return false;
-
-    // Things the URL Parser rejects:
-    switch (charCode) {
-    case '#':
-    case '%':
-    case '/':
-    case ':':
-    case '?':
-    case '@':
-    case '[':
-    case '\\':
-    case ']':
-        return false;
-    default:
-        return true;
-    }
-}
-
-
-
-static bool isLookalikeCharacter(std::optional<UChar32> previousCodePoint, UChar32 charCode)
-{
-    // This function treats the following as unsafe, lookalike characters:
-    // any non-printable character, any character considered as whitespace,
-    // any ignorable character, and emoji characters related to locks.
-    
-    // We also considered the characters in Mozilla's blacklist <http://kb.mozillazine.org/Network.IDN.blacklist_chars>.
-
-    // Some of the characters here will never appear once ICU has encoded.
-    // For example, ICU transforms most spaces into an ASCII space and most
-    // slashes into an ASCII solidus. But one of the two callers uses this
-    // on characters that have not been processed by ICU, so they are needed here.
-    
-    if (!u_isprint(charCode) || u_isUWhiteSpace(charCode) || u_hasBinaryProperty(charCode, UCHAR_DEFAULT_IGNORABLE_CODE_POINT))
-        return true;
-    
-    switch (charCode) {
-        case 0x00BC: /* VULGAR FRACTION ONE QUARTER */
-        case 0x00BD: /* VULGAR FRACTION ONE HALF */
-        case 0x00BE: /* VULGAR FRACTION THREE QUARTERS */
-        case 0x00ED: /* LATIN SMALL LETTER I WITH ACUTE */
-        case 0x01C3: /* LATIN LETTER RETROFLEX CLICK */
-        case 0x0251: /* LATIN SMALL LETTER ALPHA */
-        case 0x0261: /* LATIN SMALL LETTER SCRIPT G */
-        case 0x02D0: /* MODIFIER LETTER TRIANGULAR COLON */
-        case 0x0335: /* COMBINING SHORT STROKE OVERLAY */
-        case 0x0337: /* COMBINING SHORT SOLIDUS OVERLAY */
-        case 0x0338: /* COMBINING LONG SOLIDUS OVERLAY */
-        case 0x0589: /* ARMENIAN FULL STOP */
-        case 0x05B4: /* HEBREW POINT HIRIQ */
-        case 0x05BC: /* HEBREW POINT DAGESH OR MAPIQ */
-        case 0x05C3: /* HEBREW PUNCTUATION SOF PASUQ */
-        case 0x05F4: /* HEBREW PUNCTUATION GERSHAYIM */
-        case 0x0609: /* ARABIC-INDIC PER MILLE SIGN */
-        case 0x060A: /* ARABIC-INDIC PER TEN THOUSAND SIGN */
-        case 0x0650: /* ARABIC KASRA */
-        case 0x0660: /* ARABIC INDIC DIGIT ZERO */
-        case 0x066A: /* ARABIC PERCENT SIGN */
-        case 0x06D4: /* ARABIC FULL STOP */
-        case 0x06F0: /* EXTENDED ARABIC INDIC DIGIT ZERO */
-        case 0x0701: /* SYRIAC SUPRALINEAR FULL STOP */
-        case 0x0702: /* SYRIAC SUBLINEAR FULL STOP */
-        case 0x0703: /* SYRIAC SUPRALINEAR COLON */
-        case 0x0704: /* SYRIAC SUBLINEAR COLON */
-        case 0x1735: /* PHILIPPINE SINGLE PUNCTUATION */
-        case 0x1D04: /* LATIN LETTER SMALL CAPITAL C */
-        case 0x1D0F: /* LATIN LETTER SMALL CAPITAL O */
-        case 0x1D1C: /* LATIN LETTER SMALL CAPITAL U */
-        case 0x1D20: /* LATIN LETTER SMALL CAPITAL V */
-        case 0x1D21: /* LATIN LETTER SMALL CAPITAL W */
-        case 0x1D22: /* LATIN LETTER SMALL CAPITAL Z */
-        case 0x1ECD: /* LATIN SMALL LETTER O WITH DOT BELOW */
-        case 0x2010: /* HYPHEN */
-        case 0x2011: /* NON-BREAKING HYPHEN */
-        case 0x2024: /* ONE DOT LEADER */
-        case 0x2027: /* HYPHENATION POINT */
-        case 0x2039: /* SINGLE LEFT-POINTING ANGLE QUOTATION MARK */
-        case 0x203A: /* SINGLE RIGHT-POINTING ANGLE QUOTATION MARK */
-        case 0x2041: /* CARET INSERTION POINT */
-        case 0x2044: /* FRACTION SLASH */
-        case 0x2052: /* COMMERCIAL MINUS SIGN */
-        case 0x2153: /* VULGAR FRACTION ONE THIRD */
-        case 0x2154: /* VULGAR FRACTION TWO THIRDS */
-        case 0x2155: /* VULGAR FRACTION ONE FIFTH */
-        case 0x2156: /* VULGAR FRACTION TWO FIFTHS */
-        case 0x2157: /* VULGAR FRACTION THREE FIFTHS */
-        case 0x2158: /* VULGAR FRACTION FOUR FIFTHS */
-        case 0x2159: /* VULGAR FRACTION ONE SIXTH */
-        case 0x215A: /* VULGAR FRACTION FIVE SIXTHS */
-        case 0x215B: /* VULGAR FRACTION ONE EIGHT */
-        case 0x215C: /* VULGAR FRACTION THREE EIGHTHS */
-        case 0x215D: /* VULGAR FRACTION FIVE EIGHTHS */
-        case 0x215E: /* VULGAR FRACTION SEVEN EIGHTHS */
-        case 0x215F: /* FRACTION NUMERATOR ONE */
-        case 0x2212: /* MINUS SIGN */
-        case 0x2215: /* DIVISION SLASH */
-        case 0x2216: /* SET MINUS */
-        case 0x2236: /* RATIO */
-        case 0x233F: /* APL FUNCTIONAL SYMBOL SLASH BAR */
-        case 0x23AE: /* INTEGRAL EXTENSION */
-        case 0x244A: /* OCR DOUBLE BACKSLASH */
-        case 0x2571: /* DisplayType::Box DRAWINGS LIGHT DIAGONAL UPPER RIGHT TO LOWER LEFT */
-        case 0x2572: /* DisplayType::Box DRAWINGS LIGHT DIAGONAL UPPER LEFT TO LOWER RIGHT */
-        case 0x29F6: /* SOLIDUS WITH OVERBAR */
-        case 0x29F8: /* BIG SOLIDUS */
-        case 0x2AFB: /* TRIPLE SOLIDUS BINARY RELATION */
-        case 0x2AFD: /* DOUBLE SOLIDUS OPERATOR */
-        case 0x2FF0: /* IDEOGRAPHIC DESCRIPTION CHARACTER LEFT TO RIGHT */
-        case 0x2FF1: /* IDEOGRAPHIC DESCRIPTION CHARACTER ABOVE TO BELOW */
-        case 0x2FF2: /* IDEOGRAPHIC DESCRIPTION CHARACTER LEFT TO MIDDLE AND RIGHT */
-        case 0x2FF3: /* IDEOGRAPHIC DESCRIPTION CHARACTER ABOVE TO MIDDLE AND BELOW */
-        case 0x2FF4: /* IDEOGRAPHIC DESCRIPTION CHARACTER FULL SURROUND */
-        case 0x2FF5: /* IDEOGRAPHIC DESCRIPTION CHARACTER SURROUND FROM ABOVE */
-        case 0x2FF6: /* IDEOGRAPHIC DESCRIPTION CHARACTER SURROUND FROM BELOW */
-        case 0x2FF7: /* IDEOGRAPHIC DESCRIPTION CHARACTER SURROUND FROM LEFT */
-        case 0x2FF8: /* IDEOGRAPHIC DESCRIPTION CHARACTER SURROUND FROM UPPER LEFT */
-        case 0x2FF9: /* IDEOGRAPHIC DESCRIPTION CHARACTER SURROUND FROM UPPER RIGHT */
-        case 0x2FFA: /* IDEOGRAPHIC DESCRIPTION CHARACTER SURROUND FROM LOWER LEFT */
-        case 0x2FFB: /* IDEOGRAPHIC DESCRIPTION CHARACTER OVERLAID */
-        case 0x3002: /* IDEOGRAPHIC FULL STOP */
-        case 0x3008: /* LEFT ANGLE BRACKET */
-        case 0x3014: /* LEFT TORTOISE SHELL BRACKET */
-        case 0x3015: /* RIGHT TORTOISE SHELL BRACKET */
-        case 0x3033: /* VERTICAL KANA REPEAT MARK UPPER HALF */
-        case 0x3035: /* VERTICAL KANA REPEAT MARK LOWER HALF */
-        case 0x321D: /* PARENTHESIZED KOREAN CHARACTER OJEON */
-        case 0x321E: /* PARENTHESIZED KOREAN CHARACTER O HU */
-        case 0x33AE: /* SQUARE RAD OVER S */
-        case 0x33AF: /* SQUARE RAD OVER S SQUARED */
-        case 0x33C6: /* SQUARE C OVER KG */
-        case 0x33DF: /* SQUARE A OVER M */
-        case 0x05B9: /* HEBREW POINT HOLAM */
-        case 0x05BA: /* HEBREW POINT HOLAM HASER FOR VAV */
-        case 0x05C1: /* HEBREW POINT SHIN DOT */
-        case 0x05C2: /* HEBREW POINT SIN DOT */
-        case 0x05C4: /* HEBREW MARK UPPER DOT */
-        case 0xA731: /* LATIN LETTER SMALL CAPITAL S */
-        case 0xA771: /* LATIN SMALL LETTER DUM */
-        case 0xA789: /* MODIFIER LETTER COLON */
-        case 0xFE14: /* PRESENTATION FORM FOR VERTICAL SEMICOLON */
-        case 0xFE15: /* PRESENTATION FORM FOR VERTICAL EXCLAMATION MARK */
-        case 0xFE3F: /* PRESENTATION FORM FOR VERTICAL LEFT ANGLE BRACKET */
-        case 0xFE5D: /* SMALL LEFT TORTOISE SHELL BRACKET */
-        case 0xFE5E: /* SMALL RIGHT TORTOISE SHELL BRACKET */
-        case 0xFF0E: /* FULLWIDTH FULL STOP */
-        case 0xFF0F: /* FULL WIDTH SOLIDUS */
-        case 0xFF61: /* HALFWIDTH IDEOGRAPHIC FULL STOP */
-        case 0xFFFC: /* OBJECT REPLACEMENT CHARACTER */
-        case 0xFFFD: /* REPLACEMENT CHARACTER */
-        case 0x1F50F: /* LOCK WITH INK PEN */
-        case 0x1F510: /* CLOSED LOCK WITH KEY */
-        case 0x1F511: /* KEY */
-        case 0x1F512: /* LOCK */
-        case 0x1F513: /* OPEN LOCK */
-            return true;
-        case 0x0307: /* COMBINING DOT ABOVE */
-            return previousCodePoint == 0x0237 /* LATIN SMALL LETTER DOTLESS J */
-                || previousCodePoint == 0x0131 /* LATIN SMALL LETTER DOTLESS I */
-                || previousCodePoint == 0x05D5; /* HEBREW LETTER VAV */
-        case 0x0548: /* ARMENIAN CAPITAL LETTER VO */
-        case 0x054D: /* ARMENIAN CAPITAL LETTER SEH */
-        case 0x0578: /* ARMENIAN SMALL LETTER VO */
-        case 0x057D: /* ARMENIAN SMALL LETTER SEH */
-            return previousCodePoint
-                && !isASCIIDigitOrValidHostCharacter(previousCodePoint.value())
-                && !isArmenianScriptCharacter(previousCodePoint.value());
-        case '.':
-            return false;
-        default:
-            return previousCodePoint
-                && isArmenianLookalikeCharacter(previousCodePoint.value())
-                && !(isArmenianScriptCharacter(charCode) || isASCIIDigitOrValidHostCharacter(charCode));
-    }
-}
-
 static BOOL readIDNScriptWhiteListFile(NSString *filename)
 {
     if (!filename)
@@ -329,7 +132,7 @@ static BOOL allCharactersInIDNScriptWhiteList(const UChar *buffer, int32_t lengt
         if (!(IDNScriptWhiteList[index] & mask))
             return NO;
         
-        if (isLookalikeCharacter(previousCodePoint, c))
+        if (URLParser::isLookalikeCharacter(previousCodePoint, c))
             return NO;
         previousCodePoint = c;
     }
@@ -1072,7 +875,7 @@ static CFStringRef createStringWithEscapedUnsafeCharacters(CFStringRef string)
         UChar32 c;
         U16_NEXT(sourceBuffer, i, length, c)
         
-        if (isLookalikeCharacter(previousCodePoint, c)) {
+        if (URLParser::isLookalikeCharacter(previousCodePoint, c)) {
             uint8_t utf8Buffer[4];
             CFIndex offset = 0;
             UBool failure = false;
