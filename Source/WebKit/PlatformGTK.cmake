@@ -105,6 +105,7 @@ set(WebKit2GTK_INSTALLED_HEADERS
     ${WEBKIT_DIR}/UIProcess/API/gtk/WebKitURIRequest.h
     ${WEBKIT_DIR}/UIProcess/API/gtk/WebKitURIResponse.h
     ${WEBKIT_DIR}/UIProcess/API/gtk/WebKitURISchemeRequest.h
+    ${WEBKIT_DIR}/UIProcess/API/gtk/WebKitURIUtilities.h
     ${WEBKIT_DIR}/UIProcess/API/gtk/WebKitUserContent.h
     ${WEBKIT_DIR}/UIProcess/API/gtk/WebKitUserContentManager.h
     ${WEBKIT_DIR}/UIProcess/API/gtk/WebKitUserMediaPermissionRequest.h
@@ -511,6 +512,7 @@ set(WebKitResources
     "        <file alias=\"images/panIcon\">panIcon.png</file>\n"
     "        <file alias=\"images/textAreaResizeCorner\">textAreaResizeCorner.png</file>\n"
     "        <file alias=\"images/textAreaResizeCorner@2x\">textAreaResizeCorner@2x.png</file>\n"
+    "        <file alias=\"IDNScriptWhiteList\">IDNScriptWhiteList.txt</file>\n"
 )
 
 if (ENABLE_ICONDATABASE)

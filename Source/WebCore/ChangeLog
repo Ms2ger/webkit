@@ -1,3 +1,30 @@
+2018-06-28  Ms2ger <Ms2ger@igalia.com> and Gabriel Ivascu <gabrielivascu@gnome.org>
+
+        [GTK][WPE] Add a function to convert internal URL to display ("pretty") URL
+        https://bugs.webkit.org/show_bug.cgi?id=174816
+
+        Reviewed by NOBODY (OOPS!).
+
+        Test: TestWebKitAPI/Tests/WebKitGLib/TestWebKitURIUtilities.cpp
+
+        * Sources.txt:
+        * WebCore.xcodeproj/project.pbxproj:
+        * platform/URLHelpers.cpp: Added.
+        (WebCore::isArmenianLookalikeCharacter): code moved without semantic changes.
+        (WebCore::isArmenianScriptCharacter): code moved without semantic changes.
+        (WebCore::isASCIIDigitOrValidHostCharacter): code moved without semantic changes.
+        (WebCore::URLParser::isLookalikeCharacter): code moved without semantic changes.
+        (WebCore::allCharactersInIDNScriptWhiteList): code moved without semantic changes.
+        (WebCore::isSecondLevelDomainNameAllowedByTLDRules): code moved without semantic changes.
+        (WebCore::isRussianDomainNameCharacter): code moved without semantic changes.
+        (WebCore::allCharactersAllowedByTLDRules): code moved without semantic changes.
+        (WebCore::URLHelpers::encodeDecodePunycode): add.
+        * platform/URLHelpers.h: Added.
+        * platform/mac/WebCoreNSURLExtras.mm:
+        (WebCore::loadIDNScriptWhiteList): factor out to allow moving allCharactersInIDNScriptWhiteList() out.
+        (WebCore::mapHostNameWithRange): use new API.
+        (WebCore::createStringWithEscapedUnsafeCharacters): adjust for moved code.
+
 2018-06-28  Dirk Schulze  <krit@webkit.org>
 
         [css-masking] Update clip-path box mapping to unified box

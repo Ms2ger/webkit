@@ -1,3 +1,16 @@
+2018-06-28  Ms2ger <Ms2ger@igalia.com> and Gabriel Ivascu <gabrielivascu@gnome.org>
+
+        [GTK][WPE] Add a function to convert internal URL to display ("pretty") URL
+        https://bugs.webkit.org/show_bug.cgi?id=174816
+
+        Reviewed by NOBODY (OOPS!).
+
+        * TestWebKitAPI/Tests/WebKitGLib/TestWebKitURIUtilities.cpp: Added.
+        (testURIForDisplay):
+        (beforeAll):
+        (afterAll):
+        * TestWebKitAPI/glib/CMakeLists.txt:
+
 2018-06-27  Ryosuke Niwa  <rniwa@webkit.org>
 
         Make MotionMark's plan file more robust against code changes

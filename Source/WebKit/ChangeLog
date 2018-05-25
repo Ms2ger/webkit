@@ -1,3 +1,23 @@
+2018-06-28  Ms2ger <Ms2ger@igalia.com> and Gabriel Ivascu <gabrielivascu@gnome.org>
+
+        [GTK][WPE] Add a function to convert internal URL to display ("pretty") URL
+        https://bugs.webkit.org/show_bug.cgi?id=174816
+
+        Reviewed by NOBODY (OOPS!).
+
+        * PlatformGTK.cmake:
+        * PlatformWPE.cmake:
+        * SourcesGTK.txt:
+        * SourcesWPE.txt:
+        * UIProcess/API/glib/WebKitURIUtilities.cpp: Added.
+        (webkit_uri_for_display):
+        * UIProcess/API/gtk/WebKitURIUtilities.h: Added.
+        * UIProcess/API/gtk/docs/webkit2gtk-4.0-sections.txt:
+        * UIProcess/API/gtk/docs/webkit2gtk-docs.sgml:
+        * UIProcess/API/gtk/webkit2.h:
+        * UIProcess/API/wpe/WebKitURIUtilities.h: Added.
+        * UIProcess/API/wpe/webkit.h:
+
 2018-06-27  Timothy Hatcher  <timothy@apple.com>
 
         Don't expose new semantic -apple-system color keywords on iOS.
