@@ -1,3 +1,30 @@
+2018-06-12  Ms2ger  <Ms2ger@igalia.com>
+
+        [GTK][WPE] Add a function to convert internal URL to display ("pretty") URL
+        https://bugs.webkit.org/show_bug.cgi?id=174816
+
+        Reviewed by NOBODY (OOPS!).
+
+        This code is based almost entirely on code by Gabriel Ivascu.
+
+        No new tests (OOPS!).
+
+        * platform/URLParser.cpp:
+        (WebCore::isArmenianLookalikeCharacter): code moved without semantic changes.
+        (WebCore::isArmenianScriptCharacter): code moved without semantic changes.
+        (WebCore::isASCIIDigitOrValidHostCharacter): code moved without semantic changes.
+        (WebCore::URLParser::isLookalikeCharacter): code moved without semantic changes.
+        (WebCore::allCharactersInIDNScriptWhiteList): code moved without semantic changes.
+        (WebCore::isSecondLevelDomainNameAllowedByTLDRules): code moved without semantic changes.
+        (WebCore::isRussianDomainNameCharacter): code moved without semantic changes.
+        (WebCore::allCharactersAllowedByTLDRules): code moved without semantic changes.
+        (WebCore::URLParser::ICUConvertHostName): add.
+        * platform/URLParser.h: add signatures.
+        * platform/mac/WebCoreNSURLExtras.mm:
+        (WebCore::loadIDNScriptWhiteList): factor out to allow moving allCharactersInIDNScriptWhiteList() out.
+        (WebCore::mapHostNameWithRange): use new API.
+        (WebCore::createStringWithEscapedUnsafeCharacters): adjust for moved code.
+
 2018-06-19  David Kilzer  <ddkilzer@apple.com>
 
         Add logging when splashboardd enables WebThread
