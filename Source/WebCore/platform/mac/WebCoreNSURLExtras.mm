@@ -90,7 +90,7 @@ static BOOL readIDNScriptWhiteListFile(NSString *filename)
     return YES;
 }
 
-static BOOL allCharactersInIDNScriptWhiteList(const UChar *buffer, int32_t length)
+static void loadIDNScriptWhiteList()
 {
     static dispatch_once_t flag;
     dispatch_once(&flag, ^{
@@ -108,7 +108,12 @@ static BOOL allCharactersInIDNScriptWhiteList(const UChar *buffer, int32_t lengt
         if (!readIDNScriptWhiteListFile([bundle pathForResource:@"IDNScriptWhiteList" ofType:@"txt"]))
             CRASH();
     });
+}
     
+static BOOL allCharactersInIDNScriptWhiteList(const UChar *buffer, int32_t length)
+{
+    loadIDNScriptWhiteList();
+
     int32_t i = 0;
     std::optional<UChar32> previousCodePoint;
     while (i < length) {
