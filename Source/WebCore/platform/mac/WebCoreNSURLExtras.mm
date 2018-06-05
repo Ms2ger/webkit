@@ -341,8 +341,9 @@ static NSString *mapHostNameWithRange(NSString *string, NSRange range, BOOL enco
         return nil;
     
     UChar sourceBuffer[HOST_NAME_BUFFER_LENGTH];
-    UChar destinationBuffer[HOST_NAME_BUFFER_LENGTH];
     
+    static const int32_t kHostNameBufferLength = 2048;
+
     if (encode && [string rangeOfString:@"%" options:NSLiteralSearch range:range].location != NSNotFound) {
         NSString *substring = [string substringWithRange:range];
         substring = CFBridgingRelease(CFURLCreateStringByReplacingPercentEscapes(nullptr, (CFStringRef)substring, CFSTR("")));
@@ -357,10 +358,11 @@ static NSString *mapHostNameWithRange(NSString *string, NSRange range, BOOL enco
     int length = range.length;
     [string getCharacters:sourceBuffer range:range];
     
+    UChar outputBuffer[kHostNameBufferLength];
     UErrorCode uerror = U_ZERO_ERROR;
-    UIDNAInfo processingDetails = UIDNA_INFO_INITIALIZER;
-    int32_t numCharactersConverted = (encode ? uidna_nameToASCII : uidna_nameToUnicode)(&URLParser::internationalDomainNameTranscoder(), sourceBuffer, length, destinationBuffer, HOST_NAME_BUFFER_LENGTH, &processingDetails, &uerror);
-    if (length && (U_FAILURE(uerror) || processingDetails.errors)) {
+    UIDNAInfo uinfo = UIDNA_INFO_INITIALIZER;
+    int32_t numCharactersConverted = (encode ? uidna_nameToASCII : uidna_nameToUnicode)(&URLParser::internationalDomainNameTranscoder(), sourceBuffer, length, outputBuffer, kHostNameBufferLength, &uinfo, &uerror);
+    if (length && (U_FAILURE(uerror) || uinfo.errors)) {
         *error = YES;
         return nil;
     }
