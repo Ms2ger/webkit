@@ -367,15 +367,11 @@ static NSString *mapHostNameWithRange(NSString *string, NSRange range, BOOL enco
         return nil;
     }
     
-    if (numCharactersConverted == length && !memcmp(inputBuffer, outputBuffer, length * sizeof(UChar))) {
-        *error = YES;
+    if (numCharactersConverted == length && !memcmp(inputBuffer, outputBuffer, length * sizeof(UChar)))
         return nil;
-    }
     
-    if (!encode && !allCharactersInIDNScriptWhiteList(outputBuffer, numCharactersConverted, IDNScriptWhiteList) && !allCharactersAllowedByTLDRules(outputBuffer, numCharactersConverted)) {
-        *error = YES;
+    if (!encode && !allCharactersInIDNScriptWhiteList(outputBuffer, numCharactersConverted, IDNScriptWhiteList) && !allCharactersAllowedByTLDRules(outputBuffer, numCharactersConverted))
         return nil;
-    }
     
     return makeString ? [NSString stringWithCharacters:outputBuffer length:numCharactersConverted] : string;
 }
