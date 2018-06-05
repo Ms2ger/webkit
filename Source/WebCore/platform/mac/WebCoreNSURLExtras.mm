@@ -110,7 +110,7 @@ static void loadIDNScriptWhiteList()
     });
 }
     
-static BOOL allCharactersInIDNScriptWhiteList(const UChar *buffer, int32_t length)
+static bool allCharactersInIDNScriptWhiteList(const UChar *buffer, int32_t length)
 {
     loadIDNScriptWhiteList();
 
@@ -123,25 +123,25 @@ static BOOL allCharactersInIDNScriptWhiteList(const UChar *buffer, int32_t lengt
         UScriptCode script = uscript_getScript(c, &error);
         if (error != U_ZERO_ERROR) {
             LOG_ERROR("got ICU error while trying to look at scripts: %d", error);
-            return NO;
+            return false;
         }
         if (script < 0) {
             LOG_ERROR("got negative number for script code from ICU: %d", script);
-            return NO;
+            return false;
         }
         if (script >= USCRIPT_CODE_LIMIT)
-            return NO;
+            return false;
 
         size_t index = script / 32;
         uint32_t mask = 1 << (script % 32);
         if (!(IDNScriptWhiteList[index] & mask))
-            return NO;
+            return false;
         
         if (URLParser::isLookalikeCharacter(previousCodePoint, c))
-            return NO;
+            return false;
         previousCodePoint = c;
     }
-    return YES;
+    return true;
 }
 
 static bool isSecondLevelDomainNameAllowedByTLDRules(const UChar* buffer, int32_t length, const WTF::Function<bool(UChar)>& characterIsAllowed)
