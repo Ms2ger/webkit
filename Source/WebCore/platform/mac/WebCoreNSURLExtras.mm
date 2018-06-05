@@ -366,13 +366,13 @@ static NSString *mapHostNameWithRange(NSString *string, NSRange range, BOOL enco
         return nil;
     }
     
-    if (numCharactersConverted == length && !memcmp(inputBuffer, destinationBuffer, length * sizeof(UChar)))
+    if (numCharactersConverted == length && !memcmp(inputBuffer, outputBuffer, length * sizeof(UChar)))
         return nil;
     
-    if (!encode && !allCharactersInIDNScriptWhiteList(destinationBuffer, numCharactersConverted, IDNScriptWhiteList) && !allCharactersAllowedByTLDRules(destinationBuffer, numCharactersConverted))
+    if (!encode && !allCharactersInIDNScriptWhiteList(outputBuffer, numCharactersConverted, IDNScriptWhiteList) && !allCharactersAllowedByTLDRules(outputBuffer, numCharactersConverted))
         return nil;
     
-    return makeString ? [NSString stringWithCharacters:destinationBuffer length:numCharactersConverted] : string;
+    return makeString ? [NSString stringWithCharacters:outputBuffer length:numCharactersConverted] : string;
 }
 
 BOOL hostNameNeedsDecodingWithRange(NSString *string, NSRange range, BOOL *error)
