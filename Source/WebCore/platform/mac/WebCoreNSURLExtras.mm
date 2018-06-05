@@ -329,6 +329,29 @@ static BOOL allCharactersAllowedByTLDRules(const UChar* buffer, int32_t length)
     return NO;
 }
 
+static NSString* ICUConvertHostName(const String& hostName, bool encode, const uint32_t (&IDNScriptWhiteList)[(USCRIPT_CODE_LIMIT + 31) / 32])
+{
+    int32_t length = static_cast<int32_t>(hostName.length());
+
+    const UChar* inputBuffer = LIKELY(hostName.is8Bit()) ? String::make16BitFrom8BitSource(hostName.characters8(), hostName.length()).characters16() : hostName.characters16();
+    UChar outputBuffer[kHostNameBufferLength];
+    UErrorCode uerror = U_ZERO_ERROR;
+    UIDNAInfo uinfo = UIDNA_INFO_INITIALIZER;
+    int32_t numCharactersConverted = (encode ? uidna_nameToASCII : uidna_nameToUnicode)(&URLParser::internationalDomainNameTranscoder(), inputBuffer, length, outputBuffer, kHostNameBufferLength, &uinfo, &uerror);
+    if (length && (U_FAILURE(uerror) || uinfo.errors)) {
+        *error = YES;
+        return nil;
+    }
+    
+    if (numCharactersConverted == length && !memcmp(inputBuffer, outputBuffer, length * sizeof(UChar)))
+        return nil;
+    
+    if (!encode && !allCharactersInIDNScriptWhiteList(outputBuffer, numCharactersConverted, IDNScriptWhiteList) && !allCharactersAllowedByTLDRules(outputBuffer, numCharactersConverted))
+        return nil;
+
+    return [NSString stringWithCharacters:outputBuffer length:numCharactersConverted];
+}
+
 // Return value of nil means no mapping is necessary.
 // If makeString is NO, then return value is either nil or self to indicate mapping is necessary.
 // If makeString is YES, then return value is either nil or the mapped string.
@@ -353,27 +376,12 @@ static NSString *mapHostNameWithRange(NSString *string, NSRange range, BOOL enco
 
     loadIDNScriptWhiteList();
 
-    int length = range.length;
-
     NSString* substring = [string substringWithRange:range];
-    String hostName(substring);
-    const UChar* inputBuffer = LIKELY(hostName.is8Bit()) ? String::make16BitFrom8BitSource(hostName.characters8(), hostName.length()).characters16() : hostName.characters16();
-    UChar outputBuffer[kHostNameBufferLength];
-    UErrorCode uerror = U_ZERO_ERROR;
-    UIDNAInfo uinfo = UIDNA_INFO_INITIALIZER;
-    int32_t numCharactersConverted = (encode ? uidna_nameToASCII : uidna_nameToUnicode)(&URLParser::internationalDomainNameTranscoder(), inputBuffer, length, outputBuffer, kHostNameBufferLength, &uinfo, &uerror);
-    if (length && (U_FAILURE(uerror) || uinfo.errors)) {
-        *error = YES;
-        return nil;
-    }
-    
-    if (numCharactersConverted == length && !memcmp(inputBuffer, outputBuffer, length * sizeof(UChar)))
+    NSString* convertedString = ICUConvertHostName(substring, encode, IDNScriptWhiteList);
+    if (!convertedString)
         return nil;
     
-    if (!encode && !allCharactersInIDNScriptWhiteList(outputBuffer, numCharactersConverted, IDNScriptWhiteList) && !allCharactersAllowedByTLDRules(outputBuffer, numCharactersConverted))
-        return nil;
-    
-    return makeString ? [NSString stringWithCharacters:outputBuffer length:numCharactersConverted] : string;
+    return makeString ? convertedString : string;
 }
 
 BOOL hostNameNeedsDecodingWithRange(NSString *string, NSRange range, BOOL *error)
