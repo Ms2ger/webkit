@@ -329,7 +329,7 @@ static BOOL allCharactersAllowedByTLDRules(const UChar* buffer, int32_t length)
     return NO;
 }
 
-static String ICUConvertHostName(const String& hostName, bool encode, const uint32_t (&IDNScriptWhiteList)[(USCRIPT_CODE_LIMIT + 31) / 32], BOOL* error)
+static String ICUConvertHostName(const String& hostName, bool encode, const uint32_t (&IDNScriptWhiteList)[(USCRIPT_CODE_LIMIT + 31) / 32], bool* error)
 {
     static const int32_t kHostNameBufferLength = 2048;
 
@@ -348,7 +348,7 @@ static String ICUConvertHostName(const String& hostName, bool encode, const uint
     UIDNAInfo uinfo = UIDNA_INFO_INITIALIZER;
     int32_t numCharactersConverted = (encode ? uidna_nameToASCII : uidna_nameToUnicode)(&URLParser::internationalDomainNameTranscoder(), inputBuffer, length, outputBuffer, kHostNameBufferLength, &uinfo, &uerror);
     if (length && (U_FAILURE(uerror) || uinfo.errors)) {
-        *error = YES;
+        *error = true;
         return String();
     }
     
@@ -384,7 +384,10 @@ static NSString *mapHostNameWithRange(NSString *string, NSRange range, BOOL enco
     loadIDNScriptWhiteList();
 
     NSString* substring = [string substringWithRange:range];
-    String convertedString = ICUConvertHostName(substring, encode, IDNScriptWhiteList, error);
+    bool conversionError = false;
+    String convertedString = ICUConvertHostName(substring, encode, IDNScriptWhiteList, &conversionError);
+    if (conversionError)
+        *error = YES;
     if (!convertedString)
         return nil;
 
