@@ -110,10 +110,8 @@ static void loadIDNScriptWhiteList()
     });
 }
     
-static bool allCharactersInIDNScriptWhiteList(const UChar *buffer, int32_t length)
+static bool allCharactersInIDNScriptWhiteList(const UChar *buffer, int32_t length, const uint32_t (&IDNScriptWhiteList)[(USCRIPT_CODE_LIMIT + 31) / 32])
 {
-    loadIDNScriptWhiteList();
-
     int32_t i = 0;
     std::optional<UChar32> previousCodePoint;
     while (i < length) {
@@ -353,7 +351,9 @@ static NSString *mapHostNameWithRange(NSString *string, NSRange range, BOOL enco
             range = NSMakeRange(0, [string length]);
         }
     }
-    
+
+    loadIDNScriptWhiteList();
+
     int length = range.length;
     [string getCharacters:sourceBuffer range:range];
     
@@ -368,7 +368,7 @@ static NSString *mapHostNameWithRange(NSString *string, NSRange range, BOOL enco
     if (numCharactersConverted == length && !memcmp(sourceBuffer, destinationBuffer, length * sizeof(UChar)))
         return nil;
     
-    if (!encode && !allCharactersInIDNScriptWhiteList(destinationBuffer, numCharactersConverted) && !allCharactersAllowedByTLDRules(destinationBuffer, numCharactersConverted))
+    if (!encode && !allCharactersInIDNScriptWhiteList(destinationBuffer, numCharactersConverted, IDNScriptWhiteList) && !allCharactersAllowedByTLDRules(destinationBuffer, numCharactersConverted))
         return nil;
     
     return makeString ? [NSString stringWithCharacters:destinationBuffer length:numCharactersConverted] : string;
