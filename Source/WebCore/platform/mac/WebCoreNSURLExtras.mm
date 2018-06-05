@@ -329,7 +329,7 @@ static BOOL allCharactersAllowedByTLDRules(const UChar* buffer, int32_t length)
     return NO;
 }
 
-static NSString* ICUConvertHostName(const String& hostName, bool encode, const uint32_t (&IDNScriptWhiteList)[(USCRIPT_CODE_LIMIT + 31) / 32], BOOL* error)
+static String ICUConvertHostName(const String& hostName, bool encode, const uint32_t (&IDNScriptWhiteList)[(USCRIPT_CODE_LIMIT + 31) / 32], BOOL* error)
 {
     static const int32_t kHostNameBufferLength = 2048;
 
@@ -342,16 +342,16 @@ static NSString* ICUConvertHostName(const String& hostName, bool encode, const u
     int32_t numCharactersConverted = (encode ? uidna_nameToASCII : uidna_nameToUnicode)(&URLParser::internationalDomainNameTranscoder(), inputBuffer, length, outputBuffer, kHostNameBufferLength, &uinfo, &uerror);
     if (length && (U_FAILURE(uerror) || uinfo.errors)) {
         *error = YES;
-        return nil;
+        return String();
     }
     
     if (numCharactersConverted == length && !memcmp(inputBuffer, outputBuffer, length * sizeof(UChar)))
-        return nil;
+        return String();
     
     if (!encode && !allCharactersInIDNScriptWhiteList(outputBuffer, numCharactersConverted, IDNScriptWhiteList) && !allCharactersAllowedByTLDRules(outputBuffer, numCharactersConverted))
-        return nil;
+        return String();
 
-    return [NSString stringWithCharacters:outputBuffer length:numCharactersConverted];
+    return String(outputBuffer, numCharactersConverted);
 }
 
 // Return value of nil means no mapping is necessary.
@@ -377,7 +377,7 @@ static NSString *mapHostNameWithRange(NSString *string, NSRange range, BOOL enco
     loadIDNScriptWhiteList();
 
     NSString* substring = [string substringWithRange:range];
-    NSString* convertedString = ICUConvertHostName(substring, encode, IDNScriptWhiteList, error);
+    String convertedString = ICUConvertHostName(substring, encode, IDNScriptWhiteList, error);
     if (!convertedString)
         return nil;
     
