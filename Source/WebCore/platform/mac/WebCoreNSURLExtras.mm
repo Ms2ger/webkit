@@ -340,8 +340,6 @@ static NSString *mapHostNameWithRange(NSString *string, NSRange range, BOOL enco
     if (![string length])
         return nil;
     
-    UChar sourceBuffer[HOST_NAME_BUFFER_LENGTH];
-    
     static const int32_t kHostNameBufferLength = 2048;
 
     if (encode && [string rangeOfString:@"%" options:NSLiteralSearch range:range].location != NSNotFound) {
@@ -356,18 +354,19 @@ static NSString *mapHostNameWithRange(NSString *string, NSRange range, BOOL enco
     loadIDNScriptWhiteList();
 
     int length = range.length;
-    [string getCharacters:sourceBuffer range:range];
-    
+
+    NSString* hostName = [string substringWithRange:range];
+    const UChar* inputBuffer = LIKELY(hostName.is8Bit()) ? String::make16BitFrom8BitSource(hostName.characters8(), hostName.length()).characters16() : hostName.characters16();
     UChar outputBuffer[kHostNameBufferLength];
     UErrorCode uerror = U_ZERO_ERROR;
     UIDNAInfo uinfo = UIDNA_INFO_INITIALIZER;
-    int32_t numCharactersConverted = (encode ? uidna_nameToASCII : uidna_nameToUnicode)(&URLParser::internationalDomainNameTranscoder(), sourceBuffer, length, outputBuffer, kHostNameBufferLength, &uinfo, &uerror);
+    int32_t numCharactersConverted = (encode ? uidna_nameToASCII : uidna_nameToUnicode)(&URLParser::internationalDomainNameTranscoder(), inputBuffer, length, outputBuffer, kHostNameBufferLength, &uinfo, &uerror);
     if (length && (U_FAILURE(uerror) || uinfo.errors)) {
         *error = YES;
         return nil;
     }
     
-    if (numCharactersConverted == length && !memcmp(sourceBuffer, destinationBuffer, length * sizeof(UChar)))
+    if (numCharactersConverted == length && !memcmp(inputBuffer, destinationBuffer, length * sizeof(UChar)))
         return nil;
     
     if (!encode && !allCharactersInIDNScriptWhiteList(destinationBuffer, numCharactersConverted, IDNScriptWhiteList) && !allCharactersAllowedByTLDRules(destinationBuffer, numCharactersConverted))
