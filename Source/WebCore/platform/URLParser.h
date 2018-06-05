@@ -27,6 +27,7 @@
 
 #include "TextEncoding.h"
 #include "URL.h"
+#include <unicode/uscript.h>
 #include <wtf/Expected.h>
 #include <wtf/Forward.h>
 
