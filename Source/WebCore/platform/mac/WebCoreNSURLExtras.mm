@@ -355,7 +355,8 @@ static NSString *mapHostNameWithRange(NSString *string, NSRange range, BOOL enco
 
     int length = range.length;
 
-    NSString* hostName = [string substringWithRange:range];
+    NSString* substring = [string substringWithRange:range];
+    String hostName(substring);
     const UChar* inputBuffer = LIKELY(hostName.is8Bit()) ? String::make16BitFrom8BitSource(hostName.characters8(), hostName.length()).characters16() : hostName.characters16();
     UChar outputBuffer[kHostNameBufferLength];
     UErrorCode uerror = U_ZERO_ERROR;
