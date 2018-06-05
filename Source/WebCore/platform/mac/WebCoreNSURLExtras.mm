@@ -335,7 +335,14 @@ static String ICUConvertHostName(const String& hostName, bool encode, const uint
 
     int32_t length = static_cast<int32_t>(hostName.length());
 
-    const UChar* inputBuffer = LIKELY(hostName.is8Bit()) ? String::make16BitFrom8BitSource(hostName.characters8(), hostName.length()).characters16() : hostName.characters16();
+    String bufferFor16BitData;
+    const UChar* inputBuffer;
+    if (LIKELY(hostName.is8Bit())) {
+        bufferFor16BitData = String::make16BitFrom8BitSource(hostName.characters8(), hostName.length());
+        inputBuffer = bufferFor16BitData.characters16();
+    } else {
+        inputBuffer = hostName.characters16();
+    }
     UChar outputBuffer[kHostNameBufferLength];
     UErrorCode uerror = U_ZERO_ERROR;
     UIDNAInfo uinfo = UIDNA_INFO_INITIALIZER;
