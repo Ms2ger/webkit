@@ -380,8 +380,10 @@ static NSString *mapHostNameWithRange(NSString *string, NSRange range, BOOL enco
     String convertedString = ICUConvertHostName(substring, encode, IDNScriptWhiteList, error);
     if (!convertedString)
         return nil;
-    
-    return makeString ? convertedString : string;
+
+    NSString* convertedString_(convertedString);
+
+    return makeString ? convertedString_ : string;
 }
 
 BOOL hostNameNeedsDecodingWithRange(NSString *string, NSRange range, BOOL *error)
