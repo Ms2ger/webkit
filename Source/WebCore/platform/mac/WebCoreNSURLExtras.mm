@@ -329,8 +329,10 @@ static BOOL allCharactersAllowedByTLDRules(const UChar* buffer, int32_t length)
     return NO;
 }
 
-static NSString* ICUConvertHostName(const String& hostName, bool encode, const uint32_t (&IDNScriptWhiteList)[(USCRIPT_CODE_LIMIT + 31) / 32])
+static NSString* ICUConvertHostName(const String& hostName, bool encode, const uint32_t (&IDNScriptWhiteList)[(USCRIPT_CODE_LIMIT + 31) / 32], BOOL* error)
 {
+    static const int32_t kHostNameBufferLength = 2048;
+
     int32_t length = static_cast<int32_t>(hostName.length());
 
     const UChar* inputBuffer = LIKELY(hostName.is8Bit()) ? String::make16BitFrom8BitSource(hostName.characters8(), hostName.length()).characters16() : hostName.characters16();
@@ -363,8 +365,6 @@ static NSString *mapHostNameWithRange(NSString *string, NSRange range, BOOL enco
     if (![string length])
         return nil;
     
-    static const int32_t kHostNameBufferLength = 2048;
-
     if (encode && [string rangeOfString:@"%" options:NSLiteralSearch range:range].location != NSNotFound) {
         NSString *substring = [string substringWithRange:range];
         substring = CFBridgingRelease(CFURLCreateStringByReplacingPercentEscapes(nullptr, (CFStringRef)substring, CFSTR("")));
@@ -377,7 +377,7 @@ static NSString *mapHostNameWithRange(NSString *string, NSRange range, BOOL enco
     loadIDNScriptWhiteList();
 
     NSString* substring = [string substringWithRange:range];
-    NSString* convertedString = ICUConvertHostName(substring, encode, IDNScriptWhiteList);
+    NSString* convertedString = ICUConvertHostName(substring, encode, IDNScriptWhiteList, error);
     if (!convertedString)
         return nil;
     
