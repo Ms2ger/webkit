@@ -3088,7 +3088,7 @@ static bool allCharactersInIDNScriptWhiteList(const UChar *buffer, int32_t lengt
         if (!(IDNScriptWhiteList[index] & mask))
             return false;
         
-        if (URLParser::isLookalikeCharacter(previousCodePoint, c))
+        if (previousCodePoint && URLParser::isLookalikeCharacter(previousCodePoint, c))
             return false;
         previousCodePoint = c;
     }
