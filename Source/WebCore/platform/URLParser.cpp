@@ -3317,7 +3317,7 @@ String URLParser::ICUConvertHostName(const String& hostName, bool encode, const 
     if (encode)
         return String(outputBuffer, numCharactersConverted);
     // Decoding needs additional checks.
-    if (allCharactersInIDNScriptWhiteList(outputBuffer, numCharactersConverted, IDNScriptWhiteList) && allCharactersAllowedByTLDRules(outputBuffer, numCharactersConverted))
+    if (allCharactersInIDNScriptWhiteList(outputBuffer, numCharactersConverted, IDNScriptWhiteList) || allCharactersAllowedByTLDRules(outputBuffer, numCharactersConverted))
         return String(outputBuffer, numCharactersConverted);
 
     return String();
