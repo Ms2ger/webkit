@@ -3306,7 +3306,7 @@ String URLParser::ICUConvertHostName(const String& hostName, bool encode, const 
     UErrorCode uerror = U_ZERO_ERROR;
     UIDNAInfo uinfo = UIDNA_INFO_INITIALIZER;
     int32_t numCharactersConverted = (encode ? uidna_nameToASCII : uidna_nameToUnicode)(&URLParser::internationalDomainNameTranscoder(), inputBuffer, length, outputBuffer, kHostNameBufferLength, &uinfo, &uerror);
-    if (length && (U_FAILURE(uerror) || uinfo.errors)) {
+    if (U_FAILURE(uerror) || uinfo.errors) {
         *error = true;
         return String();
     }
