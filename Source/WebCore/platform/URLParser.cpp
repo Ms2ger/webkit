@@ -3314,10 +3314,13 @@ String URLParser::ICUConvertHostName(const String& hostName, bool encode, const 
     if (numCharactersConverted == length && !memcmp(inputBuffer, outputBuffer, length * sizeof(UChar)))
         return String();
     
-    if (!encode && !allCharactersInIDNScriptWhiteList(outputBuffer, numCharactersConverted, IDNScriptWhiteList) && !allCharactersAllowedByTLDRules(outputBuffer, numCharactersConverted))
-        return String();
+    if (encode)
+        return String(outputBuffer, numCharactersConverted);
+    // Decoding needs additional checks.
+    if (allCharactersInIDNScriptWhiteList(outputBuffer, numCharactersConverted, IDNScriptWhiteList) || allCharactersAllowedByTLDRules(outputBuffer, numCharactersConverted))
+        return String(outputBuffer, numCharactersConverted);
 
-    return String(outputBuffer, numCharactersConverted);
+    return String();
 }
 
 bool URLParser::allValuesEqual(const URL& a, const URL& b)
