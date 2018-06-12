@@ -3285,14 +3285,14 @@ static bool allCharactersAllowedByTLDRules(const UChar* buffer, int32_t length)
 String URLParser::ICUConvertHostName(const String& hostName, bool encode, const uint32_t (&IDNScriptWhiteList)[(USCRIPT_CODE_LIMIT + 31) / 32], bool* error)
 {
     if (hostName.isNull() || hostName.isEmpty())
-        return emptyString();
+        return String();
 
     // Needs to be big enough to hold an IDN-encoded name.
     // For host names bigger than this, we won't do IDN encoding, which is almost certainly OK.
     static const int32_t kHostNameBufferLength = 2048;
     int32_t length = static_cast<int32_t>(hostName.length());
     if (length > kHostNameBufferLength)
-        return hostName;
+        return String();
 
     String bufferFor16BitData;
     const UChar* inputBuffer;
