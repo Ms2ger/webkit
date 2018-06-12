@@ -49,7 +49,7 @@ gchar* webkit_uri_for_display(const gchar* uri)
 {
     g_return_val_if_fail(uri, nullptr);
 
-    auto coreURI = WebCore::URL(WebCore::ParsedURLStringTag::ParsedURLString, String::fromUTF8(uri));
+    auto coreURI = WebCore::URL(WebCore::URL(), String::fromUTF8(uri));
     if (!coreURI.isValid())
         return g_strdup(uri);
 
@@ -59,14 +59,18 @@ gchar* webkit_uri_for_display(const gchar* uri)
     if (!soupURI.get()->host)
         return g_strdup(uri);
 
-    GUniquePtr<gchar> percentDecodedHost(soup_uri_decode(soupURI.get()->host));
+    GUniquePtr<gchar> percentDecodedHostChars(soup_uri_decode(soupURI.get()->host));
+    auto percentDecodedHost = String::fromUTF8(percentDecodedHostChars.get());
     // Handle Unicode characters in the host name.
-    uint32_t IDNScriptWhiteList[(USCRIPT_CODE_LIMIT + 31) / 32];
-    memset(IDNScriptWhiteList, 0xff, sizeof(IDNScriptWhiteList)); // All scripts are whitelisted.
+    uint32_t IDNScriptWhiteList[(USCRIPT_CODE_LIMIT + 31) / 32] = {};
     bool error = false;
-    auto convertedHostName = WebCore::URLParser::ICUConvertHostName(String::fromUTF8(percentDecodedHost.get()), false, IDNScriptWhiteList, &error);
+    auto convertedHostName = WebCore::URLParser::ICUConvertHostName(percentDecodedHost, false, IDNScriptWhiteList, &error);
     if (error)
         return g_strdup(uri);
+
+    if (convertedHostName.isNull()) {
+        convertedHostName = percentDecodedHost;
+    }
 
     g_free(soupURI.get()->host);
     soupURI.get()->host = g_strdup(convertedHostName.utf8().data());
