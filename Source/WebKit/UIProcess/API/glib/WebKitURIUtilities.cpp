@@ -63,7 +63,11 @@ gchar* webkit_uri_for_display(const gchar* uri)
     // Handle Unicode characters in the host name.
     uint32_t IDNScriptWhiteList[(USCRIPT_CODE_LIMIT + 31) / 32];
     memset(IDNScriptWhiteList, 0xff, sizeof(IDNScriptWhiteList)); // All scripts are whitelisted.
-    auto convertedHostName = WebCore::URLParser::ICUConvertHostName(String::fromUTF8(percentDecodedHost.get()), false, IDNScriptWhiteList);
+    bool error = false;
+    auto convertedHostName = WebCore::URLParser::ICUConvertHostName(String::fromUTF8(percentDecodedHost.get()), false, IDNScriptWhiteList, &error);
+    if (error)
+        return g_strdup(uri);
+
     g_free(soupURI.get()->host);
     soupURI.get()->host = g_strdup(convertedHostName.utf8().data());
 

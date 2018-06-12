@@ -53,9 +53,9 @@ static void testURIForDisplay(Test*, gconstpointer)
         { "http://example.com/a%2Fb", "http://example.com/a%2Fb" }, // '/' in path needs to remain encoded.
     };
 
-    for (auto i = 0; i < G_N_ELEMENTS(items); i++) {
-        GUniquePtr<char> displayURI(webkit_uri_for_display(items[i].input));
-        g_assert_cmpstr(displayURI.get(), ==, items[i].output);
+    for (auto& item : items) {
+        GUniquePtr<char> displayURI(webkit_uri_for_display(item.input));
+        g_assert_cmpstr(displayURI.get(), ==, item.output);
     }
 }
 
