@@ -21,7 +21,8 @@
 #include "WebKitURIUtilities.h"
 
 #include <WebCore/GUniquePtrSoup.h>
-#include <WebCore/URLParser.h>
+#include <WebCore/URL.h>
+#include <WebCore/URLHelpers.h>
 #include <libsoup/soup.h>
 #include <mutex>
 #include <unicode/uidna.h>
@@ -64,7 +65,7 @@ gchar* webkit_uri_for_display(const gchar* uri)
     // Handle Unicode characters in the host name.
     uint32_t IDNScriptWhiteList[(USCRIPT_CODE_LIMIT + 31) / 32] = {};
     bool error = false;
-    auto convertedHostName = WebCore::URLParser::ICUConvertHostName(percentDecodedHost, false, IDNScriptWhiteList, &error);
+    auto convertedHostName = WebCore::URLHelpers::ICUConvertHostName(percentDecodedHost, false, IDNScriptWhiteList, &error);
     if (error)
         return g_strdup(uri);
 

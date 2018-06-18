@@ -1522,6 +1522,7 @@ platform/ThreadGlobalData.cpp
 platform/ThreadTimers.cpp
 platform/Timer.cpp
 platform/URL.cpp
+platform/URLHelpers.cpp @no-unify
 platform/URLParser.cpp
 platform/UserActivity.cpp
 platform/WebCoreCrossThreadCopier.cpp

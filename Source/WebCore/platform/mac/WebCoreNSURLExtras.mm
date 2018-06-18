@@ -27,7 +27,7 @@
  */
 
 #import "config.h"
-#import "URLParser.h"
+#import "URLHelpers.h"
 #import "WebCoreNSURLExtras.h"
 #import <wtf/Function.h>
 #import <wtf/HexNumber.h>
@@ -134,7 +134,7 @@ static NSString *mapHostNameWithRange(NSString *string, NSRange range, BOOL enco
 
     NSString* substring = [string substringWithRange:range];
     bool conversionError = false;
-    String convertedString = URLParser::ICUConvertHostName(substring, encode, IDNScriptWhiteList, &conversionError);
+    String convertedString = URLHelpers::ICUConvertHostName(substring, encode, IDNScriptWhiteList, &conversionError);
     if (conversionError)
         *error = YES;
     if (!convertedString)
@@ -651,7 +651,7 @@ static CFStringRef createStringWithEscapedUnsafeCharacters(CFStringRef string)
         UChar32 c;
         U16_NEXT(sourceBuffer, i, length, c)
         
-        if (URLParser::isLookalikeCharacter(previousCodePoint, c)) {
+        if (URLHelpers::isLookalikeCharacter(previousCodePoint, c)) {
             uint8_t utf8Buffer[4];
             CFIndex offset = 0;
             UBool failure = false;
