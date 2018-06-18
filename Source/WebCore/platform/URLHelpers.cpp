@@ -50,7 +50,6 @@ static bool isArmenianScriptCharacter(UChar32 codePoint)
     return script == USCRIPT_ARMENIAN;
 }
 
-
 template<typename CharacterType> inline bool isASCIIDigitOrValidHostCharacter(CharacterType charCode)
 {
     if (!isASCIIDigitOrPunctuation(charCode))
@@ -72,8 +71,6 @@ template<typename CharacterType> inline bool isASCIIDigitOrValidHostCharacter(Ch
         return true;
     }
 }
-
-
 
 bool URLHelpers::isLookalikeCharacter(std::optional<UChar32> previousCodePoint, UChar32 charCode)
 {
