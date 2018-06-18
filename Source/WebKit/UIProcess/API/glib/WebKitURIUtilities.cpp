@@ -65,7 +65,7 @@ gchar* webkit_uri_for_display(const gchar* uri)
     // Handle Unicode characters in the host name.
     uint32_t IDNScriptWhiteList[(USCRIPT_CODE_LIMIT + 31) / 32] = {};
     bool error = false;
-    auto convertedHostName = WebCore::URLHelpers::ICUConvertHostName(percentDecodedHost, false, IDNScriptWhiteList, &error);
+    auto convertedHostName = WebCore::URLHelpers::decodePunycode(percentDecodedHost, false, IDNScriptWhiteList, &error);
     if (error)
         return g_strdup(uri);
 

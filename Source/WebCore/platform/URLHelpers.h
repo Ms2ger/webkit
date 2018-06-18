@@ -38,7 +38,7 @@ namespace WebCore {
 class URLHelpers final {
 public:
     static bool isLookalikeCharacter(std::optional<UChar32>, UChar32);
-    static String ICUConvertHostName(const String& hostName, bool encode, const uint32_t (&IDNScriptWhiteList)[(USCRIPT_CODE_LIMIT + 31) / 32], bool* error);
+    static String decodePunycode(const String& hostName, bool encode, const uint32_t (&IDNScriptWhiteList)[(USCRIPT_CODE_LIMIT + 31) / 32], bool* error);
 };
 
 } // namespace WebCore

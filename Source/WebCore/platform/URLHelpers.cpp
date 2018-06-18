@@ -446,7 +446,7 @@ static bool allCharactersAllowedByTLDRules(const UChar* buffer, int32_t length)
     return false;
 }
 
-String URLHelpers::ICUConvertHostName(const String& hostName, bool encode, const uint32_t (&IDNScriptWhiteList)[(USCRIPT_CODE_LIMIT + 31) / 32], bool* error)
+String URLHelpers::decodePunycode(const String& hostName, bool encode, const uint32_t (&IDNScriptWhiteList)[(USCRIPT_CODE_LIMIT + 31) / 32], bool* error)
 {
     if (hostName.isNull() || hostName.isEmpty())
         return String();

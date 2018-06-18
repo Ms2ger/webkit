@@ -134,7 +134,7 @@ static NSString *mapHostNameWithRange(NSString *string, NSRange range, BOOL enco
 
     NSString* substring = [string substringWithRange:range];
     bool conversionError = false;
-    String convertedString = URLHelpers::ICUConvertHostName(substring, encode, IDNScriptWhiteList, &conversionError);
+    String convertedString = URLHelpers::decodePunycode(substring, encode, IDNScriptWhiteList, &conversionError);
     if (conversionError)
         *error = YES;
     if (!convertedString)
