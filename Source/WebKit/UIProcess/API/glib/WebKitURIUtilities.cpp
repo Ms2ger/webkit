@@ -41,45 +41,46 @@
  * Use this function to format a URI for display. The URIs used internally by
  * WebKit may contain percent-encoded characters or Punycode, which are not
  * generally suitable to display to users. This function provides protection
- * against IDN homograph attacks so in some cases the host part of the returned
+ * against IDN homograph attacks, so in some cases the host part of the returned
  * URI may be in Punycode if the safety check fails.
  *
- * Returns: (transfer full): @uri suitable for display.
+ * Returns: (nullable) (transfer full): @uri suitable for display, or %NULL in
+ *    case of error.
  **/
 gchar* webkit_uri_for_display(const gchar* uri)
 {
     g_return_val_if_fail(uri, nullptr);
 
-    auto coreURI = WebCore::URL(WebCore::URL(), String::fromUTF8(uri));
+    auto coreURI = WebCore::URL { { }, String::fromUTF8(uri) };
     if (!coreURI.isValid())
-        return g_strdup(uri);
+        return nullptr;
 
     // Remove password and percent-decode host name.
     coreURI.setPass(emptyString());
     auto soupURI = coreURI.createSoupURI();
     if (!soupURI.get()->host)
-        return g_strdup(uri);
+        return nullptr;
 
     GUniquePtr<gchar> percentDecodedHostChars(soup_uri_decode(soupURI.get()->host));
     auto percentDecodedHost = String::fromUTF8(percentDecodedHostChars.get());
     // Handle Unicode characters in the host name.
-    uint32_t IDNScriptWhiteList[(USCRIPT_CODE_LIMIT + 31) / 32] = {};
+    WebCore::ICUConvertHostnameWhitelist IDNScriptWhiteList = {};
     bool error = false;
     auto convertedHostName = WebCore::URLHelpers::decodePunycode(percentDecodedHost, false, IDNScriptWhiteList, &error);
     if (error)
-        return g_strdup(uri);
+        return nullptr;
 
-    if (convertedHostName.isNull()) {
+    if (convertedHostName.isNull())
         convertedHostName = percentDecodedHost;
-    }
 
     g_free(soupURI.get()->host);
     soupURI.get()->host = g_strdup(convertedHostName.utf8().data());
 
-    // Now, decode any percent-encoded characters in the URI. If there are null
-    // characters or escaped slashes, this returns nullptr, so just display the
-    // encoded URI in that case.
+    // Now, decode any percent-encoded characters in the URI.
     GUniquePtr<char> percentEncodedURI(soup_uri_to_string(soupURI.get(), FALSE));
     char* decodedURI = g_uri_unescape_string(percentEncodedURI.get(), "/");
-    return decodedURI ? decodedURI : g_strdup(percentEncodedURI.get());
+    if (!decodedURI)
+        return nullptr;
+
+    return decodedURI;
 }

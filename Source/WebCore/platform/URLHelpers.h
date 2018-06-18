@@ -35,10 +35,12 @@ template<typename> class optional;
 
 namespace WebCore {
 
+using ICUConvertHostnameWhitelist = uint32_t[(USCRIPT_CODE_LIMIT + 31) / 32];
+
 class URLHelpers final {
 public:
     static bool isLookalikeCharacter(std::optional<UChar32>, UChar32);
-    static String decodePunycode(const String& hostName, bool encode, const uint32_t (&IDNScriptWhiteList)[(USCRIPT_CODE_LIMIT + 31) / 32], bool* error);
+    static String decodePunycode(const String& hostName, bool encode, const ICUConvertHostnameWhitelist& IDNScriptWhiteList, bool* error);
 };
 
 } // namespace WebCore
