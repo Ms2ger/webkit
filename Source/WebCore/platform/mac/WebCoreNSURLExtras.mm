@@ -27,6 +27,7 @@
  */
 
 #import "config.h"
+#import "URL.h"
 #import "URLHelpers.h"
 #import "WebCoreNSURLExtras.h"
 #import <wtf/Function.h>
