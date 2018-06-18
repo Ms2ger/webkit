@@ -51,7 +51,7 @@ gchar* webkit_uri_for_display(const gchar* uri)
 {
     g_return_val_if_fail(uri, nullptr);
 
-    auto coreURI = WebCore::URL { { }, String::fromUTF8(uri) };
+    auto coreURI = WebCore::URL { WebCore::URL { }, String::fromUTF8(uri) };
     if (!coreURI.isValid())
         return nullptr;
 

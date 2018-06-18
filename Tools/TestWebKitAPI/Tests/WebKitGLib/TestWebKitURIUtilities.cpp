@@ -50,7 +50,7 @@ static void testURIForDisplay(Test*, gconstpointer)
         { "http://おかがキギク.com/", "http://xn--t8jcd20bfag.com/" },
         // Percent-decoding.
         { "http://www.%7Bexample%7D.com/", "http://www.{example}.com/" },
-        { "http://example.com/a%2Fb", "http://example.com/a%2Fb" }, // '/' in path needs to remain encoded.
+        { "http://example.com/a%2Fb", nullptr }, // '/' in path needs to remain encoded.
     };
 
     for (auto& item : items) {
