@@ -31085,9 +31085,6 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				KnownAssetTags = (
-					New,
-				);
 				LastSwiftUpdateCheck = 0700;
 				LastUpgradeCheck = 0700;
 			};
