@@ -64,7 +64,7 @@ gchar* webkit_uri_for_display(const gchar* uri)
     GUniquePtr<gchar> percentDecodedHostChars(soup_uri_decode(soupURI.get()->host));
     auto percentDecodedHost = String::fromUTF8(percentDecodedHostChars.get());
     // Handle Unicode characters in the host name.
-    WebCore::ICUConvertHostnameWhitelist IDNScriptWhiteList = {};
+    WebCore::ICUConvertHostnameWhitelist IDNScriptWhiteList = { };
     bool error = false;
     auto convertedHostName = WebCore::URLHelpers::decodePunycode(percentDecodedHost, false, IDNScriptWhiteList, &error);
     if (error)

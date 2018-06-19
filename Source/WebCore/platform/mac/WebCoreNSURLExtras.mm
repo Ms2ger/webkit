@@ -27,9 +27,10 @@
  */
 
 #import "config.h"
+#import "WebCoreNSURLExtras.h"
+
 #import "URL.h"
 #import "URLHelpers.h"
-#import "WebCoreNSURLExtras.h"
 #import <wtf/Function.h>
 #import <wtf/HexNumber.h>
 #import <wtf/ObjcRuntimeExtras.h>
