@@ -108,7 +108,6 @@ public:
     void setCookieObserverHandler(Function<void ()>&&);
     void getCredentialFromPersistentStorage(const ProtectionSpace&, Function<void (Credential&&)> completionHandler);
     void saveCredentialToPersistentStorage(const ProtectionSpace&, const Credential&);
-    void setCookiesLimit(uint64_t limit);
 #else
     NetworkStorageSession(PAL::SessionID, NetworkingContext*);
     ~NetworkStorageSession();
@@ -136,7 +135,6 @@ private:
     mutable std::unique_ptr<SoupNetworkSession> m_session;
     GRefPtr<SoupCookieJar> m_cookieStorage;
     Function<void ()> m_cookieObserverHandler;
-    uint64_t m_cookiesLimit { 0 };
 #if USE(LIBSECRET)
     Function<void (Credential&&)> m_persisentStorageCompletionHandler;
     GRefPtr<GCancellable> m_persisentStorageCancellable;

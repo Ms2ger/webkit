@@ -234,7 +234,6 @@ public:
 #if USE(SOUP)
     void setInitialHTTPCookieAcceptPolicy(HTTPCookieAcceptPolicy policy) { m_initialHTTPCookieAcceptPolicy = policy; }
     void setNetworkProxySettings(const WebCore::SoupNetworkProxySettings&);
-    void setInitialCookiesLimit(uint64_t limit) { m_initialCookiesLimit = limit; }
 #endif
     void setEnhancedAccessibility(bool);
     
@@ -540,7 +539,6 @@ private:
 #if USE(SOUP)
     HTTPCookieAcceptPolicy m_initialHTTPCookieAcceptPolicy { HTTPCookieAcceptPolicyOnlyFromMainDocumentDomain };
     WebCore::SoupNetworkProxySettings m_networkProxySettings;
-    uint64_t m_initialCookiesLimit { 0 };
 #endif
     HashSet<String, ASCIICaseInsensitiveHash> m_urlSchemesRegisteredForCustomProtocols;
 

@@ -104,7 +104,6 @@ struct NetworkProcessCreationParameters {
     String cookiePersistentStoragePath;
     uint32_t cookiePersistentStorageType { 0 };
     HTTPCookieAcceptPolicy cookieAcceptPolicy { HTTPCookieAcceptPolicyAlways };
-    uint64_t cookiesLimit { 0 };
     bool ignoreTLSErrors { false };
     Vector<String> languages;
     WebCore::SoupNetworkProxySettings proxySettings;
