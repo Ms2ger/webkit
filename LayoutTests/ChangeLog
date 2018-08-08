@@ -1,3 +1,12 @@
+2018-08-08  Ms2ger  <Ms2ger@igalia.com>
+
+        [SOUP] Check length before calling soup_message_body_append_buffer.
+        https://bugs.webkit.org/show_bug.cgi?id=176803
+
+        Reviewed by NOBODY (OOPS!).
+
+        * platform/gtk/TestExpectations: Enable test.
+
 2018-07-29  Basuke Suzuki  <Basuke.Suzuki@sony.com>
 
         [Curl] Test gardening

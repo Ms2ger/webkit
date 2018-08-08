@@ -51,7 +51,8 @@ static uint64_t appendEncodedBlobItemToSoupMessageBody(SoupMessage* soupMessage,
 
         if (RefPtr<SharedBuffer> buffer = SharedBuffer::createWithContentsOfFile(blobItem.file()->path())) {
             GUniquePtr<SoupBuffer> soupBuffer(buffer->createSoupBuffer(blobItem.offset(), blobItem.length() == BlobDataItem::toEndOfFile ? 0 : blobItem.length()));
-            soup_message_body_append_buffer(soupMessage->request_body, soupBuffer.get());
+            if (soupBuffer->length)
+                soup_message_body_append_buffer(soupMessage->request_body, soupBuffer.get());
             return soupBuffer->length;
         }
         break;
@@ -79,7 +80,8 @@ void ResourceRequest::updateSoupMessageBody(SoupMessage* soupMessage) const
             if (RefPtr<SharedBuffer> buffer = SharedBuffer::createWithContentsOfFile(element.m_filename)) {
                 GUniquePtr<SoupBuffer> soupBuffer(buffer->createSoupBuffer());
                 bodySize += buffer->size();
-                soup_message_body_append_buffer(soupMessage->request_body, soupBuffer.get());
+                if (soupBuffer->length)
+                    soup_message_body_append_buffer(soupMessage->request_body, soupBuffer.get());
             }
             break;
         case FormDataElement::Type::EncodedBlob:
