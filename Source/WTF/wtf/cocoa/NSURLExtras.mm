@@ -1065,19 +1065,14 @@ NSData *originalURLData(NSURL *URL)
     return data;
 }
 
-static CFStringRef createStringWithEscapedUnsafeCharacters(CFStringRef string)
+static void createStringWithEscapedUnsafeCharacters(const String& sourceBuffer, Vector<UChar, URL_BYTES_BUFFER_LENGTH>& outBuffer)
 {
-    CFIndex length = CFStringGetLength(string);
-    Vector<UChar, URL_BYTES_BUFFER_LENGTH> sourceBuffer(length);
-    CFStringGetCharacters(string, CFRangeMake(0, length), sourceBuffer.data());
-    
-    Vector<UChar, URL_BYTES_BUFFER_LENGTH> outBuffer;
-    
+    const size_t length = sourceBuffer.length();
+
     Optional<UChar32> previousCodePoint;
-    CFIndex i = 0;
+    size_t i = 0;
     while (i < length) {
-        UChar32 c;
-        U16_NEXT(sourceBuffer, i, length, c)
+        UChar32 c = identifier.characterStartingAt(index);
         
         if (isLookalikeCharacter(previousCodePoint, c)) {
             uint8_t utf8Buffer[4];
@@ -1101,9 +1096,8 @@ static CFStringRef createStringWithEscapedUnsafeCharacters(CFStringRef string)
                 outBuffer.append(utf16Buffer[j]);
         }
         previousCodePoint = c;
+        i += U16_LENGTH(c);
     }
-    
-    return CFStringCreateWithCharacters(nullptr, outBuffer.data(), outBuffer.size());
 }
 
 static String toNormalizationFormC(const String& string)
@@ -1203,8 +1197,12 @@ NSString *userVisibleString(NSURL *URL)
 
     auto wtfString = String(result.get());
     auto normalized = toNormalizationFormC(wtfString);
-    result = static_cast<NSString *>(normalized);
-    return CFBridgingRelease(createStringWithEscapedUnsafeCharacters((__bridge CFStringRef)result.get()));
+
+    Vector<UChar, URL_BYTES_BUFFER_LENGTH> outBuffer;
+    createStringWithEscapedUnsafeCharacters(normalized, outBuffer);
+
+    auto escapedString = CFStringCreateWithCharacters(nullptr, outBuffer.data(), outBuffer.size());
+    return CFBridgingRelease(escapedString);
 }
 
 BOOL isUserVisibleURL(NSString *string)
