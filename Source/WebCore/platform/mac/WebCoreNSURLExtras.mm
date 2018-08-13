@@ -37,6 +37,7 @@
 #import <wtf/Vector.h>
 #import <unicode/uchar.h>
 #import <unicode/uidna.h>
+#import <unicode/unorm.h>
 #import <unicode/uscript.h>
 
 // Needs to be big enough to hold an IDN-encoded name.
@@ -1161,16 +1162,23 @@ NSString *userVisibleString(NSURL *URL)
             result = mappedResult;
     }
 
-    result = [result precomposedStringWithCanonicalMapping];
 
-    auto string = (__bridge CFStringRef)result;
+    Vector<UChar, URL_BYTES_BUFFER_LENGTH> sourceBuffer([result length]);
+    [result getCharacters:sourceBuffer.data()];
 
-    CFIndex length_ = CFStringGetLength(string);
-    Vector<UChar, URL_BYTES_BUFFER_LENGTH> sourceBuffer(length_);
-    CFStringGetCharacters(string, CFRangeMake(0, length_), sourceBuffer.data());
+    Vector<UChar, URL_BYTES_BUFFER_LENGTH> normalizedCharacters(sourceBuffer.size());
+    UErrorCode uerror = U_ZERO_ERROR;
+    int32_t normalizedLength = unorm_normalize(sourceBuffer.data(), sourceBuffer.size(), UNORM_NFC, 0, normalizedCharacters.data(), sourceBuffer.size(), &uerror);
+    if (uerror == U_BUFFER_OVERFLOW_ERROR) {
+        uerror = U_ZERO_ERROR;
+        normalizedCharacters.resize(normalizedLength);
+        normalizedLength = unorm_normalize(sourceBuffer.data(), sourceBuffer.size(), UNORM_NFC, 0, normalizedCharacters.data(), normalizedLength, &uerror);
+    }
+    if (U_FAILURE(uerror))
+        return nil;
 
     Vector<UChar, URL_BYTES_BUFFER_LENGTH> outBuffer;
-    createStringWithEscapedUnsafeCharacters(sourceBuffer, outBuffer);
+    createStringWithEscapedUnsafeCharacters(normalizedCharacters, outBuffer);
 
     auto escapedString = CFStringCreateWithCharacters(nullptr, outBuffer.data(), outBuffer.size());
     return CFBridgingRelease(escapedString);
