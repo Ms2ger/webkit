@@ -1056,16 +1056,12 @@ NSData *originalURLData(NSURL *URL)
     return data;
 }
 
-static CFStringRef createStringWithEscapedUnsafeCharacters(CFStringRef string)
+static void createStringWithEscapedUnsafeCharacters(const Vector<UChar, URL_BYTES_BUFFER_LENGTH>& sourceBuffer, Vector<UChar, URL_BYTES_BUFFER_LENGTH>& outBuffer)
 {
-    CFIndex length = CFStringGetLength(string);
-    Vector<UChar, URL_BYTES_BUFFER_LENGTH> sourceBuffer(length);
-    CFStringGetCharacters(string, CFRangeMake(0, length), sourceBuffer.data());
-    
-    Vector<UChar, URL_BYTES_BUFFER_LENGTH> outBuffer;
+    const size_t length = sourceBuffer.size();
     
     std::optional<UChar32> previousCodePoint;
-    CFIndex i = 0;
+    size_t i = 0;
     while (i < length) {
         UChar32 c;
         U16_NEXT(sourceBuffer, i, length, c)
@@ -1093,8 +1089,6 @@ static CFStringRef createStringWithEscapedUnsafeCharacters(CFStringRef string)
         }
         previousCodePoint = c;
     }
-    
-    return CFStringCreateWithCharacters(nullptr, outBuffer.data(), outBuffer.size());
 }
 
 NSString *userVisibleString(NSURL *URL)
@@ -1168,7 +1162,18 @@ NSString *userVisibleString(NSURL *URL)
     }
 
     result = [result precomposedStringWithCanonicalMapping];
-    return CFBridgingRelease(createStringWithEscapedUnsafeCharacters((__bridge CFStringRef)result));
+
+    auto string = (__bridge CFStringRef)result;
+
+    CFIndex length_ = CFStringGetLength(string);
+    Vector<UChar, URL_BYTES_BUFFER_LENGTH> sourceBuffer(length_);
+    CFStringGetCharacters(string, CFRangeMake(0, length_), sourceBuffer.data());
+
+    Vector<UChar, URL_BYTES_BUFFER_LENGTH> outBuffer;
+    createStringWithEscapedUnsafeCharacters(sourceBuffer, outBuffer);
+
+    auto escapedString = CFStringCreateWithCharacters(nullptr, outBuffer.data(), outBuffer.size());
+    return CFBridgingRelease(escapedString);
 }
 
 BOOL isUserVisibleURL(NSString *string)
