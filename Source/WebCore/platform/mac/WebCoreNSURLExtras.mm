@@ -1154,9 +1154,14 @@ NSString *userVisibleString(NSURL *URL)
             p++;
         }
         *q = '\0';
+        // Note: after.data() points to a null-terminated, pure ASCII string.
         result = [NSString stringWithUTF8String:after.data()];
     }
-    
+
+    // Note: result is UTF–16 string, created from either a valid UTF-8 string,
+    //       or a pure ASCII string (where all bytes with the high bit set are
+    //       percent-encoded).
+
     if (mayNeedHostNameDecoding) {
         // FIXME: Is it good to ignore the failure of mapHostNames and keep result intact?
         NSString *mappedResult = mapHostNames(result, NO);
