@@ -1108,7 +1108,7 @@ NSString *userVisibleString(NSURL *URL)
         for (int i = 0; i < length; i++) {
             unsigned char c = p[i];
             // unescape escape sequences that indicate bytes greater than 0x7f
-            if (c == '%' && (i + 1 < length && isASCIIHexDigit(p[i + 1])) && i + 2 < length && isASCIIHexDigit(p[i + 2])) {
+            if (c == '%' && i + 2 < length && isASCIIHexDigit(p[i + 1]) && isASCIIHexDigit(p[i + 2])) {
                 auto u = toASCIIHexValue(p[i + 1], p[i + 2]);
                 if (u > 0x7f) {
                     // unescape
