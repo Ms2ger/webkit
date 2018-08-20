@@ -1099,35 +1099,37 @@ NSString *userVisibleString(NSURL *URL)
     int length = [data length];
     
     bool mayNeedHostNameDecoding = false;
-    
-    const unsigned char *p = before;
     int bufferLength = (length * 3) + 1;
     Vector<char, URL_BYTES_BUFFER_LENGTH> after(bufferLength); // large enough to %-escape every character
+
     char *q = after.data();
-    for (int i = 0; i < length; i++) {
-        unsigned char c = p[i];
-        // unescape escape sequences that indicate bytes greater than 0x7f
-        if (c == '%' && (i + 1 < length && isASCIIHexDigit(p[i + 1])) && i + 2 < length && isASCIIHexDigit(p[i + 2])) {
-            auto u = toASCIIHexValue(p[i + 1], p[i + 2]);
-            if (u > 0x7f) {
-                // unescape
-                *q++ = u;
+    {
+        const unsigned char *p = before;
+        for (int i = 0; i < length; i++) {
+            unsigned char c = p[i];
+            // unescape escape sequences that indicate bytes greater than 0x7f
+            if (c == '%' && (i + 1 < length && isASCIIHexDigit(p[i + 1])) && i + 2 < length && isASCIIHexDigit(p[i + 2])) {
+                auto u = toASCIIHexValue(p[i + 1], p[i + 2]);
+                if (u > 0x7f) {
+                    // unescape
+                    *q++ = u;
+                } else {
+                    // do not unescape
+                    *q++ = p[i];
+                    *q++ = p[i + 1];
+                    *q++ = p[i + 2];
+                }
+                i += 2;
             } else {
-                // do not unescape
-                *q++ = p[i];
-                *q++ = p[i + 1];
-                *q++ = p[i + 2];
+                *q++ = c;
+                
+                // Check for "xn--" in an efficient, non-case-sensitive, way.
+                if (c == '-' && i >= 3 && !mayNeedHostNameDecoding && (q[-4] | 0x20) == 'x' && (q[-3] | 0x20) == 'n' && q[-2] == '-')
+                    mayNeedHostNameDecoding = true;
             }
-            i += 2;
-        } else {
-            *q++ = c;
-            
-            // Check for "xn--" in an efficient, non-case-sensitive, way.
-            if (c == '-' && i >= 3 && !mayNeedHostNameDecoding && (q[-4] | 0x20) == 'x' && (q[-3] | 0x20) == 'n' && q[-2] == '-')
-                mayNeedHostNameDecoding = true;
         }
+        *q = '\0';
     }
-    *q = '\0';
     
     // Check string to see if it can be converted to display using UTF-8  
     NSString *result = [NSString stringWithUTF8String:after.data()];
