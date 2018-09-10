@@ -45,7 +45,7 @@
 #define HOST_NAME_BUFFER_LENGTH 2048
 #define URL_BYTES_BUFFER_LENGTH 2048
 
-typedef void (* StringRangeApplierFunction)(NSString *string, NSRange range, void *context);
+typedef void (* StringRangeApplierFunction)(NSString *string, NSRange range, NSMutableArray **context);
 
 static uint32_t IDNScriptWhiteList[(USCRIPT_CODE_LIMIT + 31) / 32];
 
@@ -609,7 +609,7 @@ NSString *encodeHostName(NSString *string)
     return !host ? string : host;
 }
 
-static void collectRangesThatNeedMapping(NSString *string, NSRange range, void *context, BOOL encode)
+static void collectRangesThatNeedMapping(NSString *string, NSRange range, NSMutableArray **context, BOOL encode)
 {
     // Generally, we want to optimize for the case where there is one host name that does not need mapping.
     // Therefore, we use nil to indicate no mapping here and an empty array to indicate error.
@@ -627,12 +627,12 @@ static void collectRangesThatNeedMapping(NSString *string, NSRange range, void *
         [*array addObject:[NSValue valueWithRange:range]];
 }
 
-static void collectRangesThatNeedEncoding(NSString *string, NSRange range, void *context)
+static void collectRangesThatNeedEncoding(NSString *string, NSRange range, NSMutableArray **context)
 {
     return collectRangesThatNeedMapping(string, range, context, YES);
 }
 
-static void collectRangesThatNeedDecoding(NSString *string, NSRange range, void *context)
+static void collectRangesThatNeedDecoding(NSString *string, NSRange range, NSMutableArray **context)
 {
     return collectRangesThatNeedMapping(string, range, context, NO);
 }
@@ -643,7 +643,7 @@ static inline NSCharacterSet *retain(NSCharacterSet *charset)
     return charset;
 }
 
-static void applyHostNameFunctionToMailToURLString(NSString *string, StringRangeApplierFunction f, void *context)
+static void applyHostNameFunctionToMailToURLString(NSString *string, StringRangeApplierFunction f, NSMutableArray **context)
 {
     // In a mailto: URL, host names come after a '@' character and end with a '>' or ',' or '?' character.
     // Skip quoted strings so that characters in them don't confuse us.
@@ -716,7 +716,7 @@ static void applyHostNameFunctionToMailToURLString(NSString *string, StringRange
     }
 }
 
-static void applyHostNameFunctionToURLString(NSString *string, StringRangeApplierFunction f, void *context)
+static void applyHostNameFunctionToURLString(NSString *string, StringRangeApplierFunction f, NSMutableArray **context)
 {
     // Find hostnames. Too bad we can't use any real URL-parsing code to do this,
     // but we have to do it before doing all the %-escaping, and this is the only
