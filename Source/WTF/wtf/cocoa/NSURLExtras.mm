@@ -47,8 +47,6 @@
 #define HOST_NAME_BUFFER_LENGTH 2048
 #define URL_BYTES_BUFFER_LENGTH 2048
 
-typedef void (* StringRangeApplierFunction)(NSString *, NSRange, RetainPtr<NSMutableArray>&);
-
 static uint32_t IDNScriptWhiteList[(USCRIPT_CODE_LIMIT + 31) / 32];
 
 namespace WTF {
@@ -651,17 +649,7 @@ static void collectRangesThatNeedMapping(NSString *string, NSRange range, Retain
         [array addObject:[NSValue valueWithRange:range]];
 }
 
-static void collectRangesThatNeedEncoding(NSString *string, NSRange range, RetainPtr<NSMutableArray>& array)
-{
-    return collectRangesThatNeedMapping(string, range, array, YES);
-}
-
-static void collectRangesThatNeedDecoding(NSString *string, NSRange range, RetainPtr<NSMutableArray>& array)
-{
-    return collectRangesThatNeedMapping(string, range, array, NO);
-}
-
-static void applyHostNameFunctionToMailToURLString(NSString *string, StringRangeApplierFunction f, RetainPtr<NSMutableArray>& array)
+static void applyHostNameFunctionToMailToURLString(NSString *string, BOOL encode, RetainPtr<NSMutableArray>& array)
 {
     // In a mailto: URL, host names come after a '@' character and end with a '>' or ',' or '?' character.
     // Skip quoted strings so that characters in them don't confuse us.
@@ -702,8 +690,8 @@ static void applyHostNameFunctionToMailToURLString(NSString *string, StringRange
             }
             
             // Process host name range.
-            f(string, NSMakeRange(hostNameStart, hostNameEnd.location - hostNameStart), array);
-            
+            collectRangesThatNeedMapping(string, NSMakeRange(hostNameStart, hostNameEnd.location - hostNameStart), array, encode);
+
             if (done)
                 return;
         } else {
@@ -734,7 +722,7 @@ static void applyHostNameFunctionToMailToURLString(NSString *string, StringRange
     }
 }
 
-static void applyHostNameFunctionToURLString(NSString *string, StringRangeApplierFunction f, RetainPtr<NSMutableArray>& array)
+static void applyHostNameFunctionToURLString(NSString *string, BOOL encode, RetainPtr<NSMutableArray>& array)
 {
     // Find hostnames. Too bad we can't use any real URL-parsing code to do this,
     // but we have to do it before doing all the %-escaping, and this is the only
@@ -743,7 +731,7 @@ static void applyHostNameFunctionToURLString(NSString *string, StringRangeApplie
     // Maybe we should implement this using a character buffer instead?
     
     if (protocolIs(string, "mailto")) {
-        applyHostNameFunctionToMailToURLString(string, f, array);
+        applyHostNameFunctionToMailToURLString(string, encode, array);
         return;
     }
     
@@ -775,7 +763,7 @@ static void applyHostNameFunctionToURLString(NSString *string, StringRangeApplie
     NSRange userInfoTerminator = [string rangeOfString:@"@" options:0 range:NSMakeRange(authorityStart, hostNameEnd - authorityStart)];
     unsigned hostNameStart = userInfoTerminator.location == NSNotFound ? authorityStart : NSMaxRange(userInfoTerminator);
     
-    return f(string, NSMakeRange(hostNameStart, hostNameEnd - hostNameStart), array);
+    collectRangesThatNeedMapping(string, NSMakeRange(hostNameStart, hostNameEnd - hostNameStart), array, encode);
 }
 
 static RetainPtr<NSString> mapHostNames(NSString *string, BOOL encode)
@@ -787,8 +775,7 @@ static RetainPtr<NSString> mapHostNames(NSString *string, BOOL encode)
     
     // Make a list of ranges that actually need mapping.
     RetainPtr<NSMutableArray> hostNameRanges;
-    StringRangeApplierFunction f = encode ? collectRangesThatNeedEncoding : collectRangesThatNeedDecoding;
-    applyHostNameFunctionToURLString(string, f, hostNameRanges);
+    applyHostNameFunctionToURLString(string, encode, hostNameRanges);
     if (!hostNameRanges)
         return string;
 
