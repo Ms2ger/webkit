@@ -521,44 +521,39 @@ static BOOL allCharactersAllowedByTLDRules(const UChar* buffer, int32_t length)
 // Return value of nil means no mapping is necessary.
 // If makeString is NO, then return value is either nil or self to indicate mapping is necessary.
 // If makeString is YES, then return value is either nil or the mapped string.
-static NSString *mapHostNameWithRange(NSString *string, NSRange range, BOOL encode, BOOL makeString, BOOL *error)
+static NSString *mapHostNameWithRange(NSString *string_, NSRange range, BOOL encode, BOOL makeString, BOOL *error)
 {
-    if (range.length > HOST_NAME_BUFFER_LENGTH)
+    String string = String(string_).substringSharingImpl(range.location, range.length);
+
+    unsigned length = string.length();
+    if (length > HOST_NAME_BUFFER_LENGTH)
         return nil;
     
-    if (![string length])
+    if (!length)
         return nil;
-    
-    UChar sourceBuffer[HOST_NAME_BUFFER_LENGTH];
-    UChar destinationBuffer[HOST_NAME_BUFFER_LENGTH];
-    
-    if (encode && [string rangeOfString:@"%" options:NSLiteralSearch range:range].location != NSNotFound) {
-        NSString *substring = [string substringWithRange:range];
-        substring = CFBridgingRelease(CFURLCreateStringByReplacingPercentEscapes(nullptr, (CFStringRef)substring, CFSTR("")));
-        if (substring) {
-            string = substring;
-            range = NSMakeRange(0, [string length]);
-        }
+
+    if (encode && string.contains('%')) {
+        string = decodeURLEscapeSequences(string);
     }
     
-    int length = range.length;
-    [string getCharacters:sourceBuffer range:range];
+    auto sourceBuffer = string.charactersWithNullTermination();
     
+    UChar destinationBuffer[HOST_NAME_BUFFER_LENGTH];
     UErrorCode uerror = U_ZERO_ERROR;
     UIDNAInfo processingDetails = UIDNA_INFO_INITIALIZER;
-    int32_t numCharactersConverted = (encode ? uidna_nameToASCII : uidna_nameToUnicode)(&URLParser::internationalDomainNameTranscoder(), sourceBuffer, length, destinationBuffer, HOST_NAME_BUFFER_LENGTH, &processingDetails, &uerror);
+    int32_t numCharactersConverted = (encode ? uidna_nameToASCII : uidna_nameToUnicode)(&URLParser::internationalDomainNameTranscoder(), sourceBuffer.data(), length, destinationBuffer, HOST_NAME_BUFFER_LENGTH, &processingDetails, &uerror);
     if (length && (U_FAILURE(uerror) || processingDetails.errors)) {
         *error = YES;
         return nil;
     }
     
-    if (numCharactersConverted == length && !memcmp(sourceBuffer, destinationBuffer, length * sizeof(UChar)))
+    if (numCharactersConverted == static_cast<int32_t>(length) && !memcmp(sourceBuffer.data(), destinationBuffer, length * sizeof(UChar)))
         return nil;
-    
+
     if (!encode && !allCharactersInIDNScriptWhiteList(destinationBuffer, numCharactersConverted) && !allCharactersAllowedByTLDRules(destinationBuffer, numCharactersConverted))
         return nil;
-    
-    return makeString ? [NSString stringWithCharacters:destinationBuffer length:numCharactersConverted] : string;
+
+    return makeString ? [NSString stringWithCharacters:destinationBuffer length:numCharactersConverted] : (NSString*)string;
 }
 
 BOOL hostNameNeedsDecodingWithRange(NSString *string, NSRange range, BOOL *error)
