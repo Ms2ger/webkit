@@ -1114,7 +1114,7 @@ NSString *userVisibleString(NSURL *URL)
     }
     
     // Check string to see if it can be converted to display using UTF-8  
-    NSString *result = [NSString stringWithUTF8String:after.data()];
+    String result = String::fromUTF8(after.data());
     if (!result) {
         // Could not convert to UTF-8.
         // Convert characters greater than 0x7f to escape sequences.
@@ -1137,7 +1137,8 @@ NSString *userVisibleString(NSURL *URL)
         }
         *q = '\0';
         // Note: after.data() points to a null-terminated, pure ASCII string.
-        result = [NSString stringWithUTF8String:after.data()];
+        result = String::fromUTF8(after.data());
+        ASSERT(!!result);
     }
 
     // Note: result is UTF–16 string, created from either a valid UTF-8 string,
@@ -1151,9 +1152,9 @@ NSString *userVisibleString(NSURL *URL)
             result = mappedResult;
     }
 
-
-    Vector<UChar, URL_BYTES_BUFFER_LENGTH> sourceBuffer([result length]);
-    [result getCharacters:sourceBuffer.data()];
+    auto sourceBuffer = result.charactersWithNullTermination();
+    ASSERT(sourceBuffer.last() == '\0');
+    sourceBuffer.removeLast();
 
     Vector<UChar, URL_BYTES_BUFFER_LENGTH> normalizedCharacters(sourceBuffer.size());
     UErrorCode uerror = U_ZERO_ERROR;
