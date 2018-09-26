@@ -563,7 +563,7 @@ BOOL hostNameNeedsDecodingWithRange(NSString *string_, NSRange range, BOOL *erro
 BOOL hostNameNeedsEncodingWithRange(NSString *string_, NSRange range, BOOL *error)
 {
     String string = String(string_).substringSharingImpl(range.location, range.length);
-    return mapHostName(string, range, YES,  NO, error) != nil;
+    return mapHostName(string, YES,  NO, error) != nil;
 }
 
 NSString *decodeHostNameWithRange(NSString *string_, NSRange range)
@@ -573,7 +573,7 @@ NSString *decodeHostNameWithRange(NSString *string_, NSRange range)
     NSString *host = mapHostName(string, NO, YES, &error);
     if (error)
         return nil;
-    return !host ? string : host;
+    return !host ? string_ : host;
 }
 
 NSString *encodeHostNameWithRange(NSString *string_, NSRange range)
@@ -583,17 +583,17 @@ NSString *encodeHostNameWithRange(NSString *string_, NSRange range)
     NSString *host = mapHostName(string, YES, YES, &error);
     if (error)
         return nil;
-    return !host ? string : host;
+    return !host ? string_ : host;
 }
 
 NSString *decodeHostName(NSString *string_)
 {
     String string = String(string_);
     BOOL error = NO;
-    NSString *host = mapHostName(string), NO, YES, &error);
+    NSString *host = mapHostName(string, NO, YES, &error);
     if (error)
         return nil;
-    return !host ? string : host;
+    return !host ? string_ : host;
 }
 
 NSString *encodeHostName(NSString *string_)
@@ -603,7 +603,7 @@ NSString *encodeHostName(NSString *string_)
     NSString *host = mapHostName(string, YES, YES, &error);
     if (error)
         return nil;
-    return !host ? string : host;
+    return !host ? string_ : host;
 }
 
 static void collectRangesThatNeedMapping(NSString *string, NSRange range, NSMutableArray **context, BOOL encode)
