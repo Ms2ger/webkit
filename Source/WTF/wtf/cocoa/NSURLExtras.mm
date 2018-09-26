@@ -590,26 +590,6 @@ static NSString *mapHostName(String string, BOOL encode, BOOL makeString, BOOL *
     return makeString ? [NSString stringWithCharacters:destinationBuffer length:numCharactersConverted] : (NSString*)string;
 }
 
-static NSString *decodeHostNameWithRange(NSString *string_, NSRange range)
-{
-    String string = String(string_).substringSharingImpl(range.location, range.length);
-    BOOL error = NO;
-    NSString *host = mapHostName(string, NO, YES, &error);
-    if (error)
-        return nil;
-    return !host ? string_ : host;
-}
-
-static NSString *encodeHostNameWithRange(NSString *string_, NSRange range)
-{
-    String string = String(string_).substringSharingImpl(range.location, range.length);
-    BOOL error = NO;
-    NSString *host = mapHostName(string, YES, YES, &error);
-    if (error)
-        return nil;
-    return !host ? string_ : host;
-}
-
 NSString *decodeHostName(NSString *string_)
 {
     String string = String(string_);
@@ -786,7 +766,8 @@ static String mapHostNames(String string, BOOL encode)
     unsigned i = [hostNameRanges count];
     while (i--) {
         NSRange hostNameRange = [[hostNameRanges objectAtIndex:i] rangeValue];
-        String mappedHostName = encode ? encodeHostNameWithRange(string, hostNameRange) : decodeHostNameWithRange(string, hostNameRange);
+        String substring = string.substringSharingImpl(hostNameRange.location, hostNameRange.length);
+        String mappedHostName = encode ? encodeHostName(substring) : decodeHostName(substring);
         mutableCopy = mutableCopy.replace(hostNameRange.location, hostNameRange.length, mappedHostName);
     }
     return mutableCopy;
