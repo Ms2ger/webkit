@@ -743,11 +743,11 @@ static void applyHostNameFunctionToURLString(NSString *string, BOOL encode, NSMu
     collectRangesThatNeedMapping(string, NSMakeRange(hostNameStart, hostNameEnd - hostNameStart), context, encode);
 }
 
-static NSString *mapHostNames(NSString *string, BOOL encode)
+static String mapHostNames(String string, BOOL encode)
 {
     // Generally, we want to optimize for the case where there is one host name that does not need mapping.
     
-    if (encode && [string canBeConvertedToEncoding:NSASCIIStringEncoding])
+    if (encode && string.isAllASCII())
         return string;
     
     // Make a list of ranges that actually need mapping.
@@ -762,15 +762,15 @@ static NSString *mapHostNames(NSString *string, BOOL encode)
     }
     
     // Do the mapping.
-    NSMutableString *mutableCopy = [string mutableCopy];
+    String mutableCopy = [string mutableCopy];
     unsigned i = [hostNameRanges count];
     while (i--) {
         NSRange hostNameRange = [[hostNameRanges objectAtIndex:i] rangeValue];
-        NSString *mappedHostName = encode ? encodeHostNameWithRange(string, hostNameRange) : decodeHostNameWithRange(string, hostNameRange);
-        [mutableCopy replaceCharactersInRange:hostNameRange withString:mappedHostName];
+        String mappedHostName = encode ? encodeHostNameWithRange(string, hostNameRange) : decodeHostNameWithRange(string, hostNameRange);
+        mutableCopy = mutableCopy.replace(mappedHostName, hostNameRange.location, hostNameRange.length);
     }
     [hostNameRanges release];
-    return [mutableCopy autorelease];
+    return mutableCopy;
 }
 
 static NSString *stringByTrimmingWhitespace(NSString *string)
