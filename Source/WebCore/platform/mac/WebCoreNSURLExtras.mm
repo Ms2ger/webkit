@@ -770,7 +770,8 @@ static String mapHostNames(String string, BOOL encode)
     unsigned i = [hostNameRanges count];
     while (i--) {
         NSRange hostNameRange = [[hostNameRanges objectAtIndex:i] rangeValue];
-        String mappedHostName = encode ? encodeHostNameWithRange(string, hostNameRange) : decodeHostNameWithRange(string, hostNameRange);
+        String substring = string.substringSharingImpl(hostNameRange.location, hostNameRange.length);
+        String mappedHostName = encode ? encodeHostName(substring) : decodeHostName(substring);
         mutableCopy = mutableCopy.replace(hostNameRange.location, hostNameRange.length, mappedHostName);
     }
     [hostNameRanges release];
