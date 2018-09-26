@@ -1142,7 +1142,7 @@ NSString *userVisibleString(NSURL *URL)
     }
     
     // Check string to see if it can be converted to display using UTF-8  
-    RetainPtr<NSString> result = [NSString stringWithUTF8String:after.data()];
+    String result = String::fromUTF8(after.data());
     if (!result) {
         // Could not convert to UTF-8.
         // Convert characters greater than 0x7f to escape sequences.
@@ -1165,7 +1165,8 @@ NSString *userVisibleString(NSURL *URL)
         }
         *q = '\0';
         // Note: after.data() points to a null-terminated, pure ASCII string.
-        result = [NSString stringWithUTF8String:after.data()];
+        result = String::fromUTF8(after.data());
+        ASSERT(!!result);
     }
 
     // Note: result is UTF–16 string, created from either a valid UTF-8 string,
@@ -1174,13 +1175,12 @@ NSString *userVisibleString(NSURL *URL)
 
     if (mayNeedHostNameDecoding) {
         // FIXME: Is it good to ignore the failure of mapHostNames and keep result intact?
-        auto mappedResult = mapHostNames(result.get(), NO);
+        auto mappedResult = mapHostNames(result, NO);
         if (mappedResult)
-            result = mappedResult;
+            result = mappedResult.get();
     }
 
-    auto wtfString = String(result.get());
-    auto normalized = toNormalizationFormC(wtfString);
+    auto normalized = toNormalizationFormC(result);
 
     Vector<UChar, URL_BYTES_BUFFER_LENGTH> outBuffer;
     createStringWithEscapedUnsafeCharacters(normalized, outBuffer);
