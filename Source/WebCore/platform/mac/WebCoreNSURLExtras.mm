@@ -758,7 +758,7 @@ static String mapHostNames(String string, BOOL encode)
 
     if (![hostNameRanges count]) {
         [hostNameRanges release];
-        return nil;
+        return String();
     }
     
     // Do the mapping.
@@ -767,7 +767,7 @@ static String mapHostNames(String string, BOOL encode)
     while (i--) {
         NSRange hostNameRange = [[hostNameRanges objectAtIndex:i] rangeValue];
         String mappedHostName = encode ? encodeHostNameWithRange(string, hostNameRange) : decodeHostNameWithRange(string, hostNameRange);
-        mutableCopy = mutableCopy.replace(mappedHostName, hostNameRange.location, hostNameRange.length);
+        mutableCopy = mutableCopy.replace(hostNameRange.location, hostNameRange.length, mappedHostName);
     }
     [hostNameRanges release];
     return mutableCopy;
