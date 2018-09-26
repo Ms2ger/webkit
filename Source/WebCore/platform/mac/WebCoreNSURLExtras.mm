@@ -521,10 +521,8 @@ static BOOL allCharactersAllowedByTLDRules(const UChar* buffer, int32_t length)
 // Return value of nil means no mapping is necessary.
 // If makeString is NO, then return value is either nil or self to indicate mapping is necessary.
 // If makeString is YES, then return value is either nil or the mapped string.
-static NSString *mapHostNameWithRange(NSString *string_, NSRange range, BOOL encode, BOOL makeString, BOOL *error)
+static NSString *mapHostName(String string, BOOL encode, BOOL makeString, BOOL *error)
 {
-    String string = String(string_).substringSharingImpl(range.location, range.length);
-
     unsigned length = string.length();
     if (length > HOST_NAME_BUFFER_LENGTH)
         return nil;
@@ -556,47 +554,53 @@ static NSString *mapHostNameWithRange(NSString *string_, NSRange range, BOOL enc
     return makeString ? [NSString stringWithCharacters:destinationBuffer length:numCharactersConverted] : (NSString*)string;
 }
 
-BOOL hostNameNeedsDecodingWithRange(NSString *string, NSRange range, BOOL *error)
+BOOL hostNameNeedsDecodingWithRange(NSString *string_, NSRange range, BOOL *error)
 {
-    return mapHostNameWithRange(string, range, NO, NO, error) != nil;
+    String string = String(string_).substringSharingImpl(range.location, range.length);
+    return mapHostName(string, NO, NO, error) != nil;
 }
  
-BOOL hostNameNeedsEncodingWithRange(NSString *string, NSRange range, BOOL *error)
+BOOL hostNameNeedsEncodingWithRange(NSString *string_, NSRange range, BOOL *error)
 {
-    return mapHostNameWithRange(string, range, YES,  NO, error) != nil;
+    String string = String(string_).substringSharingImpl(range.location, range.length);
+    return mapHostName(string, range, YES,  NO, error) != nil;
 }
 
-NSString *decodeHostNameWithRange(NSString *string, NSRange range)
+NSString *decodeHostNameWithRange(NSString *string_, NSRange range)
 {
+    String string = String(string_).substringSharingImpl(range.location, range.length);
     BOOL error = NO;
-    NSString *host = mapHostNameWithRange(string, range, NO, YES, &error);
+    NSString *host = mapHostName(string, NO, YES, &error);
     if (error)
         return nil;
     return !host ? string : host;
 }
 
-NSString *encodeHostNameWithRange(NSString *string, NSRange range)
+NSString *encodeHostNameWithRange(NSString *string_, NSRange range)
 {
+    String string = String(string_).substringSharingImpl(range.location, range.length);
     BOOL error = NO;
-    NSString *host = mapHostNameWithRange(string, range, YES, YES, &error);
+    NSString *host = mapHostName(string, YES, YES, &error);
     if (error)
         return nil;
     return !host ? string : host;
 }
 
-NSString *decodeHostName(NSString *string)
+NSString *decodeHostName(NSString *string_)
 {
+    String string = String(string_);
     BOOL error = NO;
-    NSString *host = mapHostNameWithRange(string, NSMakeRange(0, [string length]), NO, YES, &error);
+    NSString *host = mapHostName(string), NO, YES, &error);
     if (error)
         return nil;
     return !host ? string : host;
 }
 
-NSString *encodeHostName(NSString *string)
+NSString *encodeHostName(NSString *string_)
 {
+    String string = String(string_);
     BOOL error = NO;
-    NSString *host = mapHostNameWithRange(string, NSMakeRange(0, [string length]), YES, YES, &error);
+    NSString *host = mapHostName(string, YES, YES, &error);
     if (error)
         return nil;
     return !host ? string : host;
