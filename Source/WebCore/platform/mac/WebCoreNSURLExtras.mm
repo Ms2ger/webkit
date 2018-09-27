@@ -703,7 +703,7 @@ static void applyHostNameFunctionToMailToURLString(NSString *string, BOOL encode
     }
 }
 
-static void applyHostNameFunctionToURLString(NSString *string, BOOL encode, NSMutableArray **context)
+static void applyHostNameFunctionToURLString(NSString *string_, BOOL encode, NSMutableArray **context)
 {
     // Find hostnames. Too bad we can't use any real URL-parsing code to do this,
     // but we have to do it before doing all the %-escaping, and this is the only
@@ -712,7 +712,7 @@ static void applyHostNameFunctionToURLString(NSString *string, BOOL encode, NSMu
     // Maybe we should implement this using a character buffer instead?
     
     if (protocolIs(string, "mailto")) {
-        applyHostNameFunctionToMailToURLString(string, encode, context);
+        applyHostNameFunctionToMailToURLString(string_, encode, context);
         return;
     }
     
@@ -720,31 +720,47 @@ static void applyHostNameFunctionToURLString(NSString *string, BOOL encode, NSMu
     // It comes after a "://" sequence, with scheme characters preceding.
     // If ends with the end of the string or a ":", "/", or a "?".
     // If there is a "@" character, the host part is just the part after the "@".
-    NSRange separatorRange = [string rangeOfString:@"://"];
-    if (separatorRange.location == NSNotFound)
+    String string(string_);
+    static const char* separator = "://";
+    auto separatorIndex = string.find(separator);
+    if (separatorIndex == notFound)
         return;
+
+    unsigned authorityStart = separatorIndex + strlen(separator);
     
     // Check that all characters before the :// are valid scheme characters.
-    static NSCharacterSet *nonSchemeCharacters = retain([[NSCharacterSet characterSetWithCharactersInString:@"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-."] invertedSet]);
-    if ([string rangeOfCharacterFromSet:nonSchemeCharacters options:0 range:NSMakeRange(0, separatorRange.location)].location != NSNotFound)
+    auto invalidSchemeCharacter = string.substringSharingImpl(0, separatorIndex).find([](ch) {
+        static const char* allowedCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-.";
+        static size_t length = strlen(allowedCharacters);
+        for (size_t i = 0; i < length; ++i)
+            if (allowedCharacters[i] == ch)
+                return false;
+        }
+        return true;
+    });
+
+    if (invalidSchemeCharacter != notFound)
         return;
     
-    unsigned stringLength = [string length];
-    
-    static NSCharacterSet *hostTerminators = retain([NSCharacterSet characterSetWithCharactersInString:@":/?#"]);
-    
-    // Start after the separator.
-    unsigned authorityStart = NSMaxRange(separatorRange);
+    unsigned stringLength = string.length();
     
     // Find terminating character.
-    NSRange hostNameTerminator = [string rangeOfCharacterFromSet:hostTerminators options:0 range:NSMakeRange(authorityStart, stringLength - authorityStart)];
-    unsigned hostNameEnd = hostNameTerminator.location == NSNotFound ? stringLength : hostNameTerminator.location;
+    auto hostNameTerminator = string.find([](ch) {
+        static const char* terminatingCharacters = ":/?#";
+        static size_t length = strlen(terminatingCharacters);
+        for (size_t i = 0; i < length; ++i)
+            if (terminatingCharacters[i] == ch)
+                return true;
+        }
+        return false;
+    }, authorityStart);
+    unsigned hostNameEnd = hostNameTerminator == notFound ? stringLength : hostNameTerminator;
     
     // Find "@" for the start of the host name.
-    NSRange userInfoTerminator = [string rangeOfString:@"@" options:0 range:NSMakeRange(authorityStart, hostNameEnd - authorityStart)];
-    unsigned hostNameStart = userInfoTerminator.location == NSNotFound ? authorityStart : NSMaxRange(userInfoTerminator);
+    auto userInfoTerminator = string.substringSharingImpl(0, hostNameEnd).find('@', authorityStart);
+    unsigned hostNameStart = userInfoTerminator == notFound ? authorityStart : userInfoTerminator + 1;
     
-    collectRangesThatNeedMapping(string, NSMakeRange(hostNameStart, hostNameEnd - hostNameStart), context, encode);
+    collectRangesThatNeedMapping(string_, NSMakeRange(hostNameStart, hostNameEnd - hostNameStart), context, encode);
 }
 
 static String mapHostNames(String string, BOOL encode)
