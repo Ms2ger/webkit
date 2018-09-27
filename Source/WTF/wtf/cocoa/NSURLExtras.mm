@@ -628,48 +628,47 @@ static void collectRangesThatNeedMapping(NSString *string_, NSRange range, Retai
         [array addObject:[NSValue valueWithRange:range]];
 }
 
-static void applyHostNameFunctionToMailToURLString(NSString *string, BOOL encode, RetainPtr<NSMutableArray>& array)
+static void applyHostNameFunctionToMailToURLString(String string, BOOL encode, RetainPtr<NSMutableArray>& array)
 {
     // In a mailto: URL, host names come after a '@' character and end with a '>' or ',' or '?' character.
     // Skip quoted strings so that characters in them don't confuse us.
     // When we find a '?' character, we are past the part of the URL that contains host names.
     
-    static NeverDestroyed<RetainPtr<NSCharacterSet>> hostNameOrStringStartCharacters = [NSCharacterSet characterSetWithCharactersInString:@"\"@?"];
-    static NeverDestroyed<RetainPtr<NSCharacterSet>> hostNameEndCharacters = [NSCharacterSet characterSetWithCharactersInString:@">,?"];
-    static NeverDestroyed<RetainPtr<NSCharacterSet>> quotedStringCharacters = [NSCharacterSet characterSetWithCharactersInString:@"\"\\"];
-    
-    unsigned stringLength = [string length];
-    NSRange remaining = NSMakeRange(0, stringLength);
+    unsigned stringLength = string.length();
+    unsigned current = 0;
     
     while (1) {
         // Find start of host name or of quoted string.
-        NSRange hostNameOrStringStart = [string rangeOfCharacterFromSet:hostNameOrStringStartCharacters.get().get() options:0 range:remaining];
-        if (hostNameOrStringStart.location == NSNotFound)
+        auto hostNameOrStringStart = string.find([](UChar ch) {
+            return ch == '"' || ch == '@' || ch == '?';
+        }, current);
+        if (hostNameOrStringStart == notFound)
             return;
 
-        unichar c = [string characterAtIndex:hostNameOrStringStart.location];
-        remaining.location = NSMaxRange(hostNameOrStringStart);
-        remaining.length = stringLength - remaining.location;
+        UChar c = string[hostNameOrStringStart];
+        current = hostNameOrStringStart + 1;
         
         if (c == '?')
             return;
         
         if (c == '@') {
             // Find end of host name.
-            unsigned hostNameStart = remaining.location;
-            NSRange hostNameEnd = [string rangeOfCharacterFromSet:hostNameEndCharacters.get().get() options:0 range:remaining];
-            BOOL done;
-            if (hostNameEnd.location == NSNotFound) {
-                hostNameEnd.location = stringLength;
-                done = YES;
+            unsigned hostNameStart = current;
+            auto hostNameEnd = string.find([](UChar ch) {
+                return ch == '>' || ch == ',' || ch == '?';
+            }, current);
+
+            bool done;
+            if (hostNameEnd == notFound) {
+                hostNameEnd = stringLength;
+                done = true;
             } else {
-                remaining.location = hostNameEnd.location;
-                remaining.length = stringLength - remaining.location;
-                done = NO;
+                current = hostNameEnd;
+                done = false;
             }
             
             // Process host name range.
-            collectRangesThatNeedMapping(string, NSMakeRange(hostNameStart, hostNameEnd.location - hostNameStart), array, encode);
+            collectRangesThatNeedMapping(string, NSMakeRange(hostNameStart, hostNameEnd - hostNameStart), array, encode);
 
             if (done)
                 return;
@@ -677,25 +676,25 @@ static void applyHostNameFunctionToMailToURLString(NSString *string, BOOL encode
             // Skip quoted string.
             ASSERT(c == '"');
             while (1) {
-                NSRange escapedCharacterOrStringEnd = [string rangeOfCharacterFromSet:quotedStringCharacters.get().get() options:0 range:remaining];
-                if (escapedCharacterOrStringEnd.location == NSNotFound)
+                auto escapedCharacterOrStringEnd = string.find([](UChar ch) {
+                    return ch == '"' || ch == '\\';
+                }, current);
+                if (escapedCharacterOrStringEnd == notFound)
                     return;
 
-                c = [string characterAtIndex:escapedCharacterOrStringEnd.location];
-                remaining.location = NSMaxRange(escapedCharacterOrStringEnd);
-                remaining.length = stringLength - remaining.location;
-                
+                c = string[escapedCharacterOrStringEnd];
+                current = escapedCharacterOrStringEnd + 1;
+
                 // If we are the end of the string, then break from the string loop back to the host name loop.
                 if (c == '"')
                     break;
                 
                 // Skip escaped character.
                 ASSERT(c == '\\');
-                if (!remaining.length)
+                if (current == stringLength)
                     return;
 
-                remaining.location += 1;
-                remaining.length -= 1;
+                ++current;
             }
         }
     }
@@ -703,6 +702,7 @@ static void applyHostNameFunctionToMailToURLString(NSString *string, BOOL encode
 
 static void applyHostNameFunctionToURLString(NSString *string_, BOOL encode, RetainPtr<NSMutableArray>& array)
 {
+    String string(string_);
     // Find hostnames. Too bad we can't use any real URL-parsing code to do this,
     // but we have to do it before doing all the %-escaping, and this is the only
     // code we have that parses mailto URLs anyway.
@@ -710,7 +710,7 @@ static void applyHostNameFunctionToURLString(NSString *string_, BOOL encode, Ret
     // Maybe we should implement this using a character buffer instead?
     
     if (protocolIs(string_, "mailto")) {
-        applyHostNameFunctionToMailToURLString(string_, encode, array);
+        applyHostNameFunctionToMailToURLString(string, encode, array);
         return;
     }
     
@@ -718,7 +718,6 @@ static void applyHostNameFunctionToURLString(NSString *string_, BOOL encode, Ret
     // It comes after a "://" sequence, with scheme characters preceding.
     // If ends with the end of the string or a ":", "/", or a "?".
     // If there is a "@" character, the host part is just the part after the "@".
-    String string(string_);
     static const char* separator = "://";
     auto separatorIndex = string.find(separator);
     if (separatorIndex == notFound)
