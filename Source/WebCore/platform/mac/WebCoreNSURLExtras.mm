@@ -670,7 +670,7 @@ static void applyHostNameFunctionToMailToURLString(String string, BOOL encode, N
             }
             
             // Process host name range.
-            collectRangesThatNeedMapping(string, NSMakeRange(hostNameStart, hostNameEnd.location - hostNameStart), context, encode);
+            collectRangesThatNeedMapping(string, NSMakeRange(hostNameStart, hostNameEnd - hostNameStart), context, encode);
 
             if (done)
                 return;
