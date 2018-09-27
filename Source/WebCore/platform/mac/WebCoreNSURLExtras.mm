@@ -711,7 +711,7 @@ static void applyHostNameFunctionToURLString(NSString *string_, BOOL encode, NSM
     
     // Maybe we should implement this using a character buffer instead?
     
-    if (protocolIs(string, "mailto")) {
+    if (protocolIs(string_, "mailto")) {
         applyHostNameFunctionToMailToURLString(string_, encode, context);
         return;
     }
@@ -729,10 +729,10 @@ static void applyHostNameFunctionToURLString(NSString *string_, BOOL encode, NSM
     unsigned authorityStart = separatorIndex + strlen(separator);
     
     // Check that all characters before the :// are valid scheme characters.
-    auto invalidSchemeCharacter = string.substringSharingImpl(0, separatorIndex).find([](ch) {
+    auto invalidSchemeCharacter = string.substringSharingImpl(0, separatorIndex).find([](UChar ch) {
         static const char* allowedCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-.";
         static size_t length = strlen(allowedCharacters);
-        for (size_t i = 0; i < length; ++i)
+        for (size_t i = 0; i < length; ++i) {
             if (allowedCharacters[i] == ch)
                 return false;
         }
@@ -745,10 +745,10 @@ static void applyHostNameFunctionToURLString(NSString *string_, BOOL encode, NSM
     unsigned stringLength = string.length();
     
     // Find terminating character.
-    auto hostNameTerminator = string.find([](ch) {
+    auto hostNameTerminator = string.find([](UChar ch) {
         static const char* terminatingCharacters = ":/?#";
         static size_t length = strlen(terminatingCharacters);
-        for (size_t i = 0; i < length; ++i)
+        for (size_t i = 0; i < length; ++i) {
             if (terminatingCharacters[i] == ch)
                 return true;
         }
