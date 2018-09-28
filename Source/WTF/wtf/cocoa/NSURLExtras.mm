@@ -620,25 +620,28 @@ NSString *encodeHostName(NSString *string_)
     return !host ? string_ : host;
 }
 
-static void collectRangesThatNeedMapping(NSString *string_, NSRange range, RetainPtr<NSMutableArray>& array, BOOL encode)
+using MappingRangesVector = std::unique_ptr<Vector<std::tuple<NSRange, NSString*>>>;
+
+static void collectRangesThatNeedMapping(NSString *string_, NSRange range, MappingRangesVector *array, BOOL encode)
 {
     // Generally, we want to optimize for the case where there is one host name that does not need mapping.
     // Therefore, we use nil to indicate no mapping here and an empty array to indicate error.
 
     String string = String(string_).substringSharingImpl(range.location, range.length);
     BOOL error = NO;
-    NSString *host = mapHostName(string, encode, NO, &error);
+    NSString *host = mapHostName(string, encode, YES, &error);
+
     if (!error && !host)
         return;
     
-    if (!array)
-        array = adoptNS([NSMutableArray new]);
+    if (!*array)
+        *array = std::make_unique<Vector<std::tuple<NSRange, NSString*>>>();
 
     if (!error)
-        [array addObject:[NSValue valueWithRange:range]];
+        (*array)->constructAndAppend(range, host);
 }
 
-static void applyHostNameFunctionToMailToURLString(String string, BOOL encode, RetainPtr<NSMutableArray>& array)
+static void applyHostNameFunctionToMailToURLString(String string, BOOL encode, MappingRangesVector *array)
 {
     // In a mailto: URL, host names come after a '@' character and end with a '>' or ',' or '?' character.
     // Skip quoted strings so that characters in them don't confuse us.
@@ -710,7 +713,7 @@ static void applyHostNameFunctionToMailToURLString(String string, BOOL encode, R
     }
 }
 
-static void applyHostNameFunctionToURLString(NSString *string_, BOOL encode, RetainPtr<NSMutableArray>& array)
+static void applyHostNameFunctionToURLString(NSString *string_, BOOL encode, MappingRangesVector *array)
 {
     String string(string_);
     // Find hostnames. Too bad we can't use any real URL-parsing code to do this,
@@ -778,24 +781,22 @@ static String mapHostNames(String string, BOOL encode)
         return string;
     
     // Make a list of ranges that actually need mapping.
-    RetainPtr<NSMutableArray> hostNameRanges;
-    applyHostNameFunctionToURLString(string, encode, hostNameRanges);
+    MappingRangesVector hostNameRanges;
+    applyHostNameFunctionToURLString(string, encode, &hostNameRanges);
     if (!hostNameRanges)
         return string;
 
-    if (![hostNameRanges count])
+    if (hostNameRanges->isEmpty())
         return String();
-    
+
     // Do the mapping.
-    String mutableCopy = [string mutableCopy];
-    unsigned i = [hostNameRanges count];
-    while (i--) {
-        NSRange hostNameRange = [[hostNameRanges objectAtIndex:i] rangeValue];
-        String substring = string.substringSharingImpl(hostNameRange.location, hostNameRange.length);
-        String mappedHostName = encode ? encodeHostName(substring) : decodeHostName(substring);
-        mutableCopy = mutableCopy.replace(hostNameRange.location, hostNameRange.length, mappedHostName);
+    while (!hostNameRanges->isEmpty()) {
+        NSRange hostNameRange;
+        NSString* mappedHostName;
+        std::tie(hostNameRange, mappedHostName) = hostNameRanges->takeLast();
+        string = string.replace(hostNameRange.location, hostNameRange.length, mappedHostName);
     }
-    return mutableCopy;
+    return string;
 }
 
 static RetainPtr<NSString> stringByTrimmingWhitespace(NSString *string)
