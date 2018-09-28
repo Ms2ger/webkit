@@ -621,7 +621,7 @@ static void collectRangesThatNeedMapping(NSString *string_, NSRange range, Mappi
         return;
     
     if (!*array)
-        *array = std::make_unique();
+        *array = std::make_unique<Vector<std::tuple<NSRange, NSString*>>>();
     
     if (!error)
         (*array)->constructAndAppend(range, host);
