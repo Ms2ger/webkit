@@ -621,7 +621,7 @@ static void collectRangesThatNeedMapping(NSString *string_, NSRange range, Mappi
         return;
     
     if (!*array)
-        *array = make_unique();
+        *array = std::make_unique();
     
     if (!error)
         (*array)->constructAndAppend(range, host);
@@ -785,7 +785,7 @@ static String mapHostNames(String string, BOOL encode)
     while (!hostNameRanges->isEmpty()) {
         NSRange hostNameRange;
         NSString* mappedHostName;
-        std::tie(hostNameRange, mappedHostName) = hostNameRanges.takeLast();
+        std::tie(hostNameRange, mappedHostName) = hostNameRanges->takeLast();
         string = string.replace(hostNameRange.location, hostNameRange.length, mappedHostName);
     }
     return string;
