@@ -773,7 +773,7 @@ static void applyHostNameFunctionToURLString(NSString *string_, BOOL encode, Map
     collectRangesThatNeedMapping(string_, NSMakeRange(hostNameStart, hostNameEnd - hostNameStart), array, encode);
 }
 
-static String mapHostNames(String string, BOOL encode)
+static String mapHostNames(String string, bool encode)
 {
     // Generally, we want to optimize for the case where there is one host name that does not need mapping.
     
@@ -898,7 +898,7 @@ NSURL *URLWithUserTypedString(NSString *string, NSURL *nsURL)
     if (!string)
         return nil;
 
-    auto mappedString = mapHostNames(stringByTrimmingWhitespace(string).get(), YES);
+    auto mappedString = mapHostNames(stringByTrimmingWhitespace(string).get(), true);
     if (!mappedString)
         return nil;
 
@@ -1183,7 +1183,7 @@ String userVisibleString(CString URL)
 
     if (mayNeedHostNameDecoding) {
         // FIXME: Is it good to ignore the failure of mapHostNames and keep result intact?
-        auto mappedResult = mapHostNames(result, NO);
+        auto mappedResult = mapHostNames(result, false);
         if (!!mappedResult)
             result = mappedResult;
     }
