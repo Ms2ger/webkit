@@ -1108,12 +1108,14 @@ static String toNormalizationFormC(const String& string)
     return result;
 }
 
-NSString *userVisibleString(NSURL *URL)
+String userVisibleString(CString URL)
 {
-    NSData *data = originalURLData(URL);
-    const unsigned char *before = static_cast<const unsigned char*>([data bytes]);
-    int length = [data length];
-    
+    auto before = reinterpret_cast<const unsigned char*>(URL.data());
+    int length = URL.length();
+
+    if (!length)
+        return emptyString();
+
     bool mayNeedHostNameDecoding = false;
     int bufferLength = (length * 3) + 1;
     Vector<char, URL_BYTES_BUFFER_LENGTH> after(bufferLength); // large enough to %-escape every character
@@ -1190,9 +1192,17 @@ NSString *userVisibleString(NSURL *URL)
 
     Vector<UChar, URL_BYTES_BUFFER_LENGTH> outBuffer;
     createStringWithEscapedUnsafeCharacters(normalized, outBuffer);
+    return String::adopt(WTFMove(outBuffer));
+}
 
-    auto escapedString = CFStringCreateWithCharacters(nullptr, outBuffer.data(), outBuffer.size());
-    return CFBridgingRelease(escapedString);
+NSString *userVisibleString(NSURL *URL)
+{
+    NSData *data = originalURLData(URL);
+    CString string(static_cast<const char*>([data bytes]), [data length]);
+    String escapedString = userVisibleString(string);
+    if (!escapedString)
+        return nil;
+    return escapedString;
 }
 
 BOOL isUserVisibleURL(NSString *string)
