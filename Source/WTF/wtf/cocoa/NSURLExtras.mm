@@ -1050,23 +1050,23 @@ static void createStringWithEscapedUnsafeCharacters(const Vector<UChar, URL_BYTE
         
         if (isLookalikeCharacter(previousCodePoint, c)) {
             uint8_t utf8Buffer[4];
-            CFIndex offset = 0;
+            size_t offset = 0;
             UBool failure = false;
             U8_APPEND(utf8Buffer, offset, 4, c, failure)
             ASSERT(!failure);
             
-            for (CFIndex j = 0; j < offset; ++j) {
+            for (size_t j = 0; j < offset; ++j) {
                 outBuffer.append('%');
                 outBuffer.append(upperNibbleToASCIIHexDigit(utf8Buffer[j]));
                 outBuffer.append(lowerNibbleToASCIIHexDigit(utf8Buffer[j]));
             }
         } else {
             UChar utf16Buffer[2];
-            CFIndex offset = 0;
+            size_t offset = 0;
             UBool failure = false;
             U16_APPEND(utf16Buffer, offset, 2, c, failure)
             ASSERT(!failure);
-            for (CFIndex j = 0; j < offset; ++j)
+            for (size_t j = 0; j < offset; ++j)
                 outBuffer.append(utf16Buffer[j]);
         }
         previousCodePoint = c;
