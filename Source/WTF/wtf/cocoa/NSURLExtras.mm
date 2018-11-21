@@ -622,14 +622,14 @@ NSString *encodeHostName(NSString *string_)
 
 using MappingRangesVector = std::unique_ptr<Vector<std::tuple<unsigned, unsigned, String>>>;
 
-static void collectRangesThatNeedMapping(NSString *string_, NSRange range, MappingRangesVector *array, BOOL encode)
+static void collectRangesThatNeedMapping(String string, unsigned location, unsigned length, MappingRangesVector *array, BOOL encode)
 {
     // Generally, we want to optimize for the case where there is one host name that does not need mapping.
     // Therefore, we use nil to indicate no mapping here and an empty array to indicate error.
 
-    String string = String(string_).substringSharingImpl(range.location, range.length);
+    String substring = string.substringSharingImpl(location, length);
     BOOL error = NO;
-    NSString *host = mapHostName(string, encode, &error);
+    NSString *host = mapHostName(substring, encode, &error);
 
     if (!error && !host)
         return;
@@ -638,7 +638,7 @@ static void collectRangesThatNeedMapping(NSString *string_, NSRange range, Mappi
         *array = std::make_unique<Vector<std::tuple<unsigned, unsigned, String>>>();
 
     if (!error)
-        (*array)->constructAndAppend(range.location, range.length, host);
+        (*array)->constructAndAppend(location, length, host);
 }
 
 static void applyHostNameFunctionToMailToURLString(String string, BOOL encode, MappingRangesVector *array)
@@ -681,7 +681,7 @@ static void applyHostNameFunctionToMailToURLString(String string, BOOL encode, M
             }
             
             // Process host name range.
-            collectRangesThatNeedMapping(string, NSMakeRange(hostNameStart, hostNameEnd - hostNameStart), array, encode);
+            collectRangesThatNeedMapping(string, hostNameStart, hostNameEnd - hostNameStart, array, encode);
 
             if (done)
                 return;
@@ -713,16 +713,15 @@ static void applyHostNameFunctionToMailToURLString(String string, BOOL encode, M
     }
 }
 
-static void applyHostNameFunctionToURLString(NSString *string_, BOOL encode, MappingRangesVector *array)
+static void applyHostNameFunctionToURLString(String string, BOOL encode, MappingRangesVector *array)
 {
-    String string(string_);
     // Find hostnames. Too bad we can't use any real URL-parsing code to do this,
     // but we have to do it before doing all the %-escaping, and this is the only
     // code we have that parses mailto URLs anyway.
     
     // Maybe we should implement this using a character buffer instead?
     
-    if (protocolIs(string_, "mailto")) {
+    if (protocolIs(string, "mailto")) {
         applyHostNameFunctionToMailToURLString(string, encode, array);
         return;
     }
@@ -770,7 +769,7 @@ static void applyHostNameFunctionToURLString(NSString *string_, BOOL encode, Map
     auto userInfoTerminator = string.substringSharingImpl(0, hostNameEnd).find('@', authorityStart);
     unsigned hostNameStart = userInfoTerminator == notFound ? authorityStart : userInfoTerminator + 1;
     
-    collectRangesThatNeedMapping(string_, NSMakeRange(hostNameStart, hostNameEnd - hostNameStart), array, encode);
+    collectRangesThatNeedMapping(string, hostNameStart, hostNameEnd - hostNameStart, array, encode);
 }
 
 static String mapHostNames(String string, bool encode)
