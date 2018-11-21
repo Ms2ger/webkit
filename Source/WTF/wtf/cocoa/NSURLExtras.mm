@@ -557,14 +557,14 @@ static String decodePercentEscapes(String string)
 // Return value of nil means no mapping is necessary.
 // If makeString is NO, then return value is either nil or self to indicate mapping is necessary.
 // If makeString is YES, then return value is either nil or the mapped string.
-static NSString *mapHostName(String string, BOOL encode, BOOL *error)
+static String mapHostName(String string, BOOL encode, BOOL *error)
 {
     unsigned length = string.length();
     if (length > HOST_NAME_BUFFER_LENGTH)
-        return nil;
+        return String();
     
     if (!length)
-        return nil;
+        return String();
 
     if (encode && string.contains('%')) {
         string = decodePercentEscapes(string);
@@ -578,36 +578,34 @@ static NSString *mapHostName(String string, BOOL encode, BOOL *error)
     int32_t numCharactersConverted = (encode ? uidna_nameToASCII : uidna_nameToUnicode)(&URLParser::internationalDomainNameTranscoder(), sourceBuffer.data(), length, destinationBuffer, HOST_NAME_BUFFER_LENGTH, &processingDetails, &uerror);
     if (length && (U_FAILURE(uerror) || processingDetails.errors)) {
         *error = YES;
-        return nil;
+        return String();
     }
     
     if (numCharactersConverted == static_cast<int32_t>(length) && !memcmp(sourceBuffer.data(), destinationBuffer, length * sizeof(UChar)))
-        return nil;
+        return String();
 
     if (!encode && !allCharactersInIDNScriptWhiteList(destinationBuffer, numCharactersConverted) && !allCharactersAllowedByTLDRules(destinationBuffer, numCharactersConverted))
-        return nil;
+        return String();
 
-    return [NSString stringWithCharacters:destinationBuffer length:numCharactersConverted];
+    return String(destinationBuffer, numCharactersConverted);
 }
 
-NSString *decodeHostName(NSString *string_)
+NSString *decodeHostName(NSString *string)
 {
-    String string = String(string_);
     BOOL error = NO;
-    NSString *host = mapHostName(string, NO, &error);
+    String host = mapHostName(string, NO, &error);
     if (error)
         return nil;
-    return !host ? string_ : host;
+    return !host ? string : (NSString*)host;
 }
 
-NSString *encodeHostName(NSString *string_)
+NSString *encodeHostName(NSString *string)
 {
-    String string = String(string_);
     BOOL error = NO;
-    NSString *host = mapHostName(string, YES, &error);
+    String host = mapHostName(string, YES, &error);
     if (error)
         return nil;
-    return !host ? string_ : host;
+    return !host ? string : (NSString*)host;
 }
 
 using MappingRangesVector = std::unique_ptr<Vector<std::tuple<unsigned, unsigned, String>>>;
@@ -619,7 +617,7 @@ static void collectRangesThatNeedMapping(String string, unsigned location, unsig
 
     String substring = string.substringSharingImpl(location, length);
     BOOL error = NO;
-    NSString *host = mapHostName(substring, encode, &error);
+    String host = mapHostName(substring, encode, &error);
 
     if (!error && !host)
         return;
