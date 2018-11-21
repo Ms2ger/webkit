@@ -620,7 +620,7 @@ NSString *encodeHostName(NSString *string_)
     return !host ? string_ : host;
 }
 
-using MappingRangesVector = std::unique_ptr<Vector<std::tuple<NSRange, NSString*>>>;
+using MappingRangesVector = std::unique_ptr<Vector<std::tuple<unsigned, unsigned, String>>>;
 
 static void collectRangesThatNeedMapping(NSString *string_, NSRange range, MappingRangesVector *array, BOOL encode)
 {
@@ -635,10 +635,10 @@ static void collectRangesThatNeedMapping(NSString *string_, NSRange range, Mappi
         return;
     
     if (!*array)
-        *array = std::make_unique<Vector<std::tuple<NSRange, NSString*>>>();
+        *array = std::make_unique<Vector<std::tuple<unsigned, unsigned, String>>>();
 
     if (!error)
-        (*array)->constructAndAppend(range, host);
+        (*array)->constructAndAppend(range.location, range.length, host);
 }
 
 static void applyHostNameFunctionToMailToURLString(String string, BOOL encode, MappingRangesVector *array)
@@ -791,10 +791,10 @@ static String mapHostNames(String string, bool encode)
 
     // Do the mapping.
     while (!hostNameRanges->isEmpty()) {
-        NSRange hostNameRange;
-        NSString* mappedHostName;
-        std::tie(hostNameRange, mappedHostName) = hostNameRanges->takeLast();
-        string = string.replace(hostNameRange.location, hostNameRange.length, mappedHostName);
+        unsigned location, length;
+        String mappedHostName;
+        std::tie(location, length, mappedHostName) = hostNameRanges->takeLast();
+        string = string.replace(location, length, mappedHostName);
     }
     return string;
 }
