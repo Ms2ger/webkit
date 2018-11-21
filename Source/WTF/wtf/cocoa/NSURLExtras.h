@@ -26,11 +26,14 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#import <wtf/text/WTFString.h>
+
 @class NSString;
 @class NSURL;
 
 namespace WTF {
 
+WTF_EXPORT_PRIVATE String userVisibleString(CString URL);
 WTF_EXPORT_PRIVATE NSString *userVisibleString(NSURL *);
 WTF_EXPORT_PRIVATE NSURL *URLWithUserTypedString(NSString *, NSURL *baseURL); // Return value of nil means error.
 WTF_EXPORT_PRIVATE NSURL *URLByRemovingUserInfo(NSURL *);
