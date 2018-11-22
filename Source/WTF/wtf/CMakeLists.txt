@@ -399,6 +399,7 @@ set(WTF_SOURCES
     TimeWithDynamicClockType.cpp
     TimingScope.cpp
     URL.cpp
+    URLHelpers.cpp
     URLParser.cpp
     UUID.cpp
     WTFAssertions.cpp
