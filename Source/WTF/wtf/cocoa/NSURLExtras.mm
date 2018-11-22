@@ -388,7 +388,7 @@ static bool isRussianDomainNameCharacter(UChar ch)
     return (ch >= 0x0430 && ch <= 0x044f) || ch == 0x0451 || isASCIIDigit(ch) || ch == '-';
 }
 
-static BOOL allCharactersAllowedByTLDRules(const UChar* buffer, int32_t length)
+static bool allCharactersAllowedByTLDRules(const UChar* buffer, int32_t length)
 {
     // Skip trailing dot for root domain.
     if (buffer[length - 1] == '.')
@@ -540,7 +540,7 @@ static BOOL allCharactersAllowedByTLDRules(const UChar* buffer, int32_t length)
     });
 
     // Not a known top level domain with special rules.
-    return NO;
+    return false;
 }
 
 static String decodePercentEscapes(String string)
