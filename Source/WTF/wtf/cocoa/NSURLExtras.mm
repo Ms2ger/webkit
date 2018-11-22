@@ -567,7 +567,7 @@ static String decodePercentEscapes(String string)
 // Return value of nil means no mapping is necessary.
 // If makeString is NO, then return value is either nil or self to indicate mapping is necessary.
 // If makeString is YES, then return value is either nil or the mapped string.
-static String mapHostName(String string, BOOL encode, BOOL *error)
+static String mapHostName(String string, bool encode, bool *error)
 {
     unsigned length = string.length();
     if (length > HOST_NAME_BUFFER_LENGTH)
@@ -587,7 +587,7 @@ static String mapHostName(String string, BOOL encode, BOOL *error)
     UIDNAInfo processingDetails = UIDNA_INFO_INITIALIZER;
     int32_t numCharactersConverted = (encode ? uidna_nameToASCII : uidna_nameToUnicode)(&URLParser::internationalDomainNameTranscoder(), sourceBuffer.data(), length, destinationBuffer, HOST_NAME_BUFFER_LENGTH, &processingDetails, &uerror);
     if (length && (U_FAILURE(uerror) || processingDetails.errors)) {
-        *error = YES;
+        *error = true;
         return String();
     }
     
@@ -602,8 +602,8 @@ static String mapHostName(String string, BOOL encode, BOOL *error)
 
 NSString *decodeHostName(NSString *string)
 {
-    BOOL error = NO;
-    String host = mapHostName(string, NO, &error);
+    bool error = false;
+    String host = mapHostName(string, false, &error);
     if (error)
         return nil;
     return !host ? string : (NSString*)host;
@@ -611,8 +611,8 @@ NSString *decodeHostName(NSString *string)
 
 NSString *encodeHostName(NSString *string)
 {
-    BOOL error = NO;
-    String host = mapHostName(string, YES, &error);
+    bool error = false;
+    String host = mapHostName(string, true, &error);
     if (error)
         return nil;
     return !host ? string : (NSString*)host;
@@ -626,7 +626,7 @@ static void collectRangesThatNeedMapping(String string, unsigned location, unsig
     // Therefore, we use nil to indicate no mapping here and an empty array to indicate error.
 
     String substring = string.substringSharingImpl(location, length);
-    BOOL error = NO;
+    bool error = false;
     String host = mapHostName(substring, encode, &error);
 
     if (!error && !host)
