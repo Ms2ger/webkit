@@ -31,6 +31,7 @@
 
 namespace WTF {
 
+WTF_EXPORT_PRIVATE String userVisibleString(CString URL);
 void loadIDNScriptWhiteList();
 
 } // namespace WTF
