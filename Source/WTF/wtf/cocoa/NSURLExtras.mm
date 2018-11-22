@@ -31,6 +31,7 @@
 #import "NSURLExtras.h"
 
 #import "CFURLExtras.h"
+#import <wtf/URLHelpers.h>
 #import "URLParser.h"
 #import <wtf/Function.h>
 #import <wtf/HexNumber.h>
@@ -289,7 +290,7 @@ static BOOL readIDNScriptWhiteListFile(NSString *filename)
     return YES;
 }
 
-static bool allCharactersInIDNScriptWhiteList(const UChar *buffer, int32_t length)
+void loadIDNScriptWhiteList()
 {
     static dispatch_once_t flag;
     dispatch_once(&flag, ^{
@@ -325,7 +326,11 @@ static bool allCharactersInIDNScriptWhiteList(const UChar *buffer, int32_t lengt
         for (const char* scriptName : defaultIDNScriptWhiteList)
             whiteListIDNScript(scriptName);
     });
+}
     
+static bool allCharactersInIDNScriptWhiteList(const UChar *buffer, int32_t length)
+{
+    loadIDNScriptWhiteList();
     int32_t i = 0;
     std::optional<UChar32> previousCodePoint;
     while (i < length) {
