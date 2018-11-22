@@ -620,7 +620,7 @@ NSString *encodeHostName(NSString *string)
 
 using MappingRangesVector = std::unique_ptr<Vector<std::tuple<unsigned, unsigned, String>>>;
 
-static void collectRangesThatNeedMapping(String string, unsigned location, unsigned length, MappingRangesVector *array, BOOL encode)
+static void collectRangesThatNeedMapping(String string, unsigned location, unsigned length, MappingRangesVector *array, bool encode)
 {
     // Generally, we want to optimize for the case where there is one host name that does not need mapping.
     // Therefore, we use nil to indicate no mapping here and an empty array to indicate error.
@@ -639,7 +639,7 @@ static void collectRangesThatNeedMapping(String string, unsigned location, unsig
         (*array)->constructAndAppend(location, length, host);
 }
 
-static void applyHostNameFunctionToMailToURLString(String string, BOOL encode, MappingRangesVector *array)
+static void applyHostNameFunctionToMailToURLString(String string, bool encode, MappingRangesVector *array)
 {
     // In a mailto: URL, host names come after a '@' character and end with a '>' or ',' or '?' character.
     // Skip quoted strings so that characters in them don't confuse us.
@@ -711,7 +711,7 @@ static void applyHostNameFunctionToMailToURLString(String string, BOOL encode, M
     }
 }
 
-static void applyHostNameFunctionToURLString(String string, BOOL encode, MappingRangesVector *array)
+static void applyHostNameFunctionToURLString(String string, bool encode, MappingRangesVector *array)
 {
     // Find hostnames. Too bad we can't use any real URL-parsing code to do this,
     // but we have to do it before doing all the %-escaping, and this is the only
