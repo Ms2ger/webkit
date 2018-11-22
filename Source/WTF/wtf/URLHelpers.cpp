@@ -27,7 +27,18 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "config.h"
 #include "URLHelpers.h"
+
+#include "URLParser.h"
+#include <unicode/uidna.h>
+#include <unicode/unorm.h>
+#include <unicode/uscript.h>
+
+// Needs to be big enough to hold an IDN-encoded name.
+// For host names bigger than this, we won't do IDN encoding, which is almost certainly OK.
+#define HOST_NAME_BUFFER_LENGTH 2048
+#define URL_BYTES_BUFFER_LENGTH 2048
 
 static uint32_t IDNScriptWhiteList[(USCRIPT_CODE_LIMIT + 31) / 32];
 
@@ -232,7 +243,7 @@ static bool isLookalikeCharacter(Optional<UChar32> previousCodePoint, UChar32 ch
     }
 }
 
-static void whiteListIDNScript(const char* scriptName)
+void whiteListIDNScript(const char* scriptName)
 {
     int32_t script = u_getPropertyValueEnum(UCHAR_SCRIPT, scriptName);
     if (script >= 0 && script < USCRIPT_CODE_LIMIT) {
@@ -242,7 +253,7 @@ static void whiteListIDNScript(const char* scriptName)
     }
 }
 
-static void initializeDefaultIDNScriptWhiteList()
+void initializeDefaultIDNScriptWhiteList()
 {
     const char* defaultIDNScriptWhiteList[20] = {
         "Common",
@@ -503,7 +514,7 @@ static bool allCharactersAllowedByTLDRules(const UChar* buffer, int32_t length)
 // Return value of nil means no mapping is necessary.
 // If makeString is NO, then return value is either nil or self to indicate mapping is necessary.
 // If makeString is YES, then return value is either nil or the mapped string.
-static String mapHostName(String string, std::optional<DecodeFunction> decodeFunction, bool *error)
+String mapHostName(String string, std::optional<DecodeFunction> decodeFunction, bool *error)
 {
     unsigned length = string.length();
     if (length > HOST_NAME_BUFFER_LENGTH)
@@ -688,7 +699,7 @@ static void applyHostNameFunctionToURLString(String string, std::optional<Decode
     collectRangesThatNeedMapping(string, hostNameStart, hostNameEnd - hostNameStart, array, decodeFunction);
 }
 
-static String mapHostNames(String string, std::optional<DecodeFunction> decodeFunction)
+String mapHostNames(String string, std::optional<DecodeFunction> decodeFunction)
 {
     // Generally, we want to optimize for the case where there is one host name that does not need mapping.
     

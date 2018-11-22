@@ -30,10 +30,6 @@
 #import <Foundation/Foundation.h>
 #import "NSURLExtras.h"
 
-#import <unicode/uchar.h>
-#import <unicode/uidna.h>
-#import <unicode/unorm.h>
-#import <unicode/uscript.h>
 #import <wtf/Function.h>
 #import <wtf/HexNumber.h>
 #import <wtf/ObjCRuntimeExtras.h>
@@ -43,9 +39,6 @@
 #import <wtf/Vector.h>
 #import <wtf/cf/CFURLExtras.h>
 
-// Needs to be big enough to hold an IDN-encoded name.
-// For host names bigger than this, we won't do IDN encoding, which is almost certainly OK.
-#define HOST_NAME_BUFFER_LENGTH 2048
 #define URL_BYTES_BUFFER_LENGTH 2048
 
 namespace WTF {
