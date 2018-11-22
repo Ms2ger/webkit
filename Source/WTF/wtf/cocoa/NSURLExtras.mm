@@ -259,6 +259,34 @@ static void whiteListIDNScript(const char* scriptName)
     }
 }
 
+static void initializeDefaultIDNScriptWhiteList()
+{
+    const char* defaultIDNScriptWhiteList[20] = {
+        "Common",
+        "Inherited",
+        "Arabic",
+        "Armenian",
+        "Bopomofo",
+        "Canadian_Aboriginal",
+        "Devanagari",
+        "Deseret",
+        "Gujarati",
+        "Gurmukhi",
+        "Hangul",
+        "Han",
+        "Hebrew",
+        "Hiragana",
+        "Katakana_Or_Hiragana",
+        "Katakana",
+        "Latin",
+        "Tamil",
+        "Thai",
+        "Yi",
+    };
+    for (const char* scriptName : defaultIDNScriptWhiteList)
+        whiteListIDNScript(scriptName);
+}
+
 static BOOL readIDNScriptWhiteListFile(NSString *filename)
 {
     if (!filename)
@@ -301,30 +329,7 @@ void loadIDNScriptWhiteList()
             if (readIDNScriptWhiteListFile([[dirs objectAtIndex:i] stringByAppendingPathComponent:@"IDNScriptWhiteList.txt"]))
                 return;
         }
-        const char* defaultIDNScriptWhiteList[20] = {
-            "Common",
-            "Inherited",
-            "Arabic",
-            "Armenian",
-            "Bopomofo",
-            "Canadian_Aboriginal",
-            "Devanagari",
-            "Deseret",
-            "Gujarati",
-            "Gurmukhi",
-            "Hangul",
-            "Han",
-            "Hebrew",
-            "Hiragana",
-            "Katakana_Or_Hiragana",
-            "Katakana",
-            "Latin",
-            "Tamil",
-            "Thai",
-            "Yi",
-        };
-        for (const char* scriptName : defaultIDNScriptWhiteList)
-            whiteListIDNScript(scriptName);
+        initializeDefaultIDNScriptWhiteList();
     });
 }
     
