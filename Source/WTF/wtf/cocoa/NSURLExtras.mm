@@ -38,6 +38,7 @@
 #import <wtf/HexNumber.h>
 #import <wtf/ObjCRuntimeExtras.h>
 #import <wtf/RetainPtr.h>
+#import <wtf/URLHelpers.h>
 #import <wtf/URLParser.h>
 #import <wtf/Vector.h>
 #import <wtf/cf/CFURLExtras.h>
@@ -289,7 +290,7 @@ static BOOL readIDNScriptWhiteListFile(NSString *filename)
     return YES;
 }
 
-static bool allCharactersInIDNScriptWhiteList(const UChar *buffer, int32_t length)
+void loadIDNScriptWhiteList()
 {
     static dispatch_once_t flag;
     dispatch_once(&flag, ^{
@@ -325,7 +326,11 @@ static bool allCharactersInIDNScriptWhiteList(const UChar *buffer, int32_t lengt
         for (const char* scriptName : defaultIDNScriptWhiteList)
             whiteListIDNScript(scriptName);
     });
+}
     
+static bool allCharactersInIDNScriptWhiteList(const UChar *buffer, int32_t length)
+{
+    loadIDNScriptWhiteList();
     int32_t i = 0;
     Optional<UChar32> previousCodePoint;
     while (i < length) {
