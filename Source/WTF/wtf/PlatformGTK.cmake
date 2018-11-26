@@ -26,6 +26,7 @@ list(APPEND WTF_SOURCES
     glib/GRefPtr.cpp
     glib/RunLoopGLib.cpp
     glib/URLGLib.cpp
+    glib/URLHelpersGlib.cpp
 
     text/unix/TextBreakIteratorInternalICUUnix.cpp
 
