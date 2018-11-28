@@ -772,11 +772,11 @@ static void applyHostNameFunctionToURLString(NSString *string, BOOL encode, Reta
     collectRangesThatNeedMapping(string, NSMakeRange(hostNameStart, hostNameEnd - hostNameStart), array, encode);
 }
 
-static RetainPtr<NSString> mapHostNames(NSString *string, BOOL encode)
+static String mapHostNames(String string, BOOL encode)
 {
     // Generally, we want to optimize for the case where there is one host name that does not need mapping.
     
-    if (encode && [string canBeConvertedToEncoding:NSASCIIStringEncoding])
+    if (encode && string.isAllASCII())
         return string;
     
     // Make a list of ranges that actually need mapping.
@@ -786,15 +786,15 @@ static RetainPtr<NSString> mapHostNames(NSString *string, BOOL encode)
         return string;
 
     if (![hostNameRanges count])
-        return nil;
+        return String();
     
     // Do the mapping.
-    auto mutableCopy = adoptNS([string mutableCopy]);
+    String mutableCopy = [string mutableCopy];
     unsigned i = [hostNameRanges count];
     while (i--) {
         NSRange hostNameRange = [[hostNameRanges objectAtIndex:i] rangeValue];
-        NSString *mappedHostName = encode ? encodeHostNameWithRange(string, hostNameRange) : decodeHostNameWithRange(string, hostNameRange);
-        [mutableCopy replaceCharactersInRange:hostNameRange withString:mappedHostName];
+        String mappedHostName = encode ? encodeHostNameWithRange(string, hostNameRange) : decodeHostNameWithRange(string, hostNameRange);
+        mutableCopy = mutableCopy.replace(hostNameRange.location, hostNameRange.length, mappedHostName);
     }
     return mutableCopy;
 }
@@ -903,13 +903,13 @@ NSURL *URLWithUserTypedString(NSString *string, NSURL *nsURL)
         return nil;
 
     // Let's check whether the URL is bogus.
-    URL url { URL { nsURL }, mappedString.get() };
+    URL url { URL { nsURL }, mappedString };
     if (!url.createCFURL())
         return nil;
 
     // FIXME: https://bugs.webkit.org/show_bug.cgi?id=186057
     // We should be able to use url.createCFURL instead of using directly CFURL parsing routines.
-    NSData *data = dataWithUserTypedString(mappedString.get());
+    NSData *data = dataWithUserTypedString(mappedString);
     if (!data)
         return [NSURL URLWithString:@""];
 
@@ -1182,8 +1182,8 @@ NSString *userVisibleString(NSURL *URL)
     if (mayNeedHostNameDecoding) {
         // FIXME: Is it good to ignore the failure of mapHostNames and keep result intact?
         auto mappedResult = mapHostNames(result, NO);
-        if (mappedResult)
-            result = mappedResult.get();
+        if (!!mappedResult)
+            result = mappedResult;
     }
 
     auto normalized = toNormalizationFormC(result);
