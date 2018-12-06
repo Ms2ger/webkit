@@ -52,6 +52,8 @@ static uint32_t IDNScriptWhiteList[(USCRIPT_CODE_LIMIT + 31) / 32];
 
 namespace WTF {
 
+using DecodeFunction = String(&)(String);
+
 static bool isArmenianLookalikeCharacter(UChar32 codePoint)
 {
     return codePoint == 0x0548 || codePoint == 0x054D || codePoint == 0x0578 || codePoint == 0x057D;
@@ -577,7 +579,7 @@ static String decodePercentEscapes(String string)
 // Return value of nil means no mapping is necessary.
 // If makeString is NO, then return value is either nil or self to indicate mapping is necessary.
 // If makeString is YES, then return value is either nil or the mapped string.
-static String mapHostName(String string, bool encode, bool *error)
+static String mapHostName(String string, std::optional<DecodeFunction> decodeFunction, bool *error)
 {
     unsigned length = string.length();
     if (length > HOST_NAME_BUFFER_LENGTH)
@@ -586,8 +588,8 @@ static String mapHostName(String string, bool encode, bool *error)
     if (!length)
         return String();
 
-    if (encode && string.contains('%')) {
-        string = decodePercentEscapes(string);
+    if (decodeFunction && string.contains('%')) {
+        string = (*decodeFunction)(string);
     }
     
     auto sourceBuffer = string.charactersWithNullTermination();
@@ -595,7 +597,7 @@ static String mapHostName(String string, bool encode, bool *error)
     UChar destinationBuffer[HOST_NAME_BUFFER_LENGTH];
     UErrorCode uerror = U_ZERO_ERROR;
     UIDNAInfo processingDetails = UIDNA_INFO_INITIALIZER;
-    int32_t numCharactersConverted = (encode ? uidna_nameToASCII : uidna_nameToUnicode)(&URLParser::internationalDomainNameTranscoder(), sourceBuffer.data(), length, destinationBuffer, HOST_NAME_BUFFER_LENGTH, &processingDetails, &uerror);
+    int32_t numCharactersConverted = (decodeFunction ? uidna_nameToASCII : uidna_nameToUnicode)(&URLParser::internationalDomainNameTranscoder(), sourceBuffer.data(), length, destinationBuffer, HOST_NAME_BUFFER_LENGTH, &processingDetails, &uerror);
     if (length && (U_FAILURE(uerror) || processingDetails.errors)) {
         *error = true;
         return String();
@@ -604,7 +606,7 @@ static String mapHostName(String string, bool encode, bool *error)
     if (numCharactersConverted == static_cast<int32_t>(length) && !memcmp(sourceBuffer.data(), destinationBuffer, length * sizeof(UChar)))
         return String();
 
-    if (!encode && !allCharactersInIDNScriptWhiteList(destinationBuffer, numCharactersConverted) && !allCharactersAllowedByTLDRules(destinationBuffer, numCharactersConverted))
+    if (!decodeFunction && !allCharactersInIDNScriptWhiteList(destinationBuffer, numCharactersConverted) && !allCharactersAllowedByTLDRules(destinationBuffer, numCharactersConverted))
         return String();
 
     return String(destinationBuffer, numCharactersConverted);
@@ -613,7 +615,7 @@ static String mapHostName(String string, bool encode, bool *error)
 NSString *decodeHostName(NSString *string)
 {
     bool error = false;
-    String host = mapHostName(string, false, &error);
+    String host = mapHostName(string, std::nullopt, &error);
     if (error)
         return nil;
     return !host ? string : (NSString*)host;
@@ -622,7 +624,7 @@ NSString *decodeHostName(NSString *string)
 NSString *encodeHostName(NSString *string)
 {
     bool error = false;
-    String host = mapHostName(string, true, &error);
+    String host = mapHostName(string, decodePercentEscapes, &error);
     if (error)
         return nil;
     return !host ? string : (NSString*)host;
@@ -630,14 +632,14 @@ NSString *encodeHostName(NSString *string)
 
 using MappingRangesVector = std::unique_ptr<Vector<std::tuple<unsigned, unsigned, String>>>;
 
-static void collectRangesThatNeedMapping(String string, unsigned location, unsigned length, MappingRangesVector *array, bool encode)
+static void collectRangesThatNeedMapping(String string, unsigned location, unsigned length, MappingRangesVector *array, std::optional<DecodeFunction> decodeFunction)
 {
     // Generally, we want to optimize for the case where there is one host name that does not need mapping.
     // Therefore, we use nil to indicate no mapping here and an empty array to indicate error.
 
     String substring = string.substringSharingImpl(location, length);
     bool error = false;
-    String host = mapHostName(substring, encode, &error);
+    String host = mapHostName(substring, decodeFunction, &error);
 
     if (!error && !host)
         return;
@@ -649,7 +651,7 @@ static void collectRangesThatNeedMapping(String string, unsigned location, unsig
         (*array)->constructAndAppend(location, length, host);
 }
 
-static void applyHostNameFunctionToMailToURLString(String string, bool encode, MappingRangesVector *array)
+static void applyHostNameFunctionToMailToURLString(String string, std::optional<DecodeFunction> decodeFunction, MappingRangesVector *array)
 {
     // In a mailto: URL, host names come after a '@' character and end with a '>' or ',' or '?' character.
     // Skip quoted strings so that characters in them don't confuse us.
@@ -689,7 +691,7 @@ static void applyHostNameFunctionToMailToURLString(String string, bool encode, M
             }
             
             // Process host name range.
-            collectRangesThatNeedMapping(string, hostNameStart, hostNameEnd - hostNameStart, array, encode);
+            collectRangesThatNeedMapping(string, hostNameStart, hostNameEnd - hostNameStart, array, decodeFunction);
 
             if (done)
                 return;
@@ -721,7 +723,7 @@ static void applyHostNameFunctionToMailToURLString(String string, bool encode, M
     }
 }
 
-static void applyHostNameFunctionToURLString(String string, bool encode, MappingRangesVector *array)
+static void applyHostNameFunctionToURLString(String string, std::optional<DecodeFunction> decodeFunction, MappingRangesVector *array)
 {
     // Find hostnames. Too bad we can't use any real URL-parsing code to do this,
     // but we have to do it before doing all the %-escaping, and this is the only
@@ -730,7 +732,7 @@ static void applyHostNameFunctionToURLString(String string, bool encode, Mapping
     // Maybe we should implement this using a character buffer instead?
     
     if (protocolIs(string, "mailto")) {
-        applyHostNameFunctionToMailToURLString(string, encode, array);
+        applyHostNameFunctionToMailToURLString(string, decodeFunction, array);
         return;
     }
     
@@ -777,19 +779,19 @@ static void applyHostNameFunctionToURLString(String string, bool encode, Mapping
     auto userInfoTerminator = string.substringSharingImpl(0, hostNameEnd).find('@', authorityStart);
     unsigned hostNameStart = userInfoTerminator == notFound ? authorityStart : userInfoTerminator + 1;
     
-    collectRangesThatNeedMapping(string, hostNameStart, hostNameEnd - hostNameStart, array, encode);
+    collectRangesThatNeedMapping(string, hostNameStart, hostNameEnd - hostNameStart, array, decodeFunction);
 }
 
-static String mapHostNames(String string, bool encode)
+static String mapHostNames(String string, std::optional<DecodeFunction> decodeFunction)
 {
     // Generally, we want to optimize for the case where there is one host name that does not need mapping.
     
-    if (encode && string.isAllASCII())
+    if (decodeFunction && string.isAllASCII())
         return string;
     
     // Make a list of ranges that actually need mapping.
     MappingRangesVector hostNameRanges;
-    applyHostNameFunctionToURLString(string, encode, &hostNameRanges);
+    applyHostNameFunctionToURLString(string, decodeFunction, &hostNameRanges);
     if (!hostNameRanges)
         return string;
 
@@ -905,7 +907,7 @@ NSURL *URLWithUserTypedString(NSString *string, NSURL *nsURL)
     if (!string)
         return nil;
 
-    auto mappedString = mapHostNames(stringByTrimmingWhitespace(string).get(), true);
+    auto mappedString = mapHostNames(stringByTrimmingWhitespace(string).get(), decodePercentEscapes);
     if (!mappedString)
         return nil;
 
@@ -1190,7 +1192,7 @@ String userVisibleString(CString URL)
 
     if (mayNeedHostNameDecoding) {
         // FIXME: Is it good to ignore the failure of mapHostNames and keep result intact?
-        auto mappedResult = mapHostNames(result, false);
+        auto mappedResult = mapHostNames(result, std::nullopt);
         if (!!mappedResult)
             result = mappedResult;
     }
