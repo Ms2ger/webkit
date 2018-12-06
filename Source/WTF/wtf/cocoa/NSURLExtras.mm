@@ -567,7 +567,7 @@ static String decodePercentEscapes(String string)
 // Return value of nil means no mapping is necessary.
 // If makeString is NO, then return value is either nil or self to indicate mapping is necessary.
 // If makeString is YES, then return value is either nil or the mapped string.
-static NSString *mapHostName(String string, BOOL encode, BOOL makeString, BOOL *error)
+static NSString *mapHostName(String string, BOOL encode, BOOL *error)
 {
     unsigned length = string.length();
     if (length > HOST_NAME_BUFFER_LENGTH)
@@ -597,14 +597,14 @@ static NSString *mapHostName(String string, BOOL encode, BOOL makeString, BOOL *
     if (!encode && !allCharactersInIDNScriptWhiteList(destinationBuffer, numCharactersConverted) && !allCharactersAllowedByTLDRules(destinationBuffer, numCharactersConverted))
         return nil;
 
-    return makeString ? [NSString stringWithCharacters:destinationBuffer length:numCharactersConverted] : (NSString*)string;
+    return [NSString stringWithCharacters:destinationBuffer length:numCharactersConverted];
 }
 
 NSString *decodeHostName(NSString *string_)
 {
     String string = String(string_);
     BOOL error = NO;
-    NSString *host = mapHostName(string, NO, YES, &error);
+    NSString *host = mapHostName(string, NO, &error);
     if (error)
         return nil;
     return !host ? string_ : host;
@@ -614,7 +614,7 @@ NSString *encodeHostName(NSString *string_)
 {
     String string = String(string_);
     BOOL error = NO;
-    NSString *host = mapHostName(string, YES, YES, &error);
+    NSString *host = mapHostName(string, YES, &error);
     if (error)
         return nil;
     return !host ? string_ : host;
@@ -629,7 +629,7 @@ static void collectRangesThatNeedMapping(NSString *string_, NSRange range, Mappi
 
     String string = String(string_).substringSharingImpl(range.location, range.length);
     BOOL error = NO;
-    NSString *host = mapHostName(string, encode, YES, &error);
+    NSString *host = mapHostName(string, encode, &error);
 
     if (!error && !host)
         return;
