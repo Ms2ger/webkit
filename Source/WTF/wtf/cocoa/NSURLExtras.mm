@@ -586,16 +586,6 @@ static NSString *mapHostNameWithRange(NSString *string, NSRange range, BOOL enco
     return makeString ? [NSString stringWithCharacters:destinationBuffer length:numCharactersConverted] : string;
 }
 
-static BOOL hostNameNeedsDecodingWithRange(NSString *string, NSRange range, BOOL *error)
-{
-    return mapHostNameWithRange(string, range, NO, NO, error) != nil;
-}
- 
-static BOOL hostNameNeedsEncodingWithRange(NSString *string, NSRange range, BOOL *error)
-{
-    return mapHostNameWithRange(string, range, YES,  NO, error) != nil;
-}
-
 static NSString *decodeHostNameWithRange(NSString *string, NSRange range)
 {
     BOOL error = NO;
@@ -638,8 +628,8 @@ static void collectRangesThatNeedMapping(NSString *string, NSRange range, Retain
     // Therefore, we use nil to indicate no mapping here and an empty array to indicate error.
 
     BOOL error = NO;
-    BOOL needsMapping = encode ? hostNameNeedsEncodingWithRange(string, range, &error) : hostNameNeedsDecodingWithRange(string, range, &error);
-    if (!error && !needsMapping)
+    NSString *host = mapHostNameWithRange(string, range, encode, NO, &error);
+    if (!error && !host)
         return;
     
     if (!array)
