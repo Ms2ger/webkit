@@ -213,6 +213,8 @@ class TestRunner(object):
     def _run_google_test_suite(self, test_program):
         result = {}
         for subtest in self._get_tests_from_google_test_suite(test_program):
+            if 'UserVisibleString' not in subtest:
+                continue
             result.update(self._run_google_test(test_program, subtest))
         return result
 
