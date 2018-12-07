@@ -1,3 +1,46 @@
+2018-12-07  Ms2ger  <Ms2ger@igalia.com>
+
+        [GTK][WPE] Need a function to convert internal URI to display ("pretty") URI
+        https://bugs.webkit.org/show_bug.cgi?id=174816
+
+        Reviewed by NOBODY (OOPS!).
+
+        Translate userVisibleString and dependent code into platform-neutral C++
+        in wtf/URLHelpers.{h,cpp}.
+
+        * WTF.xcodeproj/project.pbxproj:
+        * wtf/CMakeLists.txt:
+        * wtf/PlatformGTK.cmake:
+        * wtf/URLHelpers.cpp: Copied from Source/WTF/wtf/cocoa/NSURLExtras.mm.
+        (WTF::isArmenianLookalikeCharacter):
+        (WTF::isArmenianScriptCharacter):
+        (WTF::isASCIIDigitOrValidHostCharacter):
+        (WTF::isLookalikeCharacter):
+        (WTF::whiteListIDNScript):
+        (WTF::initializeDefaultIDNScriptWhiteList):
+        (WTF::allCharactersInIDNScriptWhiteList):
+        (WTF::isSecondLevelDomainNameAllowedByTLDRules):
+        (WTF::isRussianDomainNameCharacter):
+        (WTF::allCharactersAllowedByTLDRules):
+        (WTF::mapHostName):
+        (WTF::collectRangesThatNeedMapping):
+        (WTF::applyHostNameFunctionToMailToURLString):
+        (WTF::applyHostNameFunctionToURLString):
+        (WTF::mapHostNames):
+        (WTF::createStringWithEscapedUnsafeCharacters):
+        (WTF::userVisibleString):
+        * wtf/URLHelpers.h: Copied from Source/WTF/wtf/cocoa/NSURLExtras.h.
+        * wtf/cocoa/NSURLExtras.h:
+        * wtf/cocoa/NSURLExtras.mm:
+        (WTF::loadIDNScriptWhiteList):
+        (WTF::decodePercentEscapes):
+        (WTF::decodeHostName):
+        (WTF::encodeHostName):
+        (WTF::URLWithUserTypedString):
+        (WTF::userVisibleString):
+        * wtf/glib/URLHelpersGlib.cpp: Copied from Source/WTF/wtf/cocoa/NSURLExtras.h.
+        (WTF::loadIDNScriptWhiteList):
+
 2019-01-28  Ross Kirsling  <ross.kirsling@sony.com>
 
         Move platform-specific files out of WTF root directory.
