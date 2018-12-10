@@ -40,8 +40,8 @@ namespace WTF {
 
 // Needs to be big enough to hold an IDN-encoded name.
 // For host names bigger than this, we won't do IDN encoding, which is almost certainly OK.
-static unsigned HOST_NAME_BUFFER_LENGTH = 2048;
-static unsigned URL_BYTES_BUFFER_LENGTH = 2048;
+const unsigned HOST_NAME_BUFFER_LENGTH = 2048;
+const unsigned URL_BYTES_BUFFER_LENGTH = 2048;
 
 static uint32_t IDNScriptWhiteList[(USCRIPT_CODE_LIMIT + 31) / 32];
 
