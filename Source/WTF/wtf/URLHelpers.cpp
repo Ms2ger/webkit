@@ -36,14 +36,14 @@
 #include <unicode/unorm.h>
 #include <unicode/uscript.h>
 
+namespace WTF {
+
 // Needs to be big enough to hold an IDN-encoded name.
 // For host names bigger than this, we won't do IDN encoding, which is almost certainly OK.
-#define HOST_NAME_BUFFER_LENGTH 2048
-#define URL_BYTES_BUFFER_LENGTH 2048
+static unsigned HOST_NAME_BUFFER_LENGTH = 2048;
+static unsigned URL_BYTES_BUFFER_LENGTH = 2048;
 
 static uint32_t IDNScriptWhiteList[(USCRIPT_CODE_LIMIT + 31) / 32];
-
-namespace WTF {
 
 #if !PLATFORM(COCOA)
 
