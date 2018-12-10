@@ -26,8 +26,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <wtf/text/WTFString.h>
-
 @class NSString;
 @class NSURL;
 

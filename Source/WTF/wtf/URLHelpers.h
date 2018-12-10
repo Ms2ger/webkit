@@ -29,18 +29,19 @@
 
 #pragma once
 
-#include <wtf/Optional.h>
 #include <wtf/Forward.h>
+#include <wtf/Optional.h>
+#include <wtf/text/WTFString.h>
 
 namespace WTF {
 
-using DecodeFunction = String(&)(String);
+using URLDecodeFunction = String(&)(const String&);
 
-WTF_EXPORT_PRIVATE String userVisibleString(CString URL);
+WTF_EXPORT_PRIVATE String userVisibleString(const CString& URL);
 void loadIDNScriptWhiteList();
 void whiteListIDNScript(const char* scriptName);
 void initializeDefaultIDNScriptWhiteList();
-String mapHostName(String string, std::optional<DecodeFunction>, bool *error);
-String mapHostNames(String string, std::optional<DecodeFunction>);
+String mapHostName(const String& string, const std::optional<URLDecodeFunction>&, bool& error);
+String mapHostNames(const String& string, const std::optional<URLDecodeFunction>&);
 
 } // namespace WTF

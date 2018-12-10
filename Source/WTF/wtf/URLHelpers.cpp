@@ -31,6 +31,7 @@
 #include "URLHelpers.h"
 
 #include "URLParser.h"
+#include <mutex>
 #include <unicode/uidna.h>
 #include <unicode/unorm.h>
 #include <unicode/uscript.h>
@@ -44,7 +45,17 @@ static uint32_t IDNScriptWhiteList[(USCRIPT_CODE_LIMIT + 31) / 32];
 
 namespace WTF {
 
-using DecodeFunction = String(&)(String);
+#if !PLATFORM(COCOA)
+
+// Cocoa has an implementation that uses a whitelist in /Library or ~/Library,
+// if it exists.
+void loadIDNScriptWhiteList()
+{
+    static std::once_flag flag;
+    std::call_once(flag, initializeDefaultIDNScriptWhiteList);
+}
+
+#endif // !PLATFORM(COCOA)
 
 static bool isArmenianLookalikeCharacter(UChar32 codePoint)
 {
@@ -62,7 +73,6 @@ static bool isArmenianScriptCharacter(UChar32 codePoint)
 
     return script == USCRIPT_ARMENIAN;
 }
-
 
 template<typename CharacterType> inline bool isASCIIDigitOrValidHostCharacter(CharacterType charCode)
 {
@@ -86,9 +96,7 @@ template<typename CharacterType> inline bool isASCIIDigitOrValidHostCharacter(Ch
     }
 }
 
-
-
-static bool isLookalikeCharacter(std::optional<UChar32> previousCodePoint, UChar32 charCode)
+static bool isLookalikeCharacter(const std::optional<UChar32>& previousCodePoint, UChar32 charCode)
 {
     // This function treats the following as unsafe, lookalike characters:
     // any non-printable character, any character considered as whitespace,
@@ -281,7 +289,7 @@ void initializeDefaultIDNScriptWhiteList()
         whiteListIDNScript(scriptName);
 }
 
-static bool allCharactersInIDNScriptWhiteList(const UChar *buffer, int32_t length)
+static bool allCharactersInIDNScriptWhiteList(const UChar* buffer, int32_t length)
 {
     loadIDNScriptWhiteList();
     int32_t i = 0;
@@ -504,19 +512,22 @@ static bool allCharactersAllowedByTLDRules(const UChar* buffer, int32_t length)
 // Return value of nil means no mapping is necessary.
 // If makeString is NO, then return value is either nil or self to indicate mapping is necessary.
 // If makeString is YES, then return value is either nil or the mapped string.
-String mapHostName(String string, std::optional<DecodeFunction> decodeFunction, bool *error)
+String mapHostName(const String& string_, const std::optional<URLDecodeFunction>& decodeFunction, bool& error)
 {
-    unsigned length = string.length();
-    if (length > HOST_NAME_BUFFER_LENGTH)
-        return String();
+    if (string_.length() > HOST_NAME_BUFFER_LENGTH)
+        return { };
     
-    if (!length)
-        return String();
+    if (!string_.length())
+        return { };
 
+    String string;
     if (decodeFunction && string.contains('%')) {
-        string = (*decodeFunction)(string);
+        string = (*decodeFunction)(string_);
+    } else {
+        string = string_;
     }
-    
+    unsigned length = string.length();
+
     auto sourceBuffer = string.charactersWithNullTermination();
     
     UChar destinationBuffer[HOST_NAME_BUFFER_LENGTH];
@@ -524,41 +535,41 @@ String mapHostName(String string, std::optional<DecodeFunction> decodeFunction, 
     UIDNAInfo processingDetails = UIDNA_INFO_INITIALIZER;
     int32_t numCharactersConverted = (decodeFunction ? uidna_nameToASCII : uidna_nameToUnicode)(&URLParser::internationalDomainNameTranscoder(), sourceBuffer.data(), length, destinationBuffer, HOST_NAME_BUFFER_LENGTH, &processingDetails, &uerror);
     if (length && (U_FAILURE(uerror) || processingDetails.errors)) {
-        *error = true;
-        return String();
+        error = true;
+        return { };
     }
     
     if (numCharactersConverted == static_cast<int32_t>(length) && !memcmp(sourceBuffer.data(), destinationBuffer, length * sizeof(UChar)))
-        return String();
+        return { };
 
     if (!decodeFunction && !allCharactersInIDNScriptWhiteList(destinationBuffer, numCharactersConverted) && !allCharactersAllowedByTLDRules(destinationBuffer, numCharactersConverted))
-        return String();
+        return { };
 
     return String(destinationBuffer, numCharactersConverted);
 }
 
 using MappingRangesVector = std::unique_ptr<Vector<std::tuple<unsigned, unsigned, String>>>;
 
-static void collectRangesThatNeedMapping(String string, unsigned location, unsigned length, MappingRangesVector *array, std::optional<DecodeFunction> decodeFunction)
+static void collectRangesThatNeedMapping(const String& string, unsigned location, unsigned length, MappingRangesVector& array, std::optional<URLDecodeFunction> decodeFunction)
 {
     // Generally, we want to optimize for the case where there is one host name that does not need mapping.
-    // Therefore, we use nil to indicate no mapping here and an empty array to indicate error.
+    // Therefore, we use null to indicate no mapping here and an empty array to indicate error.
 
     String substring = string.substringSharingImpl(location, length);
     bool error = false;
-    String host = mapHostName(substring, decodeFunction, &error);
+    String host = mapHostName(substring, decodeFunction, error);
 
     if (!error && !host)
         return;
     
-    if (!*array)
-        *array = std::make_unique<Vector<std::tuple<unsigned, unsigned, String>>>();
+    if (!array)
+        array = std::make_unique<Vector<std::tuple<unsigned, unsigned, String>>>();
 
     if (!error)
-        (*array)->constructAndAppend(location, length, host);
+        array->constructAndAppend(location, length, host);
 }
 
-static void applyHostNameFunctionToMailToURLString(String string, std::optional<DecodeFunction> decodeFunction, MappingRangesVector *array)
+static void applyHostNameFunctionToMailToURLString(const String& string, const std::optional<URLDecodeFunction>& decodeFunction, MappingRangesVector& array)
 {
     // In a mailto: URL, host names come after a '@' character and end with a '>' or ',' or '?' character.
     // Skip quoted strings so that characters in them don't confuse us.
@@ -630,7 +641,7 @@ static void applyHostNameFunctionToMailToURLString(String string, std::optional<
     }
 }
 
-static void applyHostNameFunctionToURLString(String string, std::optional<DecodeFunction> decodeFunction, MappingRangesVector *array)
+static void applyHostNameFunctionToURLString(const String& string, const std::optional<URLDecodeFunction>& decodeFunction, MappingRangesVector& array)
 {
     // Find hostnames. Too bad we can't use any real URL-parsing code to do this,
     // but we have to do it before doing all the %-escaping, and this is the only
@@ -689,7 +700,7 @@ static void applyHostNameFunctionToURLString(String string, std::optional<Decode
     collectRangesThatNeedMapping(string, hostNameStart, hostNameEnd - hostNameStart, array, decodeFunction);
 }
 
-String mapHostNames(String string, std::optional<DecodeFunction> decodeFunction)
+String mapHostNames(const String& string, const std::optional<URLDecodeFunction>& decodeFunction)
 {
     // Generally, we want to optimize for the case where there is one host name that does not need mapping.
     
@@ -698,21 +709,22 @@ String mapHostNames(String string, std::optional<DecodeFunction> decodeFunction)
     
     // Make a list of ranges that actually need mapping.
     MappingRangesVector hostNameRanges;
-    applyHostNameFunctionToURLString(string, decodeFunction, &hostNameRanges);
+    applyHostNameFunctionToURLString(string, decodeFunction, hostNameRanges);
     if (!hostNameRanges)
         return string;
 
     if (hostNameRanges->isEmpty())
-        return String();
+        return { };
 
     // Do the mapping.
+    String result = string;
     while (!hostNameRanges->isEmpty()) {
         unsigned location, length;
         String mappedHostName;
         std::tie(location, length, mappedHostName) = hostNameRanges->takeLast();
-        string = string.replace(location, length, mappedHostName);
+        result = result.replace(location, length, mappedHostName);
     }
-    return string;
+    return result;
 }
 
 static void createStringWithEscapedUnsafeCharacters(const Vector<UChar, URL_BYTES_BUFFER_LENGTH>& sourceBuffer, Vector<UChar, URL_BYTES_BUFFER_LENGTH>& outBuffer)
@@ -750,21 +762,23 @@ static void createStringWithEscapedUnsafeCharacters(const Vector<UChar, URL_BYTE
     }
 }
 
-String userVisibleString(CString URL)
+String userVisibleString(const CString& URL)
 {
     auto before = reinterpret_cast<const unsigned char*>(URL.data());
     int length = URL.length();
 
     if (!length)
-        return emptyString();
+        return { };
 
     bool mayNeedHostNameDecoding = false;
-    int bufferLength = (length * 3) + 1;
-    Vector<char, URL_BYTES_BUFFER_LENGTH> after(bufferLength); // large enough to %-escape every character
 
-    char *q = after.data();
+    // The buffer should be large enough to %-escape every character.
+    int bufferLength = (length * 3) + 1;
+    Vector<char, URL_BYTES_BUFFER_LENGTH> after(bufferLength);
+
+    char* q = after.data();
     {
-        const unsigned char *p = before;
+        const unsigned char* p = before;
         for (int i = 0; i < length; i++) {
             unsigned char c = p[i];
             // unescape escape sequences that indicate bytes greater than 0x7f
@@ -800,9 +814,9 @@ String userVisibleString(CString URL)
         // then we will copy back bytes to the start of the buffer 
         // as we convert.
         int afterlength = q - after.data();
-        char *p = after.data() + bufferLength - afterlength - 1;
+        char* p = after.data() + bufferLength - afterlength - 1;
         memmove(p, after.data(), afterlength + 1); // copies trailing '\0'
-        char *q = after.data();
+        char* q = after.data();
         while (*p) {
             unsigned char c = *p;
             if (c > 0x7f) {
@@ -843,7 +857,7 @@ String userVisibleString(CString URL)
         normalizedLength = unorm_normalize(sourceBuffer.data(), sourceBuffer.size(), UNORM_NFC, 0, normalizedCharacters.data(), normalizedLength, &uerror);
     }
     if (U_FAILURE(uerror))
-        return String();
+        return { };
 
     Vector<UChar, URL_BYTES_BUFFER_LENGTH> outBuffer;
     createStringWithEscapedUnsafeCharacters(normalizedCharacters, outBuffer);
