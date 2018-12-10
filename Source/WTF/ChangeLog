@@ -1,4 +1,4 @@
-2018-12-07  Ms2ger  <Ms2ger@igalia.com>
+2018-12-10  Ms2ger  <Ms2ger@igalia.com>
 
         [GTK][WPE] Need a function to convert internal URI to display ("pretty") URI
         https://bugs.webkit.org/show_bug.cgi?id=174816
@@ -10,8 +10,8 @@
 
         * WTF.xcodeproj/project.pbxproj:
         * wtf/CMakeLists.txt:
-        * wtf/PlatformGTK.cmake:
-        * wtf/URLHelpers.cpp: Copied from Source/WTF/wtf/cocoa/NSURLExtras.mm.
+        * wtf/URLHelpers.cpp: Added.
+        (WTF::loadIDNScriptWhiteList):
         (WTF::isArmenianLookalikeCharacter):
         (WTF::isArmenianScriptCharacter):
         (WTF::isASCIIDigitOrValidHostCharacter):
@@ -29,8 +29,7 @@
         (WTF::mapHostNames):
         (WTF::createStringWithEscapedUnsafeCharacters):
         (WTF::userVisibleString):
-        * wtf/URLHelpers.h: Copied from Source/WTF/wtf/cocoa/NSURLExtras.h.
-        * wtf/cocoa/NSURLExtras.h:
+        * wtf/URLHelpers.h: Added.
         * wtf/cocoa/NSURLExtras.mm:
         (WTF::loadIDNScriptWhiteList):
         (WTF::decodePercentEscapes):
@@ -38,8 +37,6 @@
         (WTF::encodeHostName):
         (WTF::URLWithUserTypedString):
         (WTF::userVisibleString):
-        * wtf/glib/URLHelpersGlib.cpp: Copied from Source/WTF/wtf/cocoa/NSURLExtras.h.
-        (WTF::loadIDNScriptWhiteList):
 
 2019-01-28  Ross Kirsling  <ross.kirsling@sony.com>
 
