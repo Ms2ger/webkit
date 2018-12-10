@@ -89,7 +89,7 @@ void loadIDNScriptWhiteList()
     });
 }
     
-static String decodePercentEscapes(String string)
+static String decodePercentEscapes(const String& string)
 {
     NSString *substring = (NSString *)string;
     substring = CFBridgingRelease(CFURLCreateStringByReplacingPercentEscapes(nullptr, (CFStringRef)substring, CFSTR("")));
@@ -103,19 +103,19 @@ static String decodePercentEscapes(String string)
 NSString *decodeHostName(NSString *string)
 {
     bool error = false;
-    String host = mapHostName(string, std::nullopt, &error);
+    String host = mapHostName(string, std::nullopt, error);
     if (error)
         return nil;
-    return !host ? string : (NSString*)host;
+    return !host ? string : (NSString *)host;
 }
 
 NSString *encodeHostName(NSString *string)
 {
     bool error = false;
-    String host = mapHostName(string, decodePercentEscapes, &error);
+    String host = mapHostName(string, decodePercentEscapes, error);
     if (error)
         return nil;
-    return !host ? string : (NSString*)host;
+    return !host ? string : (NSString *)host;
 }
 
 static RetainPtr<NSString> stringByTrimmingWhitespace(NSString *string)
@@ -371,10 +371,7 @@ NSString *userVisibleString(NSURL *URL)
 {
     NSData *data = originalURLData(URL);
     CString string(static_cast<const char*>([data bytes]), [data length]);
-    String escapedString = userVisibleString(string);
-    if (!escapedString)
-        return nil;
-    return escapedString;
+    return userVisibleString(string);
 }
 
 BOOL isUserVisibleURL(NSString *string)

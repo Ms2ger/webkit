@@ -27,7 +27,6 @@ list(APPEND WTF_SOURCES
     glib/GRefPtr.cpp
     glib/RunLoopGLib.cpp
     glib/URLGLib.cpp
-    glib/URLHelpersGlib.cpp
 
     posix/OSAllocatorPOSIX.cpp
     posix/ThreadingPOSIX.cpp

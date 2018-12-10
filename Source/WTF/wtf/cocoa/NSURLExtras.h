@@ -28,8 +28,6 @@
 
 #pragma once
 
-#import <wtf/text/WTFString.h>
-
 @class NSString;
 @class NSURL;
 
