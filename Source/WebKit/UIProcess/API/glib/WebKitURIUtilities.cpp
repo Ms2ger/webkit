@@ -42,6 +42,8 @@
  *
  * Returns: (nullable) (transfer full): @uri suitable for display, or %NULL in
  *    case of error.
+ *
+ * Since: 2.24
  **/
 gchar* webkit_uri_for_display(const gchar* uri)
 {
