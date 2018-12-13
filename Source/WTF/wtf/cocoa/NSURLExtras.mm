@@ -43,6 +43,8 @@
 
 namespace WTF {
 
+using namespace URLHelpers;
+
 static BOOL readIDNScriptWhiteListFile(NSString *filename)
 {
     if (!filename)
@@ -102,20 +104,18 @@ static String decodePercentEscapes(const String& string)
 
 NSString *decodeHostName(NSString *string)
 {
-    bool error = false;
-    String host = mapHostName(string, std::nullopt, error);
-    if (error)
+    std::optional<String> host = mapHostName(string, std::nullopt);
+    if (!host)
         return nil;
-    return !host ? string : (NSString *)host;
+    return !*host ? string : (NSString *)*host;
 }
 
 NSString *encodeHostName(NSString *string)
 {
-    bool error = false;
-    String host = mapHostName(string, decodePercentEscapes, error);
-    if (error)
+    std::optional<String> host = mapHostName(string, decodePercentEscapes, error);
+    if (!host)
         return nil;
-    return !host ? string : (NSString *)host;
+    return !*host ? string : (NSString *)*host;
 }
 
 static RetainPtr<NSString> stringByTrimmingWhitespace(NSString *string)
@@ -371,7 +371,7 @@ NSString *userVisibleString(NSURL *URL)
 {
     NSData *data = originalURLData(URL);
     CString string(static_cast<const char*>([data bytes]), [data length]);
-    return userVisibleString(string);
+    return userVisibleURL(string);
 }
 
 BOOL isUserVisibleURL(NSString *string)

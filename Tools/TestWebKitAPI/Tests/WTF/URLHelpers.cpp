@@ -29,11 +29,12 @@
 #include <wtf/text/CString.h>
 #include <wtf/text/WTFString.h>
 
-using namespace WTF;
-
 namespace TestWebKitAPI {
 
-TEST(WTF, UserVisibleStringUnaffected)
+using namespace WTF;
+using namespace WTF::URLHelpers;
+
+TEST(WTF, UserVisibleURLUnaffected)
 {
     const char* const items[] = {
         "http://site.com",
@@ -79,12 +80,12 @@ TEST(WTF, UserVisibleStringUnaffected)
 
     for (auto& item : items) {
         CString input(item);
-        String result = userVisibleString(input);
+        String result = userVisibleURL(input);
         EXPECT_EQ(result.utf8(), item);
     }
 }
 
-TEST(WTF, UserVisibleStringAffected)
+TEST(WTF, UserVisibleURLAffected)
 {
     struct {
         const char* input;
@@ -107,7 +108,7 @@ TEST(WTF, UserVisibleStringAffected)
 
     for (auto& item : items) {
         CString input(item.input);
-        String result = userVisibleString(input);
+        String result = userVisibleURL(input);
         EXPECT_EQ(result.utf8(), item.output);
     }
 }

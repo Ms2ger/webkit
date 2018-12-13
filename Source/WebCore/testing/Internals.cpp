@@ -4227,7 +4227,7 @@ String Internals::getCurrentMediaControlsStatusForElement(HTMLMediaElement& medi
 
 String Internals::userVisibleString(const DOMURL& url)
 {
-    return WTF::userVisibleString(url.href().string().utf8());
+    return WTF::URLHelpers::userVisibleURL(url.href().string().utf8());
 }
 
 #endif
