@@ -76,6 +76,8 @@ static BOOL readIDNScriptWhiteListFile(NSString *filename)
     return YES;
 }
 
+namespace URLHelpers {
+
 void loadIDNScriptWhiteList()
 {
     static dispatch_once_t flag;
@@ -90,6 +92,8 @@ void loadIDNScriptWhiteList()
         initializeDefaultIDNScriptWhiteList();
     });
 }
+
+} // namespace URLHelpers
     
 static String decodePercentEscapes(const String& string)
 {
@@ -112,7 +116,7 @@ NSString *decodeHostName(NSString *string)
 
 NSString *encodeHostName(NSString *string)
 {
-    std::optional<String> host = mapHostName(string, decodePercentEscapes, error);
+    std::optional<String> host = mapHostName(string, decodePercentEscapes);
     if (!host)
         return nil;
     return !*host ? string : (NSString *)*host;
