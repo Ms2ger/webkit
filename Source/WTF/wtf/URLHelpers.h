@@ -34,14 +34,16 @@
 #include <wtf/text/WTFString.h>
 
 namespace WTF {
+namespace URLHelpers {
 
 using URLDecodeFunction = String(&)(const String&);
 
-WTF_EXPORT_PRIVATE String userVisibleString(const CString& URL);
+WTF_EXPORT_PRIVATE String userVisibleURL(const CString& URL);
 void loadIDNScriptWhiteList();
 void whiteListIDNScript(const char* scriptName);
 void initializeDefaultIDNScriptWhiteList();
-String mapHostName(const String& string, const std::optional<URLDecodeFunction>&, bool& error);
+std::optional<String> mapHostName(const String& string, const std::optional<URLDecodeFunction>&);
 String mapHostNames(const String& string, const std::optional<URLDecodeFunction>&);
 
+} // namespace URLHelpers
 } // namespace WTF

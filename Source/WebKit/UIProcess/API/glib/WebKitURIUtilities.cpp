@@ -28,7 +28,7 @@
  * SECTION: WebKitURIUtilities
  * @Short_description: Utility functions to manipulate URIs
  * @Title: WebKitURIUtilities
- **/
+ */
 
 /**
  * webkit_uri_for_display:
@@ -44,13 +44,12 @@
  *    case of error.
  *
  * Since: 2.24
- **/
+ */
 gchar* webkit_uri_for_display(const gchar* uri)
 {
     g_return_val_if_fail(uri, nullptr);
 
-    CString uri_string(uri);
-    String result = WTF::userVisibleString(uri_string);
+    String result = WTF::URLHelpers::userVisibleURL(uri);
     if (!result)
         return nullptr;
 
