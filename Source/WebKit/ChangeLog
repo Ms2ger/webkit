@@ -18,6 +18,8 @@
         * UIProcess/API/gtk/docs/webkit2gtk-docs.sgml:
         * UIProcess/API/gtk/webkit2.h:
         * UIProcess/API/wpe/WebKitURIUtilities.h: Added.
+        * UIProcess/API/wpe/docs/wpe-0.1-sections.txt:
+        * UIProcess/API/wpe/docs/wpe-docs.sgml:
         * UIProcess/API/wpe/webkit.h:
 
 2019-01-28  Ryosuke Niwa  <rniwa@webkit.org>
