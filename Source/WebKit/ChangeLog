@@ -18,6 +18,8 @@
         * UIProcess/API/gtk/docs/webkit2gtk-docs.sgml:
         * UIProcess/API/gtk/webkit2.h:
         * UIProcess/API/wpe/WebKitURIUtilities.h: Added.
+        * UIProcess/API/wpe/docs/wpe-0.1-sections.txt:
+        * UIProcess/API/wpe/docs/wpe-docs.sgml:
         * UIProcess/API/wpe/webkit.h:
 
 2018-12-13  Chris Fleizach  <cfleizach@apple.com>
