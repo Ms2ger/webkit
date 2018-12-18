@@ -850,11 +850,12 @@ String userVisibleURL(const CString& url)
 
     Vector<UChar, urlBytesBufferLength> normalizedCharacters(sourceBuffer.size());
     UErrorCode uerror = U_ZERO_ERROR;
-    int32_t normalizedLength = unorm_normalize(sourceBuffer.data(), sourceBuffer.size(), UNORM_NFC, 0, normalizedCharacters.data(), sourceBuffer.size(), &uerror);
+    const UNormalizer2* normalizer = unorm2_getNFCInstance(&uerror);
+    int32_t normalizedLength = unorm2_normalize(normalizer, sourceBuffer.data(), sourceBuffer.size(), normalizedCharacters.data(), normalizedCharacters.size(), &uerror);
     if (uerror == U_BUFFER_OVERFLOW_ERROR) {
         uerror = U_ZERO_ERROR;
         normalizedCharacters.resize(normalizedLength);
-        normalizedLength = unorm_normalize(sourceBuffer.data(), sourceBuffer.size(), UNORM_NFC, 0, normalizedCharacters.data(), normalizedLength, &uerror);
+        normalizedLength = unorm2_normalize(normalizer, sourceBuffer.data(), sourceBuffer.size(), normalizedCharacters.data(), normalizedLength, &uerror);
     }
     if (U_FAILURE(uerror))
         return { };
