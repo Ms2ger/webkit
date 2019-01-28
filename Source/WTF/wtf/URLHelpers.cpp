@@ -523,7 +523,7 @@ static bool allCharactersAllowedByTLDRules(const UChar* buffer, int32_t length)
 }
 
 // Return value of null means no mapping is necessary.
-std::optional<String> mapHostName(const String& hostName, const std::optional<URLDecodeFunction>& decodeFunction)
+Optional<String> mapHostName(const String& hostName, const Optional<URLDecodeFunction>& decodeFunction)
 {
     if (hostName.length() > hostNameBufferLength)
         return String();
@@ -546,7 +546,7 @@ std::optional<String> mapHostName(const String& hostName, const std::optional<UR
     UIDNAInfo processingDetails = UIDNA_INFO_INITIALIZER;
     int32_t numCharactersConverted = (decodeFunction ? uidna_nameToASCII : uidna_nameToUnicode)(&URLParser::internationalDomainNameTranscoder(), sourceBuffer.data(), length, destinationBuffer, hostNameBufferLength, &processingDetails, &uerror);
     if (length && (U_FAILURE(uerror) || processingDetails.errors))
-        return std::nullopt;
+        return nullopt;
     
     if (numCharactersConverted == static_cast<int32_t>(length) && !memcmp(sourceBuffer.data(), destinationBuffer, length * sizeof(UChar)))
         return String();
@@ -557,15 +557,15 @@ std::optional<String> mapHostName(const String& hostName, const std::optional<UR
     return String(destinationBuffer, numCharactersConverted);
 }
 
-using MappingRangesVector = std::optional<Vector<std::tuple<unsigned, unsigned, String>>>;
+using MappingRangesVector = Optional<Vector<std::tuple<unsigned, unsigned, String>>>;
 
-static void collectRangesThatNeedMapping(const String& string, unsigned location, unsigned length, MappingRangesVector& array, const std::optional<URLDecodeFunction>& decodeFunction)
+static void collectRangesThatNeedMapping(const String& string, unsigned location, unsigned length, MappingRangesVector& array, const Optional<URLDecodeFunction>& decodeFunction)
 {
     // Generally, we want to optimize for the case where there is one host name that does not need mapping.
     // Therefore, we use null to indicate no mapping here and an empty array to indicate error.
 
     String substring = string.substringSharingImpl(location, length);
-    std::optional<String> host = mapHostName(substring, decodeFunction);
+    Optional<String> host = mapHostName(substring, decodeFunction);
 
     if (host && !*host)
         return;
@@ -577,7 +577,7 @@ static void collectRangesThatNeedMapping(const String& string, unsigned location
         array->constructAndAppend(location, length, *host);
 }
 
-static void applyHostNameFunctionToMailToURLString(const String& string, const std::optional<URLDecodeFunction>& decodeFunction, MappingRangesVector& array)
+static void applyHostNameFunctionToMailToURLString(const String& string, const Optional<URLDecodeFunction>& decodeFunction, MappingRangesVector& array)
 {
     // In a mailto: URL, host names come after a '@' character and end with a '>' or ',' or '?' character.
     // Skip quoted strings so that characters in them don't confuse us.
@@ -649,7 +649,7 @@ static void applyHostNameFunctionToMailToURLString(const String& string, const s
     }
 }
 
-static void applyHostNameFunctionToURLString(const String& string, const std::optional<URLDecodeFunction>& decodeFunction, MappingRangesVector& array)
+static void applyHostNameFunctionToURLString(const String& string, const Optional<URLDecodeFunction>& decodeFunction, MappingRangesVector& array)
 {
     // Find hostnames. Too bad we can't use any real URL-parsing code to do this,
     // but we have to do it before doing all the %-escaping, and this is the only
@@ -708,7 +708,7 @@ static void applyHostNameFunctionToURLString(const String& string, const std::op
     collectRangesThatNeedMapping(string, hostNameStart, hostNameEnd - hostNameStart, array, decodeFunction);
 }
 
-String mapHostNames(const String& string, const std::optional<URLDecodeFunction>& decodeFunction)
+String mapHostNames(const String& string, const Optional<URLDecodeFunction>& decodeFunction)
 {
     // Generally, we want to optimize for the case where there is one host name that does not need mapping.
     
@@ -744,8 +744,8 @@ static String createStringWithEscapedUnsafeCharacters(const String& sourceBuffer
     Optional<UChar32> previousCodePoint;
     size_t i = 0;
     while (i < length) {
-        UChar32 c = identifier.characterStartingAt(index);
-        
+        UChar32 c = sourceBuffer.characterStartingAt(i);
+
         if (isLookalikeCharacter(previousCodePoint, c)) {
             uint8_t utf8Buffer[4];
             size_t offset = 0;
@@ -780,7 +780,7 @@ static String toNormalizationFormC(const String& string)
     sourceBuffer.removeLast();
 
     String result;
-    Vector<UChar, URL_BYTES_BUFFER_LENGTH> normalizedCharacters(sourceBuffer.size());
+    Vector<UChar, urlBytesBufferLength> normalizedCharacters(sourceBuffer.size());
     UErrorCode uerror = U_ZERO_ERROR;
     int32_t normalizedLength = 0;
     const UNormalizer2 *normalizer = unorm2_getNFCInstance(&uerror);
@@ -875,7 +875,7 @@ String userVisibleURL(const CString& url)
 
     if (mayNeedHostNameDecoding) {
         // FIXME: Is it good to ignore the failure of mapHostNames and keep result intact?
-        auto mappedResult = mapHostNames(result, std::nullopt);
+        auto mappedResult = mapHostNames(result, nullopt);
         if (!!mappedResult)
             result = mappedResult;
     }

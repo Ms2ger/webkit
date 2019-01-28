@@ -42,8 +42,8 @@ WTF_EXPORT_PRIVATE String userVisibleURL(const CString& URL);
 void loadIDNScriptWhiteList();
 void whiteListIDNScript(const char* scriptName);
 void initializeDefaultIDNScriptWhiteList();
-std::optional<String> mapHostName(const String&, const std::optional<URLDecodeFunction>&);
-String mapHostNames(const String&, const std::optional<URLDecodeFunction>&);
+Optional<String> mapHostName(const String&, const Optional<URLDecodeFunction>&);
+String mapHostNames(const String&, const Optional<URLDecodeFunction>&);
 
 } // namespace URLHelpers
 } // namespace WTF
