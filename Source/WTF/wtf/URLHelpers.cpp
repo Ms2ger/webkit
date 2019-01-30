@@ -783,7 +783,7 @@ static String toNormalizationFormC(const String& string)
     Vector<UChar, urlBytesBufferLength> normalizedCharacters(sourceBuffer.size());
     UErrorCode uerror = U_ZERO_ERROR;
     int32_t normalizedLength = 0;
-    const UNormalizer2 *normalizer = unorm2_getNFCInstance(&uerror);
+    const UNormalizer2* normalizer = unorm2_getNFCInstance(&uerror);
     if (!U_FAILURE(uerror)) {
         normalizedLength = unorm2_normalize(normalizer, sourceBuffer.data(), sourceBuffer.size(), normalizedCharacters.data(), normalizedCharacters.size(), &uerror);
         if (uerror == U_BUFFER_OVERFLOW_ERROR) {
